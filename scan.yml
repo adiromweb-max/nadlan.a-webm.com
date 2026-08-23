@@ -1,0 +1,64 @@
+name: nadlan-scout daily scan
+
+# רץ כל בוקr ב-05:00 UTC (≈ 08:00 בישראל) + כפתור הרצה ידנית.
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch: {}
+
+# הרשאה לכתוב חזרה ל-repo (DB עם היסטוריה + הדשבורד ל-Pages).
+permissions:
+  contents: write
+
+concurrency:
+  group: nadlan-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scan (scrape + build dashboard)
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+        run: python -m scout.main --dry-run
+
+      - name: Publish dashboard to GitHub Pages folder
+        run: |
+          mkdir -p docs
+          cp out/app.html docs/index.html
+
+      # ---- אופציה ב' (וורדפרס): במקום Pages, דוחפים ל-WP דרך SFTP. ----
+      # כדי להפעיל: הסר את ההערות, והוסף ב-Secrets: WP_HOST, WP_USER, WP_PASS, WP_PATH
+      # - name: Push dashboard to WordPress (SFTP)
+      #   uses: wlixcc/SFTP-Deploy-Action@v1.2.5
+      #   with:
+      #     server:   ${{ secrets.WP_HOST }}
+      #     username: ${{ secrets.WP_USER }}
+      #     password: ${{ secrets.WP_PASS }}
+      #     local_path: "./out/app.html"
+      #     remote_path: ${{ secrets.WP_PATH }}   # לדוגמה: /public_html/nadlan/app.html
+
+      - name: Commit data + dashboard back to repo
+        run: |
+          git config user.name  "nadlan-scout-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -f data/nadlan.db docs/index.html out/latest.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "אין שינויים לשמירה"
+          else
+            git commit -m "daily scan $(date -u +%Y-%m-%d) [skip ci]"
+            git push
+          fi
