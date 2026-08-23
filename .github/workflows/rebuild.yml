@@ -1,0 +1,34 @@
+name: rebuild dashboard (design only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scout/webapp.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: rebuild
+  cancel-in-progress: true
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Rebuild dashboard from existing data (no scan, no credits)
+        run: python -c "from pathlib import Path; from scout import webapp; webapp.write(Path('out'))"
+      - name: Publish
+        run: |
+          mkdir -p docs
+          cp out/app.html docs/index.html
+      - name: Commit
+        run: |
+          git config user.name "nadlan-scout-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -f docs/index.html out/app.html || true
+          git commit -m "rebuild dashboard (design) [skip ci]" || echo "nothing to commit"
+          git push || echo "push skipped"
