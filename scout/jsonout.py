@@ -72,6 +72,8 @@ def listing_record(s, ladder=None):
         "first_seen": s.get("first_seen"),
         "last_seen": s.get("last_seen"),
         "listing_type": s.get("listing_type"),
+        "disqualified": bool(s.get("disqualified")),
+        "suspicious_price": bool(s.get("suspicious_price")),
         "is_new": bool(s.get("is_new")),
         "dropped_today": bool(s.get("dropped_today")),
         "city": s.get("city"),
