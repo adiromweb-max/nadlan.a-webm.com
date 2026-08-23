@@ -1,12 +1,13 @@
 name: nadlan-scout daily scan
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: "0 5 * * *"
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: nadlan-scan
+  cancel-in-progress: false
 jobs:
   scan:
     runs-on: ubuntu-latest
