@@ -467,6 +467,24 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             quality = "מחיר מעל החציון — ייתכן הבדל גודל/קטגוריה"
         gap_pct = None
 
+    # ── פילטר מניפולציות מפרסם ──
+    # (1) מחיר לא-סביר: פער עצום מהשוק = כמעט תמיד מחיר-פיתיון או "זכויות/על
+    #     הנייר", לא דירה אמיתית במחיר הזה. אדם שמבין מסנן מיד — כך גם המנוע.
+    manip_gap = float(cfg.get("manipulation_gap_pct", 48.0))
+    suspicious_price = bool(gap_pct is not None and gap_pct > manip_gap)
+    # (2) מילות פסילה: זכויות/קבוצת רכישה/מגרש/מסחרי/ללא טאבו וכו' —
+    #     אינדיקציה שזו לא דירת יד-שנייה סטנדרטית.
+    blob = " ".join(str(x) for x in (listing.get("text"),
+                    listing.get("description"), listing.get("condition_text")) if x)
+    bad_kw = [k for k in (cfg.get("disqualify_keywords") or []) if k and k in blob]
+    disqualified = suspicious_price or bool(bad_kw)
+    if disqualified:
+        tier = TIER_NONE          # לעולם לא הזדמנות
+        if suspicious_price and quality in ("תקין", "סינון מקדים — טרם הושווה לעסקאות"):
+            quality = "מחיר חשוד — נמוך בצורה לא-סבירה מהשוק (מחיר-פיתיון/זכויות?)"
+        elif bad_kw:
+            quality = "לא דירת יד-שנייה סטנדרטית (%s)" % ", ".join(bad_kw[:2])
+
     area_name = (comp or {}).get("comp_area") or (baseline or {}).get("area_name")
     reason = plain_reason(listing.get("city"), area_name, comp if stage == "final" else None,
                           drop_pct, dom_days, yield_info, area_info, signals,
@@ -496,6 +514,9 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
         },
         "days_on_market": dom_days,
         "drop_pct": drop_pct,
+        "disqualified": disqualified,
+        "suspicious_price": suspicious_price,
+        "disqualify_keywords": bad_kw,
         "keywords_found": kw_found,
         "yield_pct": y_pct,
         "monthly_rent_est": (yield_info or {}).get("monthly_rent"),
