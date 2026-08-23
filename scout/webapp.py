@@ -57,6 +57,7 @@ def _trim(listings):
             "comps": s.get("comp_count"),
             "complevel": s.get("comp_level_he"),
             "dtype": s.get("listing_type"),
+            "disq": bool(s.get("disqualified")),
             "isnew": bool(s.get("is_new")),
             "dropped": bool(s.get("dropped_today")),
             "stage": s.get("stage"),
@@ -75,7 +76,7 @@ def build_payload(data):
         "run_date": data.get("run_date"),
         "data_version": _official_version(data),
         "summary_counts": {
-            "new": sum(1 for x in listings if x["isnew"]),
+            "new": sum(1 for x in listings if x["isnew"] and not x["disq"]),
             "drops": (data.get("section_counts") or {}).get("drops", 0),
             "scanned": len(listings),
             "hot_areas": (data.get("section_counts") or {}).get("hot_areas", 0),
@@ -442,7 +443,7 @@ function render(){
   const c=D.summary_counts||{};
   document.getElementById('tabs').innerHTML = TABS.map(t=>{
     let n='';
-    if(t.k==='new') n=c.new; else if(t.k==='drops') n=c.drops;
+    if(t.k==='new') n=c.new; else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
     return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${t.label}${(n!==''&&n!=null)?` <span class="cnt">${n}</span>`:''}</a>`;
   }).join('');
@@ -464,8 +465,8 @@ function render(){
   if(S.tab==='trends'){ body.innerHTML=trends(); }
   else {
     let list, empty;
-    if(S.tab==='new'){ list=D.listings.filter(d=>d.isnew); empty='אין מודעות חדשות בריצה האחרונה — חזור מחר.'; }
-    else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0); empty='אין ירידות מחיר כרגע.'; }
+    if(S.tab==='new'){ list=D.listings.filter(d=>d.isnew && !d.disq); empty='אין מודעות חדשות בריצה האחרונה — חזור מחר.'; }
+    else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq); empty='אין ירידות מחיר כרגע.'; }
     else if(S.tab==='watch'){ list=D.listings.filter(d=>WL.has(d.id)); empty='עדיין לא שמרת נכסים. לחץ על ★ בכל כרטיס.'; }
     else { list=D.listings.filter(isOpp); empty='אין הזדמנויות מאומתות בריצה הזו.'; }
     body.innerHTML = toolbar() + feed(list, empty);
@@ -474,7 +475,7 @@ function render(){
     `הנתונים מ‑${D.run_date||''} · עסקאות רשות המיסים גרסה ${D.data_version||'—'}<br>מופעל על ידי מנוע נדל״ן סקאוט של A‑WEB.`;
   if(!S._noscroll) window.scrollTo(0,0); S._noscroll=false;
 }
-function isOpp(d){ return d.stage==='final' && ((d.gap!=null && d.gap>=5 && !d.suspect) || d.tier); }
+function isOpp(d){ return !d.disq && d.stage==='final' && ((d.gap!=null && d.gap>=5 && !d.suspect) || d.tier); }
 
 /* ---- CSV export (Excel, UTF-8 BOM) ---- */
 function exportCSV(){
