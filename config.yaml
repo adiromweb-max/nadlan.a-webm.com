@@ -140,6 +140,8 @@ yad2_max_pages_per_city: 1        # מסלול Hobby: ultra_premium=30 ק׳/בק
                                   # (~36 מודעות) = ~2,200 ק׳ לריצה יומית ל-32 ערים ≈ 65k/חודש
 yad2_concurrency: 3               # ScraperAPI מתיר 5 בו-זמנית
 scraperapi_country: il            # רלוונטי רק אם ultra_premium=false (geotargeting)
+nadlan_via_scraperapi: true       # נתב בקשות nadlan דרך ScraperAPI (~1 ק׳/בקשה).
+                                  # חובה כשהרץ בענן (GitHub) ש-nadlan חוסם את ה-IP שלו.
 scraperapi_ultra_premium: true    # חובה ליד2 במסלול Hobby — geotargeting חוזר 403,
                                   # ורק ultra_premium עוקף את Radware. עולה 30 קרדיטים לבקשה.
 scraperapi_credit_cost: 30        # עלות בקשת ultra_premium בקרדיטים (למעקב תקציב)
