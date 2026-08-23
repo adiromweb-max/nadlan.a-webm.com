@@ -82,6 +82,8 @@ def build_payload(data):
             "drops": (data.get("section_counts") or {}).get("drops", 0),
             "scanned": len(listings),
             "hot_areas": (data.get("section_counts") or {}).get("hot_areas", 0),
+            "private": sum(1 for x in listings if x.get("dtype") == "private"),
+            "agency": sum(1 for x in listings if x.get("dtype") == "agency"),
         },
         "listings": listings,
         "areas": [{
@@ -153,8 +155,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .appbar{position:sticky;top:0;z-index:40;background:var(--dark);color:#fff}
   .appbar .in{max-width:1120px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
   .wm{font-size:19px;font-weight:800;cursor:pointer}.wm i{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .tabs{display:flex;gap:4px;flex:1;flex-wrap:wrap}
-  .tabs a{color:#cfc9dd;text-decoration:none;font-size:14px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .tabs{display:flex;gap:4px;flex:1;flex-wrap:wrap;justify-content:center}
+  .tabs a{color:#cfc9dd;text-decoration:none;font-size:14px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .15s,color .15s}
+  .tabs a svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .tabs a:hover{color:#fff;background:rgba(255,255,255,.07)}
+  .tabs a.on svg{stroke:#e0489e}
   .tabs a.on{background:rgba(255,255,255,.13);color:#fff}
   .tabs a .cnt{opacity:.7;font-weight:700}
   .abtools{display:flex;align-items:center;gap:8px}
@@ -168,12 +173,21 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .hero::before{content:"";position:absolute;inset:0;
     background:radial-gradient(680px 300px at 84% -30%,rgba(224,72,158,.34),transparent 60%),
                radial-gradient(680px 300px at 6% -10%,rgba(123,63,242,.4),transparent 60%)}
-  .hero .in{position:relative;max-width:1120px;margin:0 auto;padding:22px 20px 30px}
-  .hero h1{font-size:30px;font-weight:900;margin:2px 0 6px;line-height:1.12}
-  .hero p{color:#cfc9dd;font-size:14.5px;max-width:600px;margin:0 0 18px}
-  .pills{display:flex;gap:24px;flex-wrap:wrap;position:relative;z-index:2}
-  .pill b{font-size:26px;font-weight:800;font-family:"Frank Ruhl Libre",serif;display:block;line-height:1}
-  .pill span{color:#b8b2c9;font-size:12px}.pill .g{color:#6ee7b0}.pill .r{color:#ff8fa3}
+  .hero .in{position:relative;max-width:1120px;margin:0 auto;padding:24px 20px 32px;display:flex;gap:28px;align-items:center;justify-content:space-between;z-index:2}
+  .htext{flex:1;min-width:0}
+  .hero h1{font-size:30px;font-weight:900;margin:2px 0 8px;line-height:1.12}
+  .hero p{color:#cfc9dd;font-size:14.5px;max-width:520px;margin:0}
+  /* side stat panel */
+  .hstat{width:308px;flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px 18px;backdrop-filter:blur(6px)}
+  .hstat .top{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+  .donut{flex-shrink:0}
+  .dlabel{font-size:12.5px;color:#cfc9dd;line-height:1.7}
+  .dlabel .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-start:6px;vertical-align:middle}
+  .dlabel b{color:#fff}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px;border-top:1px solid rgba(255,255,255,.1);padding-top:13px}
+  .kpi b{font-size:22px;font-weight:800;font-family:"Frank Ruhl Libre",serif;display:block;line-height:1}
+  .kpi span{color:#a8a2ba;font-size:11.5px}
+  .kpi .g{color:#6ee7b0}.kpi .r{color:#ff8fa3}.kpi .v{color:#c9b0ff}
   .skyline{position:absolute;left:0;right:0;bottom:0;width:100%;height:74px;opacity:.5}
 
   .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 80px}
@@ -270,8 +284,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     .appbar .wm{order:1}.abtools{order:2;margin-inline-start:auto}
     .tabs{order:3;flex-basis:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:2px}
     .tabs::-webkit-scrollbar{display:none}
-    .hero .in{padding:16px 14px 22px}.hero h1{font-size:22px}
-    .pills{gap:16px}.pill b{font-size:22px}
+    .hero .in{padding:16px 14px 22px;flex-direction:column;align-items:stretch;gap:16px}.hero h1{font-size:22px}
+    .hstat{width:100%}.kpi b{font-size:20px}
     .wrap{padding:16px 14px 70px}
     .search input{width:88px}
     .sec-h h2{font-size:19px}
@@ -300,9 +314,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   </div></div>
 
   <div class="hero"><div class="in">
-    <h1 class="serif" id="heroTitle"></h1>
-    <p id="heroSub"></p>
-    <div class="pills" id="pills"></div>
+    <div class="htext">
+      <h1 class="serif" id="heroTitle"></h1>
+      <p id="heroSub"></p>
+    </div>
+    <aside class="hstat" id="hstat"></aside>
   </div>
   <svg class="skyline" viewBox="0 0 1200 90" preserveAspectRatio="none"><g fill="#241a38">
     <rect x="0" y="46" width="70" height="44"/><rect x="80" y="30" width="54" height="60"/><rect x="146" y="54" width="60" height="36"/><rect x="216" y="20" width="46" height="70"/><rect x="272" y="40" width="70" height="50"/><rect x="352" y="58" width="52" height="32"/><rect x="414" y="26" width="60" height="64"/><rect x="484" y="48" width="66" height="42"/><rect x="560" y="34" width="48" height="56"/><rect x="618" y="52" width="70" height="38"/><rect x="698" y="22" width="52" height="68"/><rect x="760" y="44" width="64" height="46"/><rect x="834" y="56" width="54" height="34"/><rect x="898" y="30" width="58" height="60"/><rect x="966" y="50" width="70" height="40"/><rect x="1046" y="38" width="50" height="52"/><rect x="1106" y="54" width="94" height="36"/></g></svg>
@@ -366,9 +382,42 @@ function nadlanLink(d){
   return 'https://www.nadlan.gov.il/?search='+q;
 }
 
+const TAB_IC={
+  new:'<svg viewBox="0 0 24 24"><path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.5z"/></svg>',
+  drops:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-4h-4"/></svg>',
+  opps:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
+  watch:'<svg viewBox="0 0 24 24"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.6 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8z"/></svg>',
+  trends:'<svg viewBox="0 0 24 24"><path d="M4 19V5M4 15l5-4 4 3 7-7"/></svg>'};
 const TABS=[{k:'new',label:'חדש היום'},{k:'drops',label:'ירידות מחיר'},
   {k:'opps',label:'הזדמנויות'},{k:'watch',label:'המעקב שלי'},{k:'trends',label:'מגמות'}];
 function go(k){S.tab=k;render();}
+
+/* ---- hero side stat panel (donut פרטי/תיווך + KPIs) ---- */
+function donutSVG(a,b){
+  const tot=(a+b)||1, fp=a/tot, r=30, C=2*Math.PI*r, cx=38, cy=38;
+  return `<svg class="donut" width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="פרטי ${a} מול תיווך ${b}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#a78bfa" stroke-width="11"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#34d399" stroke-width="11"
+      stroke-dasharray="${(fp*C).toFixed(1)} ${(C).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>
+    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#fff" font-family="Frank Ruhl Libre,serif">${Math.round(fp*100)}%</text>
+  </svg>`;
+}
+function statPanel(c){
+  const a=c.private||0, b=c.agency||0;
+  const opps=D.listings.filter(isOpp).length;
+  return `<div class="top">${donutSVG(a,b)}
+    <div class="dlabel">
+      <div style="font-size:16px;color:#fff;font-weight:800;font-family:'Frank Ruhl Libre',serif;line-height:1.2">${fmt(c.scanned)}<div style="font-weight:400;font-size:11.5px;color:#a8a2ba">מודעות במעקב</div></div>
+      <div style="margin-top:8px"><span class="dot" style="background:#34d399"></span>פרטי <b>${a}</b></div>
+      <div><span class="dot" style="background:#a78bfa"></span>תיווך <b>${b}</b></div>
+    </div></div>
+  <div class="kpis">
+    <div class="kpi"><b class="v">${c.new||0}</b><span>חדשות היום</span></div>
+    <div class="kpi"><b class="r">${c.drops||0}</b><span>ירידות מחיר</span></div>
+    <div class="kpi"><b class="g">${opps}</b><span>הזדמנויות מאומתות</span></div>
+    <div class="kpi"><b class="g">${c.hot_areas||0}</b><span>אזורים מתחממים</span></div>
+  </div>`;
+}
 
 function bld(){return '<svg class="bld" viewBox="0 0 100 80"><g stroke="#7b3ff2" fill="none" stroke-width="2" opacity=".8"><rect x="20" y="26" width="42" height="50"/><rect x="62" y="36" width="22" height="40"/><line x1="28" y1="36" x2="54" y2="36"/><line x1="28" y1="48" x2="54" y2="48"/><line x1="28" y1="60" x2="54" y2="60"/><line x1="68" y1="48" x2="80" y2="48"/><line x1="68" y1="60" x2="80" y2="60"/></g></svg>';}
 function iR(){return '<svg viewBox="0 0 24 24"><path d="M3 21V10l9-6 9 6v11"/><rect x="9" y="14" width="6" height="7"/></svg>';}
@@ -447,7 +496,7 @@ function render(){
     let n='';
     if(t.k==='new') n=c.new; else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
-    return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${t.label}${(n!==''&&n!=null)?` <span class="cnt">${n}</span>`:''}</a>`;
+    return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${TAB_IC[t.k]||''}<span>${t.label}</span>${(n!==''&&n!=null)?`<span class="cnt">${n}</span>`:''}</a>`;
   }).join('');
   const H={new:['מה חדש היום','רק מודעות שהתגלו או השתנו מאז אתמול — לא אותה רשימה כל יום.'],
     drops:['ראדאר ירידות מחיר','כל מודעה שירדה במחיר — כמה ירדה וכמה היא מתחת לשוק.'],
@@ -457,11 +506,7 @@ function render(){
   const words=H[S.tab][0].split(' ');
   document.getElementById('heroTitle').innerHTML = `${words.slice(0,-1).join(' ')} <span class="grad-text">${words.slice(-1)}</span>`;
   document.getElementById('heroSub').textContent = H[S.tab][1];
-  document.getElementById('pills').innerHTML =
-    `<div class="pill"><b class="grad-text">${c.new||0}</b><span>חדשות היום</span></div>
-     <div class="pill"><b class="r">${c.drops||0}</b><span>ירידות מחיר</span></div>
-     <div class="pill"><b>${fmt(c.scanned)}</b><span>מודעות במעקב</span></div>
-     <div class="pill"><b class="g">${c.hot_areas||0}</b><span>אזורים מתחממים</span></div>`;
+  document.getElementById('hstat').innerHTML = statPanel(c);
 
   const body=document.getElementById('body');
   if(S.tab==='trends'){ body.innerHTML=trends(); }
