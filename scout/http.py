@@ -22,14 +22,26 @@ BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 class Fetcher:
     """קליינט HTTP מנומס: השהיה בין בקשות, retry מוגבל, לא זורק חריגות."""
 
-    def __init__(self, delay=3.0, timeout=20, retries=2, extra_headers=None):
+    def __init__(self, delay=3.0, timeout=20, retries=2, extra_headers=None,
+                 proxy_key=None):
         self.delay = delay
         self.timeout = timeout
         self.retries = retries
         self.extra_headers = extra_headers or {}
+        # אם proxy_key מוגדר, כל בקשה מנותבת דרך ScraperAPI (מצב רגיל, קרדיט
+        # אחד) — נדרש כשה-IP של הרץ (למשל GitHub Actions) חסום ע"י nadlan.
+        self.proxy_key = proxy_key
         self._local = threading.local()
         self._lock = threading.Lock()
         self._last_request = 0.0
+
+    def _wrap(self, url):
+        """עוטף URL דרך ScraperAPI אם מוגדר proxy_key, אחרת מחזיר כמו שהוא."""
+        if not self.proxy_key:
+            return url
+        import urllib.parse
+        return "https://api.scraperapi.com/?" + urllib.parse.urlencode(
+            {"api_key": self.proxy_key, "url": url}, safe="")
 
     @property
     def session(self):
@@ -64,7 +76,7 @@ class Fetcher:
         for attempt in range(self.retries + 1):
             self._throttle()
             try:
-                resp = self.session.get(url, timeout=self.timeout, **kwargs)
+                resp = self.session.get(self._wrap(url), timeout=self.timeout, **kwargs)
                 if resp.status_code >= 500:
                     last_err = f"HTTP {resp.status_code}"
                     log.debug("שגיאת שרת %s ב-%s (ניסיון %d)", resp.status_code, url, attempt + 1)
