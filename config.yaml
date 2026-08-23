@@ -140,6 +140,22 @@ yad2_max_pages_per_city: 1        # מסלול Hobby: ultra_premium=30 ק׳/בק
                                   # (~36 מודעות) = ~2,200 ק׳ לריצה יומית ל-32 ערים ≈ 65k/חודש
 yad2_concurrency: 3               # ScraperAPI מתיר 5 בו-זמנית
 scraperapi_country: il            # רלוונטי רק אם ultra_premium=false (geotargeting)
+# ---- פילטר מניפולציות מפרסם ----
+# מחיר שהוא פער עצום מהשוק = כמעט תמיד מחיר-פיתיון או "זכויות/על הנייר",
+# לא דירה אמיתית. מסומן disqualified ומוסר מההזדמנויות ומהפיד.
+manipulation_gap_pct: 58          # פער מעל זה = מחיר חשוד → נפסל (מניפולציה כמעט ודאית).
+                                  # פער 45–58% מסומן "לאימות" אך עדיין מוצג.
+disqualify_keywords:              # מילים בעלות דיוק גבוה — לא דירת יד-שנייה
+  - "זכויות רכישה"
+  - "קבוצת רכישה"
+  - "על הנייר"
+  - "פינוי בינוי"
+  - "פינוי-בינוי"
+  - "קומבינציה"
+  - "ללא טאבו"
+  - "טאבו משותף"
+  - "לא רשום בטאבו"
+
 nadlan_via_scraperapi: true       # נתב בקשות nadlan דרך ScraperAPI (~1 ק׳/בקשה).
                                   # חובה כשהרץ בענן (GitHub) ש-nadlan חוסם את ה-IP שלו.
 scraperapi_ultra_premium: true    # חובה ליד2 במסלול Hobby — geotargeting חוזר 403,
