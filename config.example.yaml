@@ -1,0 +1,95 @@
+# nadlan-scout — קובץ הגדרות לדוגמה. העתק ל-config.yaml וערוך.
+# (הסיסמאות לא כאן — הן ב-secrets.env)
+
+# ערים בדרום (ערוך/הוסף/הסר בחופשיות)
+cities:
+  - באר שבע
+  - אשקלון
+  - אשדוד
+  - קרית גת
+  - קרית מלאכי
+  - שדרות
+  - נתיבות
+  - אופקים
+  - רהט
+  - דימונה
+  - ירוחם
+  - מצפה רמון
+  - ערד
+  - אילת
+  - עומר
+  - מיתר
+  - להבים
+
+# פילטרים
+price_min: 300000
+price_max: 1200000
+property_type: apartment      # דירות בלבד
+
+# סף התראה (ציון אטרקטיביות 0..100). ההתראה עצמה נקבעת לפי tiers.
+alert_threshold: 70
+
+# דירוג — מחליף את סף ההתראה הבודד. רק "לבדוק דחוף" נכנס לכותרת המייל.
+tiers:
+  check_urgent: 78
+  worth_checking: 66
+  watch: 55
+
+# משקלי הניקוד (סכום מקסימלי = 100)
+weights:
+  price_gap: 40           # פער מול עסקאות אמיתיות באזור
+  price_drop: 15          # ירידת מחיר במודעה
+  days_on_market: 8       # ותק המודעה
+  opportunity_keywords: 7
+  area_liquidity: 5
+  rental_yield: 15        # תשואת שכירות ברוטו (מוערכת)
+  area_appreciation: 10   # עליית ערך רב-שנתית (CAGR)
+
+# פרמטרים לחישוב
+price_gap_full_at_pct: 25    # ירידה של 25% מהחציון = ניקוד מלא בפער
+comps_months: 12             # חלון עסקאות רשות המיסים אחורה
+days_on_market_full_at: 90   # 90 יום באוויר = ניקוד ותק מלא
+
+# השוואה like-for-like. שים לב: comps_min_count סופר תצפיות רבעון ולא
+# עסקאות בודדות — המקור הרשמי אינו חושף עסקה בודדת (ראה scout/comps.py).
+comps_window_months: 18
+comps_min_count: 5
+comps_rooms_tolerance: 0.5
+comps_size_tolerance_pct: 20
+comps_gap_suspect_pct: 30    # פער גדול מזה = חשוד, לעולם לא בכותרת
+comps_gap_min_pct: 8
+
+# אותות תומכים — נדרש לפחות אחד כדי להכתיר מודעה כ"לבדוק דחוף"
+signal_min_drop_pct: 3
+signal_min_days_on_market: 60
+signal_liquidity_frac: 0.7
+
+# תשואת שכירות — הערכה מהשכ"ד הממוצע הרשמי באזור, ברוטו, בלי הוצאות
+yield_floor_pct: 2.0
+yield_full_at_pct: 5.0
+yield_good_pct: 3.5
+
+# עליית ערך אזורית
+appreciation_years: 5
+cagr_full_at_pct: 6.0
+cagr_good_pct: 3.0
+
+# |ירידת מחיר| מעל זה = שגיאת נתונים, לא הזדמנות
+max_plausible_drop_pct: 60
+
+# דדופ התראות — עליית ציון שמחזירה מודעה שדווחה כבר להתראה
+alert_score_rise: 10
+keywords:
+  - דורשת שיפוץ
+  - גמיש
+  - להשקעה
+  - מיידי
+  - ללא מעלית
+  - הזדמנות
+
+# מייל
+alert_to: adiromweb@gmail.com
+
+# בקרת קצב (התנהגות עדינה מול האתרים)
+request_delay_seconds: 3
+request_timeout_seconds: 20

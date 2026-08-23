@@ -1,0 +1,8 @@
+requests>=2.31
+PyYAML>=6.0
+pandas>=2.0
+openpyxl>=3.1
+# גרפים ל-out/charts. python-bidi חובה — matplotlib אינו תומך ב-bidi,
+# ובלעדיו כל כיתוב עברי בגרף מופיע הפוך.
+matplotlib>=3.8
+python-bidi>=0.4
