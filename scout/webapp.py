@@ -64,7 +64,9 @@ def _trim(listings):
             "suspect": suspect,
             "url": s.get("url"),
             "nadlan": s.get("nadlan_link"),
-            "hist": [p.get("price") for p in (s.get("price_history") or [])],
+            "first_seen": s.get("first_seen"),
+            "hist": [{"p": p.get("price"), "d": p.get("seen_at")}
+                     for p in (s.get("price_history") or []) if p.get("price")],
         })
     return out
 
@@ -232,7 +234,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   /* ===== deal detail modal ===== */
   .overlay{position:fixed;inset:0;background:rgba(16,10,28,.62);backdrop-filter:blur(4px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow:auto}
   .overlay.show{display:flex}
-  .modal{background:var(--panel);border-radius:22px;max-width:820px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);margin:auto}
+  .modal{background:var(--panel);border-radius:22px;max-width:820px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);margin:20px auto 40px}
   .mhead{position:relative;background:var(--dark);color:#fff;padding:24px 26px;border-radius:22px 22px 0 0;overflow:hidden}
   .mhead::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 200px at 85% -30%,rgba(224,72,158,.4),transparent 60%),radial-gradient(500px 200px at 6% 0,rgba(123,63,242,.44),transparent 60%)}
   .mhead .z{position:relative;z-index:2}
@@ -542,6 +544,36 @@ function positionBar(mine, market){
   <div style="display:flex;justify-content:space-between;font-size:10px;color:#8b8896"><span>← זול יותר</span><span>יקר יותר →</span></div>`;
 }
 
+/* ---- price timeline (dated) ---- */
+function fmtDate(s){ if(!s) return ''; const m=String(s).slice(0,10).split('-'); return m.length===3?(m[2]+'/'+m[1]):String(s).slice(0,10); }
+function priceTimeline(d){
+  const h=(d.hist||[]).filter(x=>x&&x.p);
+  if(h.length<2){
+    const pub=d.first_seen?fmtDate(d.first_seen):(h[0]&&fmtDate(h[0].d));
+    const pr=h[0]?fmt(h[0].p):fmt(d.price);
+    return `<div style="color:var(--ink2);font-size:13.5px;background:var(--hair2);border-radius:12px;padding:14px 16px">פורסמה${pub?' ב-'+pub:''} במחיר <b>${pr} ₪</b> — המחיר <b>לא השתנה</b> מאז.</div>`;
+  }
+  const W=470,H=180,pad=36,padTop=34;
+  const ps=h.map(x=>x.p),max=Math.max(...ps),min=Math.min(...ps),rng=(max-min)||1;
+  const xs=i=>pad+i*((W-pad*2)/(h.length-1));
+  const ys=v=>padTop+(1-(v-min)/rng)*(H-padTop-pad);
+  const line=h.map((x,i)=>`${i?'L':'M'}${xs(i).toFixed(1)},${ys(x.p).toFixed(1)}`).join(' ');
+  const area=`M${xs(0)},${ys(ps[0])} `+h.map((x,i)=>`L${xs(i).toFixed(1)},${ys(x.p).toFixed(1)}`).join(' ')+` L${xs(h.length-1)},${H-pad} L${xs(0)},${H-pad} Z`;
+  const drop=((h[0].p-h[h.length-1].p)/h[0].p*100), down=drop>0, col=down?'#0f9d63':'#e0455e';
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+    <defs><linearGradient id="pt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".18"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#pt)"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round"/>
+    ${h.map((x,i)=>{const first=i===0,last=i===h.length-1;return `
+      <circle cx="${xs(i).toFixed(1)}" cy="${ys(x.p).toFixed(1)}" r="${(first||last)?4.5:3}" fill="${last?'#e0489e':col}"/>
+      <text x="${xs(i).toFixed(1)}" y="${(ys(x.p)-9).toFixed(1)}" font-size="10.5" font-weight="700" fill="${last?'#e0489e':'#4a4756'}" text-anchor="middle">${fmt(x.p)}</text>
+      <text x="${xs(i).toFixed(1)}" y="${H-10}" font-size="10" fill="#8b8896" text-anchor="middle">${fmtDate(x.d)}</text>
+      ${first?`<text x="${xs(i).toFixed(1)}" y="16" font-size="10" fill="#8b8896" text-anchor="middle">פורסמה</text>`:''}
+      ${last?`<text x="${xs(i).toFixed(1)}" y="16" font-size="10" fill="#e0489e" text-anchor="middle">היום</text>`:''}`;}).join('')}
+  </svg>
+  <div style="text-align:center;margin-top:4px;font-weight:800;font-size:14px;color:${col}">${down?'▼ ירד '+drop.toFixed(1)+'% מאז הפרסום':'▲ עלה '+Math.abs(drop).toFixed(1)+'% מאז הפרסום'}</div>`;
+}
+
 /* ---- deal detail modal ---- */
 function openDeal(id){
   const d=BYID[id]; if(!d) return;
@@ -562,9 +594,7 @@ function openDeal(id){
   const posBlock = (d.ppm && marketPpm)
     ? `<div class="dsec"><h3>מיקום מול השוק</h3><p class="ph">₪/מ״ר של הדירה מול חציון האזור.</p>${positionBar(d.ppm,marketPpm)}</div>`
     : '';
-  const histBlock = (d.hist && d.hist.length>=2)
-    ? `<div class="dsec"><h3>היסטוריית מחיר המודעה</h3><p class="ph">כל שינוי מחיר מאז שעלתה לאוויר.</p>${lineChart(d.hist.map((p,i)=>({y:'',ppm:p})),'ppm')}</div>`
-    : '';
+  const histBlock = `<div class="dsec"><h3>מסלול המחיר של המודעה</h3><p class="ph">מתי פורסמה, מתי ירד המחיר, וכמה — לפי הרישום בפועל ביד2.</p>${priceTimeline(d)}</div>`;
   document.getElementById('modal').innerHTML = `
     <div class="mhead"><button class="xbtn" onclick="closeDeal()">✕</button><div class="z">
       <h2 class="serif">${d.city||''} ${d.hood?'· '+d.hood:''}</h2>
@@ -579,7 +609,7 @@ function openDeal(id){
         <div class="keynum"><b class="grad-text">${d.ppm?fmt(d.ppm):'—'}</b><span>₪ למ״ר</span></div>
       </div>
       <div class="dsec"><h3>למה זו עסקה</h3><p class="ph" style="color:var(--ink2);font-size:13.5px">${smartWhy(d)}</p></div>
-      ${posBlock}${trendBlock}${histBlock}
+      ${histBlock}${posBlock}${trendBlock}
       <div class="dsec"><h3>צ׳ק־ליסט דגלים אדומים</h3><ul class="flags">${flags.map(f=>`<li><span class="${f[0]}">${f[0]==='ok'?'✓':'!'}</span> ${f[1]}</li>`).join('')}</ul></div>
       <div class="dsec roi"><h3>מחשבון השקעה ומשכנתא</h3><p class="ph">כל הפרמטרים אינטראקטיביים — גרור וראה איך התשואה משתנה.</p>
         <div style="display:flex;gap:16px;flex-wrap:wrap">
@@ -606,6 +636,21 @@ function openDeal(id){
           <div><b id="rCash">—</b><span>הון עצמי נדרש</span></div>
           <div><b id="rLoan">—</b><span>סכום המשכנתא</span></div>
         </div>
+      </div>
+      <div class="dsec">
+        <h3>תחזית וערך — התמונה המלאה</h3>
+        <p class="ph">עלות הכניסה האמיתית (כולל מס רכישה) והקרנת שווי לפי קצב עליית הערך ההיסטורי של האזור.</p>
+        <div class="out" style="border-top:none;padding-top:0">
+          <div><b id="pTax">—</b><span>מס רכישה (משקיע)</span></div>
+          <div><b id="pEntry">—</b><span>מזומן נדרש בכניסה</span></div>
+          <div><b id="pNet">—</b><span>תשואה נטו משוערת</span></div>
+        </div>
+        <div class="out">
+          <div><b id="pV5">—</b><span>שווי צפוי · 5 שנים</span></div>
+          <div><b id="pV10">—</b><span>שווי צפוי · 10 שנים</span></div>
+          <div><b id="pTot">—</b><span>תשואה כוללת · 10 שנים</span></div>
+        </div>
+        <p class="ph" id="pNote" style="margin-top:10px;color:var(--muted)"></p>
       </div>
       <div class="mrow">
         ${d.url?`<a class="prim" href="${d.url}" target="_blank" rel="noopener">פתח ביד2 ↗</a>`:''}
@@ -638,6 +683,32 @@ function calcRoi(id){
   document.getElementById('rGross').textContent=gross.toFixed(1)+'%';
   document.getElementById('rCash').textContent='₪'+fmt(equity);
   document.getElementById('rLoan').textContent='₪'+fmt(loan);
+
+  // ── תחזית וערך ──
+  const tax=price*0.08;                 // מדרגת משקיע (דירה שנייה) — 8%
+  const buyCosts=price*0.015;           // עו"ד + נלוות משוער ~1.5%
+  const entryCash=equity+tax+buyCosts;  // המזומן שצריך בפועל בכניסה
+  const net=gross*0.72;                 // אחרי ~28% עלויות: ארנונה/ניהול/ריקות/תחזוקה
+  const g=(d.cagr||0)/100;
+  const v5 = g? price*Math.pow(1+g,5):null;
+  const v10= g? price*Math.pow(1+g,10):null;
+  let tot=null;
+  if(v10){
+    const capGain=v10-price;
+    const netRent10=annual*0.72*10 - pay*12*Math.min(term,10);
+    tot=((capGain+netRent10)/(entryCash||1))*100;
+  }
+  const SET=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+  SET('pTax','₪'+fmt(tax));
+  SET('pEntry','₪'+fmt(entryCash));
+  SET('pNet',net.toFixed(1)+'%');
+  SET('pV5', v5?('₪'+fmt(v5)):'—');
+  SET('pV10', v10?('₪'+fmt(v10)):'—');
+  SET('pTot', tot!=null?((tot>=0?'+':'')+tot.toFixed(0)+'%'):'—');
+  const noteEl=document.getElementById('pNote');
+  if(noteEl) noteEl.textContent = g
+    ? `הקרנה לפי קצב היסטורי של ${(+d.cagr).toFixed(1)}% בשנה באזור — אומדן, לא הבטחה. התשואה הכוללת מחשבת רווח הון + שכ״ד נטו פחות החזרי משכנתא, על המזומן שהושקע.`
+    : `אין נתוני עליית ערך לאזור זה — התחזית מבוססת על תזרים בלבד. מס רכישה לפי מדרגת משקיע (8%).`;
 }
 
 function trends(){
