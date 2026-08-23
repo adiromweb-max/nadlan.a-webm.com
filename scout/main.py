@@ -401,11 +401,20 @@ def run(cfg, dry_run=False, today=None):
         report["notes"].append(
             "שימו לב: בדיקת נוסחת ירידת המחיר נכשלה — ראה לוג.")
 
-    fetcher = Fetcher(delay=cfg["request_delay_seconds"],
-                      timeout=cfg["request_timeout_seconds"])
-
     # --- ScraperAPI ---
     api_key = os.environ.get("SCRAPERAPI_KEY")
+
+    # נדל"ן ממשלתי חוסם IP של רצים בענן (למשל GitHub Actions). כשמפעילים
+    # nadlan_via_scraperapi, בקשות nadlan מנותבות דרך ScraperAPI (מצב רגיל,
+    # ~קרדיט אחד לבקשה). ריצה חיה = timeout ארוך יותר לפרוקסי.
+    nadlan_proxy = api_key if (api_key and not offline
+                               and cfg.get("nadlan_via_scraperapi", True)) else None
+    fetcher = Fetcher(
+        delay=(0.5 if nadlan_proxy else cfg["request_delay_seconds"]),
+        timeout=(70 if nadlan_proxy else cfg["request_timeout_seconds"]),
+        proxy_key=nadlan_proxy)
+    if nadlan_proxy:
+        log.info("בקשות נדל\"ן ממשלתי מנותבות דרך ScraperAPI (מצב רגיל)")
     client, y2status = None, yad2.Yad2Status()
     if offline:
         # אף בקשה ל-ScraperAPI, גם לא ל-‎/account‎: הריצה כולה מהנתונים
