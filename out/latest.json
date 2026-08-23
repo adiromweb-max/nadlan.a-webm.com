@@ -1,0 +1,2275 @@
+{
+  "run_date": "2026-08-23",
+  "generated_by": "nadlan-scout",
+  "schema_version": 2,
+  "notes": [
+    "אינדקס היישובים של נדל\"ן ממשלתי לא נטען — אי אפשר לגזור קודי ערים ליד2.",
+    "אין קודי ערים — יד2 לא נסרק."
+  ],
+  "data_caveats": {
+    "comps": "מקור העסקאות אינו חושף עסקה בודדת. comp_count סופר תצפיות רבעון (מחיר ממוצע מפורסם לקטגוריית חדרים), לא עסקאות בודדות. ראה scout/comps.py.",
+    "yield": "תשואה ברוטו מוערכת משכר הדירה הממוצע הרשמי באזור, לא משכר דירה בפועל של הנכס. בלי ניכוי הוצאות.",
+    "size": "₪/מ\"ר רשמי מחושב כמחיר עסקה ממוצע חלקי גודל טיפוסי — הנתון הרשמי אינו כולל מ\"ר.",
+    "lag": "נתוני העסקאות הרשמיים מתעדכנים בפיגור של מספר חודשים."
+  },
+  "summary": {
+    "ערים בסריקה": "0/32",
+    "מודעות שנסרקו": 0,
+    "עברו סינון מקדים": "0 (שער 41)",
+    "נבדקו מול עסקאות אמיתיות": 0,
+    "נמצאו קומפים מספיקים": "0 (ל-0 אין מספיק)",
+    "לבדוק דחוף": 0,
+    "שווה בדיקה": 0,
+    "למעקב": 0,
+    "נשלחו בהתראה": "0 נשלחו (0 חדשות, 0 ציון עלה, 0 ירידת מחיר), 0 דווחו כבר",
+    "מכ\"ם ירידות מחיר": "51 מודעות (5 ירידות חדות)",
+    "ערך יחסי מוביל": "0 מודעות",
+    "אזורים מתחממים": "0 אזורים",
+    "רמות ההשוואה": "—",
+    "רמת ביטחון": "—",
+    "ירידות מחיר במעקב": 60,
+    "בדיקת נוסחת ירידת מחיר": "400,000→385,000 = 3.8% (גולמי 3.7500) — תקין; חסם שגיאת נתונים 60%",
+    "מקור יד2": "לא נוסה",
+    "נדל\"ן ממשלתי": "0 יישובים, 0 שכונות נשלפו (0 עם נתונים ברמת שכונה), 0 שליפות שכירות (0 עם נתונים)",
+    "ScraperAPI": "0 בקשות מוצלחות, 0 כשלים, ~0 קרדיטים",
+    "קרדיטים שנוצלו בריצה": "0 מתוך תקרה 3000",
+    "קרדיטים שנותרו לפני הריצה": 99540
+  },
+  "tier_counts": {
+    "check-urgent": 0,
+    "worth-checking": 0,
+    "watch": 0
+  },
+  "section_counts": {
+    "drops": 51,
+    "sharp_drops": 5,
+    "best_value": 0,
+    "hot_areas": 0
+  },
+  "comp_levels": {},
+  "confidence_counts": {},
+  "credits_used": 0,
+  "offline_run": false,
+  "drop_assertion": {
+    "ok": true,
+    "raw": 3.75,
+    "shown": 3.8,
+    "expected": 3.8,
+    "sanity_limit": 60.0,
+    "text": "400,000→385,000 = 3.8% (גולמי 3.7500) — תקין; חסם שגיאת נתונים 60%"
+  },
+  "dedup": {
+    "new": 0,
+    "score_up": 0,
+    "price_drop": 0,
+    "repeat": 0
+  },
+  "sections": {
+    "price_drop_radar": [
+      {
+        "listing_id": "yad2:qknz39xl",
+        "city": "אופקים",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/qknz39xl",
+        "rooms": 4.0,
+        "size_sqm": 100.0,
+        "original_price": 950000.0,
+        "current_price": 790000.0,
+        "total_drop_pct": 16.84,
+        "num_drops": 1,
+        "last_drop_pct": 19.8,
+        "last_change_at": "2026-08-12",
+        "price_history_text": "‎950,000 (06/08) → 985,000 (10/08) → 790,000 (12/08)",
+        "price_history": [
+          {
+            "price": 950000.0,
+            "seen_at": "2026-08-06"
+          },
+          {
+            "price": 985000.0,
+            "seen_at": "2026-08-10"
+          },
+          {
+            "price": 790000.0,
+            "seen_at": "2026-08-12"
+          }
+        ],
+        "sharp_drop": true,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_qknz39xl.png"
+      },
+      {
+        "listing_id": "yad2:eepx68pg",
+        "city": "דימונה",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/eepx68pg",
+        "rooms": 3.0,
+        "size_sqm": 60.0,
+        "original_price": 590000.0,
+        "current_price": 500000.0,
+        "total_drop_pct": 15.25,
+        "num_drops": 1,
+        "last_drop_pct": 15.25,
+        "last_change_at": "2026-08-12",
+        "price_history_text": "‎590,000 (02/08) → 500,000 (12/08)",
+        "price_history": [
+          {
+            "price": 590000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 500000.0,
+            "seen_at": "2026-08-12"
+          }
+        ],
+        "sharp_drop": true,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_eepx68pg.png"
+      },
+      {
+        "listing_id": "yad2:z9rq0fre",
+        "city": "אשקלון",
+        "neighborhood": "בן גוריון",
+        "url": "https://www.yad2.co.il/realestate/item/z9rq0fre",
+        "rooms": 2.0,
+        "size_sqm": 50.0,
+        "original_price": 999000.0,
+        "current_price": 889000.0,
+        "total_drop_pct": 11.01,
+        "num_drops": 1,
+        "last_drop_pct": 11.01,
+        "last_change_at": "2026-08-14",
+        "price_history_text": "‎999,000 (09/08) → 889,000 (14/08)",
+        "price_history": [
+          {
+            "price": 999000.0,
+            "seen_at": "2026-08-09"
+          },
+          {
+            "price": 889000.0,
+            "seen_at": "2026-08-14"
+          }
+        ],
+        "sharp_drop": true,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_z9rq0fre.png"
+      },
+      {
+        "listing_id": "yad2:c9nqjp3q",
+        "city": "באר שבע",
+        "neighborhood": "שכונה א'",
+        "url": "https://www.yad2.co.il/realestate/item/c9nqjp3q",
+        "rooms": 3.0,
+        "size_sqm": 90.0,
+        "original_price": 1100000.0,
+        "current_price": 990000.0,
+        "total_drop_pct": 10.0,
+        "num_drops": 1,
+        "last_drop_pct": 10.0,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎1,100,000 (02/08) → 990,000 (09/08)",
+        "price_history": [
+          {
+            "price": 1100000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 990000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": true,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_c9nqjp3q.png"
+      },
+      {
+        "listing_id": "yad2:lbqw5ke8",
+        "city": "אשקלון",
+        "neighborhood": "בן גוריון",
+        "url": "https://www.yad2.co.il/realestate/item/lbqw5ke8",
+        "rooms": 3.0,
+        "size_sqm": 54.0,
+        "original_price": 1050000.0,
+        "current_price": 970000.0,
+        "total_drop_pct": 7.62,
+        "num_drops": 1,
+        "last_drop_pct": 7.62,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎1,050,000 (09/08) → 970,000 (13/08)",
+        "price_history": [
+          {
+            "price": 1050000.0,
+            "seen_at": "2026-08-09"
+          },
+          {
+            "price": 970000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": true,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_lbqw5ke8.png"
+      },
+      {
+        "listing_id": "yad2:mxxx9r7h",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ד'",
+        "url": "https://www.yad2.co.il/realestate/item/mxxx9r7h",
+        "rooms": 3.0,
+        "size_sqm": 70.0,
+        "original_price": 790000.0,
+        "current_price": 739000.0,
+        "total_drop_pct": 6.46,
+        "num_drops": 1,
+        "last_drop_pct": 6.46,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎790,000 (02/08) → 739,000 (09/08)",
+        "price_history": [
+          {
+            "price": 790000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 739000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_mxxx9r7h.png"
+      },
+      {
+        "listing_id": "yad2:k2fbybve",
+        "city": "דימונה",
+        "neighborhood": "גיורא יוספטל",
+        "url": "https://www.yad2.co.il/realestate/item/k2fbybve",
+        "rooms": 3.0,
+        "size_sqm": 54.0,
+        "original_price": 650000.0,
+        "current_price": 610000.0,
+        "total_drop_pct": 6.15,
+        "num_drops": 1,
+        "last_drop_pct": 6.15,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎650,000 (02/08) → 610,000 (09/08)",
+        "price_history": [
+          {
+            "price": 650000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 610000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_k2fbybve.png"
+      },
+      {
+        "listing_id": "yad2:ol2m3ivm",
+        "city": "קרית גת",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/ol2m3ivm",
+        "rooms": 2.0,
+        "size_sqm": 45.0,
+        "original_price": 890000.0,
+        "current_price": 840000.0,
+        "total_drop_pct": 5.62,
+        "num_drops": 1,
+        "last_drop_pct": 5.62,
+        "last_change_at": "2026-08-05",
+        "price_history_text": "‎890,000 (02/08) → 840,000 (05/08)",
+        "price_history": [
+          {
+            "price": 890000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 840000.0,
+            "seen_at": "2026-08-05"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_ol2m3ivm.png"
+      },
+      {
+        "listing_id": "yad2:dk79q60y",
+        "city": "ערד",
+        "neighborhood": "טללים",
+        "url": "https://www.yad2.co.il/realestate/item/dk79q60y",
+        "rooms": 4.0,
+        "size_sqm": 87.0,
+        "original_price": 900000.0,
+        "current_price": 850000.0,
+        "total_drop_pct": 5.56,
+        "num_drops": 2,
+        "last_drop_pct": 4.37,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎900,000 (04/08) → 888,888 (07/08) → 850,000 (09/08)",
+        "price_history": [
+          {
+            "price": 900000.0,
+            "seen_at": "2026-08-04"
+          },
+          {
+            "price": 888888.0,
+            "seen_at": "2026-08-07"
+          },
+          {
+            "price": 850000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_dk79q60y.png"
+      },
+      {
+        "listing_id": "yad2:w8y2wjx0",
+        "city": "אופקים",
+        "neighborhood": "מישור הגפן",
+        "url": "https://www.yad2.co.il/realestate/item/w8y2wjx0",
+        "rooms": 3.0,
+        "size_sqm": 74.0,
+        "original_price": 950000.0,
+        "current_price": 900000.0,
+        "total_drop_pct": 5.26,
+        "num_drops": 1,
+        "last_drop_pct": 5.26,
+        "last_change_at": "2026-08-05",
+        "price_history_text": "‎950,000 (02/08) → 900,000 (05/08)",
+        "price_history": [
+          {
+            "price": 950000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 900000.0,
+            "seen_at": "2026-08-05"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_w8y2wjx0.png"
+      },
+      {
+        "listing_id": "yad2:q8ileaz6",
+        "city": "אילת",
+        "neighborhood": "אורים, מערב 2",
+        "url": "https://www.yad2.co.il/realestate/item/q8ileaz6",
+        "rooms": 3.0,
+        "size_sqm": 70.0,
+        "original_price": 1180000.0,
+        "current_price": 1120000.0,
+        "total_drop_pct": 5.08,
+        "num_drops": 1,
+        "last_drop_pct": 5.08,
+        "last_change_at": "2026-08-02",
+        "price_history_text": "‎1,180,000 (02/08) → 1,120,000 (02/08)",
+        "price_history": [
+          {
+            "price": 1180000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1120000.0,
+            "seen_at": "2026-08-02"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_q8ileaz6.png"
+      },
+      {
+        "listing_id": "yad2:9sexpdxv",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ה'",
+        "url": "https://www.yad2.co.il/realestate/item/9sexpdxv",
+        "rooms": 3.0,
+        "size_sqm": 78.0,
+        "original_price": 845000.0,
+        "current_price": 805000.0,
+        "total_drop_pct": 4.73,
+        "num_drops": 1,
+        "last_drop_pct": 4.73,
+        "last_change_at": "2026-08-11",
+        "price_history_text": "‎845,000 (10/08) → 805,000 (11/08)",
+        "price_history": [
+          {
+            "price": 845000.0,
+            "seen_at": "2026-08-10"
+          },
+          {
+            "price": 805000.0,
+            "seen_at": "2026-08-11"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": "ladder-yad2_9sexpdxv.png"
+      },
+      {
+        "listing_id": "yad2:vae12a0u",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ד'",
+        "url": "https://www.yad2.co.il/realestate/item/vae12a0u",
+        "rooms": 3.0,
+        "size_sqm": 48.0,
+        "original_price": 650000.0,
+        "current_price": 620000.0,
+        "total_drop_pct": 4.62,
+        "num_drops": 1,
+        "last_drop_pct": 4.62,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎650,000 (07/08) → 620,000 (13/08)",
+        "price_history": [
+          {
+            "price": 650000.0,
+            "seen_at": "2026-08-07"
+          },
+          {
+            "price": 620000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:v2t0235x",
+        "city": "אשדוד",
+        "neighborhood": "רובע ב'",
+        "url": "https://www.yad2.co.il/realestate/item/v2t0235x",
+        "rooms": 2.0,
+        "size_sqm": 50.0,
+        "original_price": 1100000.0,
+        "current_price": 1050000.0,
+        "total_drop_pct": 4.55,
+        "num_drops": 1,
+        "last_drop_pct": 4.55,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,100,000 (07/08) → 1,050,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1100000.0,
+            "seen_at": "2026-08-07"
+          },
+          {
+            "price": 1050000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:r4aggss4",
+        "city": "דימונה",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/r4aggss4",
+        "rooms": 3.0,
+        "size_sqm": 97.0,
+        "original_price": 680000.0,
+        "current_price": 650000.0,
+        "total_drop_pct": 4.41,
+        "num_drops": 1,
+        "last_drop_pct": 4.41,
+        "last_change_at": "2026-08-14",
+        "price_history_text": "‎680,000 (02/08) → 650,000 (14/08)",
+        "price_history": [
+          {
+            "price": 680000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 650000.0,
+            "seen_at": "2026-08-14"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:ygj0fmpr",
+        "city": "שדרות",
+        "neighborhood": "נאות אשכול",
+        "url": "https://www.yad2.co.il/realestate/item/ygj0fmpr",
+        "rooms": 4.5,
+        "size_sqm": 90.0,
+        "original_price": 1150000.0,
+        "current_price": 1100000.0,
+        "total_drop_pct": 4.35,
+        "num_drops": 1,
+        "last_drop_pct": 4.35,
+        "last_change_at": "2026-08-06",
+        "price_history_text": "‎1,150,000 (02/08) → 1,100,000 (06/08)",
+        "price_history": [
+          {
+            "price": 1150000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1100000.0,
+            "seen_at": "2026-08-06"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:imldnn18",
+        "city": "ערד",
+        "neighborhood": "טללים",
+        "url": "https://www.yad2.co.il/realestate/item/imldnn18",
+        "rooms": 1.0,
+        "size_sqm": 38.0,
+        "original_price": 480000.0,
+        "current_price": 460000.0,
+        "total_drop_pct": 4.17,
+        "num_drops": 1,
+        "last_drop_pct": 4.17,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎480,000 (02/08) → 460,000 (13/08)",
+        "price_history": [
+          {
+            "price": 480000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 460000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:dq865qyo",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ג'",
+        "url": "https://www.yad2.co.il/realestate/item/dq865qyo",
+        "rooms": 4.0,
+        "size_sqm": 100.0,
+        "original_price": 995000.0,
+        "current_price": 955000.0,
+        "total_drop_pct": 4.02,
+        "num_drops": 1,
+        "last_drop_pct": 4.02,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎995,000 (02/08) → 955,000 (13/08)",
+        "price_history": [
+          {
+            "price": 995000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 955000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:1dh5f5av",
+        "city": "שדרות",
+        "neighborhood": "נאות אשכול",
+        "url": "https://www.yad2.co.il/realestate/item/1dh5f5av",
+        "rooms": 4.0,
+        "size_sqm": 94.0,
+        "original_price": 1030000.0,
+        "current_price": 990000.0,
+        "total_drop_pct": 3.88,
+        "num_drops": 1,
+        "last_drop_pct": 3.88,
+        "last_change_at": "2026-08-10",
+        "price_history_text": "‎1,030,000 (02/08) → 990,000 (10/08)",
+        "price_history": [
+          {
+            "price": 1030000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 990000.0,
+            "seen_at": "2026-08-10"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:8q03elq8",
+        "city": "דימונה",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/8q03elq8",
+        "rooms": 3.5,
+        "size_sqm": 74.0,
+        "original_price": 540000.0,
+        "current_price": 520000.0,
+        "total_drop_pct": 3.7,
+        "num_drops": 1,
+        "last_drop_pct": 3.7,
+        "last_change_at": "2026-08-06",
+        "price_history_text": "‎540,000 (02/08) → 520,000 (06/08)",
+        "price_history": [
+          {
+            "price": 540000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 520000.0,
+            "seen_at": "2026-08-06"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:xgai1dd4",
+        "city": "דימונה",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/xgai1dd4",
+        "rooms": 2.5,
+        "size_sqm": 50.0,
+        "original_price": 540000.0,
+        "current_price": 520000.0,
+        "total_drop_pct": 3.7,
+        "num_drops": 1,
+        "last_drop_pct": 3.7,
+        "last_change_at": "2026-08-06",
+        "price_history_text": "‎540,000 (02/08) → 520,000 (06/08)",
+        "price_history": [
+          {
+            "price": 540000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 520000.0,
+            "seen_at": "2026-08-06"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:mq7at20n",
+        "city": "אשדוד",
+        "neighborhood": "רובע א'",
+        "url": "https://www.yad2.co.il/realestate/item/mq7at20n",
+        "rooms": 2.0,
+        "size_sqm": 48.0,
+        "original_price": 1430000.0,
+        "current_price": 1380000.0,
+        "total_drop_pct": 3.5,
+        "num_drops": 1,
+        "last_drop_pct": 3.5,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,430,000 (14/08) → 1,380,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1430000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1380000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:pdwkzgkb",
+        "city": "קרית מלאכי",
+        "neighborhood": "קיבוץ גלויות",
+        "url": "https://www.yad2.co.il/realestate/item/pdwkzgkb",
+        "rooms": 2.0,
+        "size_sqm": 48.0,
+        "original_price": 860000.0,
+        "current_price": 830000.0,
+        "total_drop_pct": 3.49,
+        "num_drops": 1,
+        "last_drop_pct": 3.49,
+        "last_change_at": "2026-08-12",
+        "price_history_text": "‎860,000 (02/08) → 830,000 (12/08)",
+        "price_history": [
+          {
+            "price": 860000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 830000.0,
+            "seen_at": "2026-08-12"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:trnb4mqv",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ד'",
+        "url": "https://www.yad2.co.il/realestate/item/trnb4mqv",
+        "rooms": 3.0,
+        "size_sqm": 52.0,
+        "original_price": 610000.0,
+        "current_price": 590000.0,
+        "total_drop_pct": 3.28,
+        "num_drops": 1,
+        "last_drop_pct": 3.28,
+        "last_change_at": "2026-08-07",
+        "price_history_text": "‎610,000 (06/08) → 590,000 (07/08)",
+        "price_history": [
+          {
+            "price": 610000.0,
+            "seen_at": "2026-08-06"
+          },
+          {
+            "price": 590000.0,
+            "seen_at": "2026-08-07"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:j910d09p",
+        "city": "באר שבע",
+        "neighborhood": "שכונה י\"א",
+        "url": "https://www.yad2.co.il/realestate/item/j910d09p",
+        "rooms": 3.5,
+        "size_sqm": 72.0,
+        "original_price": 920000.0,
+        "current_price": 890000.0,
+        "total_drop_pct": 3.26,
+        "num_drops": 1,
+        "last_drop_pct": 3.26,
+        "last_change_at": "2026-08-10",
+        "price_history_text": "‎920,000 (02/08) → 890,000 (10/08)",
+        "price_history": [
+          {
+            "price": 920000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 890000.0,
+            "seen_at": "2026-08-10"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:e2wvbz3x",
+        "city": "דימונה",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/e2wvbz3x",
+        "rooms": 3.0,
+        "size_sqm": 84.0,
+        "original_price": 650000.0,
+        "current_price": 630000.0,
+        "total_drop_pct": 3.08,
+        "num_drops": 1,
+        "last_drop_pct": 3.08,
+        "last_change_at": "2026-08-11",
+        "price_history_text": "‎650,000 (02/08) → 630,000 (11/08)",
+        "price_history": [
+          {
+            "price": 650000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 630000.0,
+            "seen_at": "2026-08-11"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:gui3d8lz",
+        "city": "קרית גת",
+        "neighborhood": "ההעפלה",
+        "url": "https://www.yad2.co.il/realestate/item/gui3d8lz",
+        "rooms": 2.0,
+        "size_sqm": 48.0,
+        "original_price": 975000.0,
+        "current_price": 945000.0,
+        "total_drop_pct": 3.08,
+        "num_drops": 1,
+        "last_drop_pct": 3.08,
+        "last_change_at": "2026-08-12",
+        "price_history_text": "‎975,000 (02/08) → 945,000 (12/08)",
+        "price_history": [
+          {
+            "price": 975000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 945000.0,
+            "seen_at": "2026-08-12"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:f8sujety",
+        "city": "אילת",
+        "neighborhood": "דקל",
+        "url": "https://www.yad2.co.il/realestate/item/f8sujety",
+        "rooms": 3.0,
+        "size_sqm": 65.0,
+        "original_price": 1020000.0,
+        "current_price": 990000.0,
+        "total_drop_pct": 2.94,
+        "num_drops": 1,
+        "last_drop_pct": 2.94,
+        "last_change_at": "2026-08-05",
+        "price_history_text": "‎1,020,000 (02/08) → 990,000 (05/08)",
+        "price_history": [
+          {
+            "price": 1020000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 990000.0,
+            "seen_at": "2026-08-05"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:lhzpksap",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ג'",
+        "url": "https://www.yad2.co.il/realestate/item/lhzpksap",
+        "rooms": 2.0,
+        "size_sqm": 45.0,
+        "original_price": 520000.0,
+        "current_price": 505000.0,
+        "total_drop_pct": 2.88,
+        "num_drops": 1,
+        "last_drop_pct": 2.88,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎520,000 (02/08) → 505,000 (09/08)",
+        "price_history": [
+          {
+            "price": 520000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 505000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:ef3x8x53",
+        "city": "אילת",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/ef3x8x53",
+        "rooms": 2.0,
+        "size_sqm": 50.0,
+        "original_price": 699000.0,
+        "current_price": 680000.0,
+        "total_drop_pct": 2.72,
+        "num_drops": 1,
+        "last_drop_pct": 2.72,
+        "last_change_at": "2026-08-10",
+        "price_history_text": "‎699,000 (02/08) → 680,000 (10/08)",
+        "price_history": [
+          {
+            "price": 699000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 680000.0,
+            "seen_at": "2026-08-10"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:8qr5zheo",
+        "city": "אילת",
+        "neighborhood": "אופיר",
+        "url": "https://www.yad2.co.il/realestate/item/8qr5zheo",
+        "rooms": 3.0,
+        "size_sqm": 56.0,
+        "original_price": 920000.0,
+        "current_price": 895000.0,
+        "total_drop_pct": 2.72,
+        "num_drops": 1,
+        "last_drop_pct": 2.72,
+        "last_change_at": "2026-08-12",
+        "price_history_text": "‎920,000 (09/08) → 895,000 (12/08)",
+        "price_history": [
+          {
+            "price": 920000.0,
+            "seen_at": "2026-08-09"
+          },
+          {
+            "price": 895000.0,
+            "seen_at": "2026-08-12"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:vyhetb9f",
+        "city": "קרית גת",
+        "neighborhood": "צה\"ל",
+        "url": "https://www.yad2.co.il/realestate/item/vyhetb9f",
+        "rooms": 3.0,
+        "size_sqm": 82.0,
+        "original_price": 1180000.0,
+        "current_price": 1150000.0,
+        "total_drop_pct": 2.54,
+        "num_drops": 1,
+        "last_drop_pct": 2.54,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎1,180,000 (02/08) → 1,150,000 (13/08)",
+        "price_history": [
+          {
+            "price": 1180000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1150000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:2dnoyepi",
+        "city": "נתיבות",
+        "neighborhood": "נתיבות מערב",
+        "url": "https://www.yad2.co.il/realestate/item/2dnoyepi",
+        "rooms": 4.0,
+        "size_sqm": 126.0,
+        "original_price": 1450000.0,
+        "current_price": 1415000.0,
+        "total_drop_pct": 2.41,
+        "num_drops": 1,
+        "last_drop_pct": 2.41,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,450,000 (14/08) → 1,415,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1450000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1415000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:97ljcy8s",
+        "city": "באר שבע",
+        "neighborhood": "שכונה י\"א",
+        "url": "https://www.yad2.co.il/realestate/item/97ljcy8s",
+        "rooms": 3.5,
+        "size_sqm": 73.0,
+        "original_price": 926000.0,
+        "current_price": 905026.0,
+        "total_drop_pct": 2.27,
+        "num_drops": 2,
+        "last_drop_pct": 1.43,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎926,000 (03/08) → 918,148 (06/08) → 905,026 (09/08)",
+        "price_history": [
+          {
+            "price": 926000.0,
+            "seen_at": "2026-08-03"
+          },
+          {
+            "price": 918148.0,
+            "seen_at": "2026-08-06"
+          },
+          {
+            "price": 905026.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:ueng4trp",
+        "city": "דימונה",
+        "neighborhood": "ממשית",
+        "url": "https://www.yad2.co.il/realestate/item/ueng4trp",
+        "rooms": 3.0,
+        "size_sqm": 94.0,
+        "original_price": 1176000.0,
+        "current_price": 1152000.0,
+        "total_drop_pct": 2.04,
+        "num_drops": 1,
+        "last_drop_pct": 2.04,
+        "last_change_at": "2026-08-07",
+        "price_history_text": "‎1,176,000 (02/08) → 1,152,000 (07/08)",
+        "price_history": [
+          {
+            "price": 1176000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1152000.0,
+            "seen_at": "2026-08-07"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:09tolsnh",
+        "city": "ערד",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/09tolsnh",
+        "rooms": 4.0,
+        "size_sqm": 100.0,
+        "original_price": 1090000.0,
+        "current_price": 1068000.0,
+        "total_drop_pct": 2.02,
+        "num_drops": 1,
+        "last_drop_pct": 2.02,
+        "last_change_at": "2026-08-10",
+        "price_history_text": "‎1,090,000 (09/08) → 1,068,000 (10/08)",
+        "price_history": [
+          {
+            "price": 1090000.0,
+            "seen_at": "2026-08-09"
+          },
+          {
+            "price": 1068000.0,
+            "seen_at": "2026-08-10"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:ouypjs3v",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ג'",
+        "url": "https://www.yad2.co.il/realestate/item/ouypjs3v",
+        "rooms": 4.0,
+        "size_sqm": 77.0,
+        "original_price": 815000.0,
+        "current_price": 799000.0,
+        "total_drop_pct": 1.96,
+        "num_drops": 1,
+        "last_drop_pct": 1.96,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎815,000 (02/08) → 799,000 (20/08)",
+        "price_history": [
+          {
+            "price": 815000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 799000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:8zlc9zyt",
+        "city": "באר שבע",
+        "neighborhood": "שכונה י\"א",
+        "url": "https://www.yad2.co.il/realestate/item/8zlc9zyt",
+        "rooms": 4.0,
+        "size_sqm": 127.0,
+        "original_price": 1090000.0,
+        "current_price": 1070000.0,
+        "total_drop_pct": 1.83,
+        "num_drops": 1,
+        "last_drop_pct": 3.67,
+        "last_change_at": "2026-08-08",
+        "price_history_text": "‎1,090,000 (02/08) → 1,050,000 (08/08) → 1,070,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1090000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1050000.0,
+            "seen_at": "2026-08-08"
+          },
+          {
+            "price": 1070000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:xpqopokq",
+        "city": "שדרות",
+        "neighborhood": "נאות אשכול",
+        "url": "https://www.yad2.co.il/realestate/item/xpqopokq",
+        "rooms": 4.0,
+        "size_sqm": 102.0,
+        "original_price": 1090000.0,
+        "current_price": 1070000.0,
+        "total_drop_pct": 1.83,
+        "num_drops": 1,
+        "last_drop_pct": 1.83,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎1,090,000 (02/08) → 1,070,000 (13/08)",
+        "price_history": [
+          {
+            "price": 1090000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1070000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:68n7oasn",
+        "city": "נתיבות",
+        "neighborhood": "נתיבות מערב",
+        "url": "https://www.yad2.co.il/realestate/item/68n7oasn",
+        "rooms": 4.0,
+        "size_sqm": 114.0,
+        "original_price": 1380000.0,
+        "current_price": 1360000.0,
+        "total_drop_pct": 1.45,
+        "num_drops": 1,
+        "last_drop_pct": 1.45,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,380,000 (14/08) → 1,360,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1380000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1360000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:a4hc9vde",
+        "city": "באר שבע",
+        "neighborhood": "שכונה א'",
+        "url": "https://www.yad2.co.il/realestate/item/a4hc9vde",
+        "rooms": 4.0,
+        "size_sqm": 95.0,
+        "original_price": 1045000.0,
+        "current_price": 1030000.0,
+        "total_drop_pct": 1.44,
+        "num_drops": 1,
+        "last_drop_pct": 1.44,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎1,045,000 (02/08) → 1,030,000 (13/08)",
+        "price_history": [
+          {
+            "price": 1045000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1030000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:k48cpg3k",
+        "city": "באר שבע",
+        "neighborhood": "רמות הרכס",
+        "url": "https://www.yad2.co.il/realestate/item/k48cpg3k",
+        "rooms": 4.0,
+        "size_sqm": 114.0,
+        "original_price": 1480000.0,
+        "current_price": 1460000.0,
+        "total_drop_pct": 1.35,
+        "num_drops": 1,
+        "last_drop_pct": 1.35,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,480,000 (14/08) → 1,460,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1480000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1460000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:piq7hioc",
+        "city": "נתיבות",
+        "neighborhood": "קרית מנחם בגין",
+        "url": "https://www.yad2.co.il/realestate/item/piq7hioc",
+        "rooms": 3.5,
+        "size_sqm": 80.0,
+        "original_price": 1200000.0,
+        "current_price": 1185000.0,
+        "total_drop_pct": 1.25,
+        "num_drops": 1,
+        "last_drop_pct": 1.25,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎1,200,000 (02/08) → 1,185,000 (13/08)",
+        "price_history": [
+          {
+            "price": 1200000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1185000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:v02iuz2y",
+        "city": "באר שבע",
+        "neighborhood": "נווה מנחם",
+        "url": "https://www.yad2.co.il/realestate/item/v02iuz2y",
+        "rooms": 3.0,
+        "size_sqm": 80.0,
+        "original_price": 1130000.0,
+        "current_price": 1120000.0,
+        "total_drop_pct": 0.88,
+        "num_drops": 1,
+        "last_drop_pct": 0.88,
+        "last_change_at": "2026-08-09",
+        "price_history_text": "‎1,130,000 (02/08) → 1,120,000 (09/08)",
+        "price_history": [
+          {
+            "price": 1130000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1120000.0,
+            "seen_at": "2026-08-09"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:2fuv63t2",
+        "city": "באר שבע",
+        "neighborhood": "שכונה י\"א",
+        "url": "https://www.yad2.co.il/realestate/item/2fuv63t2",
+        "rooms": 4.0,
+        "size_sqm": 100.0,
+        "original_price": 1190000.0,
+        "current_price": 1180000.0,
+        "total_drop_pct": 0.84,
+        "num_drops": 1,
+        "last_drop_pct": 0.84,
+        "last_change_at": "2026-08-11",
+        "price_history_text": "‎1,190,000 (09/08) → 1,180,000 (11/08)",
+        "price_history": [
+          {
+            "price": 1190000.0,
+            "seen_at": "2026-08-09"
+          },
+          {
+            "price": 1180000.0,
+            "seen_at": "2026-08-11"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:zmbnav0i",
+        "city": "אשקלון",
+        "neighborhood": "נווה ים",
+        "url": "https://www.yad2.co.il/realestate/item/zmbnav0i",
+        "rooms": 4.0,
+        "size_sqm": 98.0,
+        "original_price": 1200000.0,
+        "current_price": 1190000.0,
+        "total_drop_pct": 0.83,
+        "num_drops": 1,
+        "last_drop_pct": 0.83,
+        "last_change_at": "2026-08-10",
+        "price_history_text": "‎1,200,000 (02/08) → 1,190,000 (10/08)",
+        "price_history": [
+          {
+            "price": 1200000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 1190000.0,
+            "seen_at": "2026-08-10"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:626cexnz",
+        "city": "ירוחם",
+        "neighborhood": "בן גוריון",
+        "url": "https://www.yad2.co.il/realestate/item/626cexnz",
+        "rooms": 4.5,
+        "size_sqm": 94.0,
+        "original_price": 670000.0,
+        "current_price": 665000.0,
+        "total_drop_pct": 0.75,
+        "num_drops": 1,
+        "last_drop_pct": 0.75,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎670,000 (02/08) → 665,000 (13/08)",
+        "price_history": [
+          {
+            "price": 670000.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 665000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:g9odcuoa",
+        "city": "באר שבע",
+        "neighborhood": "שכונה ד'",
+        "url": "https://www.yad2.co.il/realestate/item/g9odcuoa",
+        "rooms": 4.0,
+        "size_sqm": 70.0,
+        "original_price": 680000.0,
+        "current_price": 675000.0,
+        "total_drop_pct": 0.74,
+        "num_drops": 1,
+        "last_drop_pct": 0.74,
+        "last_change_at": "2026-08-14",
+        "price_history_text": "‎680,000 (08/08) → 675,000 (14/08)",
+        "price_history": [
+          {
+            "price": 680000.0,
+            "seen_at": "2026-08-08"
+          },
+          {
+            "price": 675000.0,
+            "seen_at": "2026-08-14"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:5vtsbkrp",
+        "city": "אשדוד",
+        "neighborhood": "רובע ב'",
+        "url": "https://www.yad2.co.il/realestate/item/5vtsbkrp",
+        "rooms": 3.0,
+        "size_sqm": 70.0,
+        "original_price": 1390000.0,
+        "current_price": 1380000.0,
+        "total_drop_pct": 0.72,
+        "num_drops": 1,
+        "last_drop_pct": 0.72,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,390,000 (14/08) → 1,380,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1390000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1380000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:63tpwdpf",
+        "city": "נתיבות",
+        "neighborhood": null,
+        "url": "https://www.yad2.co.il/realestate/item/63tpwdpf",
+        "rooms": 4.0,
+        "size_sqm": 120.0,
+        "original_price": 1420000.0,
+        "current_price": 1410000.0,
+        "total_drop_pct": 0.7,
+        "num_drops": 1,
+        "last_drop_pct": 0.7,
+        "last_change_at": "2026-08-20",
+        "price_history_text": "‎1,420,000 (14/08) → 1,410,000 (20/08)",
+        "price_history": [
+          {
+            "price": 1420000.0,
+            "seen_at": "2026-08-14"
+          },
+          {
+            "price": 1410000.0,
+            "seen_at": "2026-08-20"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      },
+      {
+        "listing_id": "yad2:8cqcn84t",
+        "city": "אשקלון",
+        "neighborhood": "נווה ים",
+        "url": "https://www.yad2.co.il/realestate/item/8cqcn84t",
+        "rooms": 3.0,
+        "size_sqm": 68.0,
+        "original_price": 892555.0,
+        "current_price": 889000.0,
+        "total_drop_pct": 0.4,
+        "num_drops": 1,
+        "last_drop_pct": 0.4,
+        "last_change_at": "2026-08-13",
+        "price_history_text": "‎892,555 (02/08) → 889,000 (13/08)",
+        "price_history": [
+          {
+            "price": 892555.0,
+            "seen_at": "2026-08-02"
+          },
+          {
+            "price": 889000.0,
+            "seen_at": "2026-08-13"
+          }
+        ],
+        "sharp_drop": false,
+        "suspect": false,
+        "value_gap_pct": null,
+        "comp_level_he": null,
+        "confidence": null,
+        "chart": null
+      }
+    ],
+    "best_relative_value": [],
+    "hot_areas": []
+  },
+  "listings": [],
+  "areas": [],
+  "price_drops": [
+    {
+      "listing_id": "yad2:09tolsnh",
+      "city": "ערד",
+      "url": "https://www.yad2.co.il/realestate/item/09tolsnh",
+      "old_price": 1090000.0,
+      "new_price": 1068000.0,
+      "drop_pct": 2.02,
+      "changed_at": "2026-08-10",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:1dh5f5av",
+      "city": "שדרות",
+      "url": "https://www.yad2.co.il/realestate/item/1dh5f5av",
+      "old_price": 1030000.0,
+      "new_price": 990000.0,
+      "drop_pct": 3.88,
+      "changed_at": "2026-08-10",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:2dnoyepi",
+      "city": "נתיבות",
+      "url": "https://www.yad2.co.il/realestate/item/2dnoyepi",
+      "old_price": 1450000.0,
+      "new_price": 1415000.0,
+      "drop_pct": 2.41,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:2fuv63t2",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/2fuv63t2",
+      "old_price": 1190000.0,
+      "new_price": 1180000.0,
+      "drop_pct": 0.84,
+      "changed_at": "2026-08-11",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:5vtsbkrp",
+      "city": "אשדוד",
+      "url": "https://www.yad2.co.il/realestate/item/5vtsbkrp",
+      "old_price": 1390000.0,
+      "new_price": 1380000.0,
+      "drop_pct": 0.72,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:626cexnz",
+      "city": "ירוחם",
+      "url": "https://www.yad2.co.il/realestate/item/626cexnz",
+      "old_price": 670000.0,
+      "new_price": 665000.0,
+      "drop_pct": 0.75,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:63tpwdpf",
+      "city": "נתיבות",
+      "url": "https://www.yad2.co.il/realestate/item/63tpwdpf",
+      "old_price": 1420000.0,
+      "new_price": 1410000.0,
+      "drop_pct": 0.7,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:68n7oasn",
+      "city": "נתיבות",
+      "url": "https://www.yad2.co.il/realestate/item/68n7oasn",
+      "old_price": 1380000.0,
+      "new_price": 1360000.0,
+      "drop_pct": 1.45,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:6rohu5xh",
+      "city": "אילת",
+      "url": "https://www.yad2.co.il/realestate/item/6rohu5xh",
+      "old_price": 929000.0,
+      "new_price": 920000.0,
+      "drop_pct": 0.97,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:8cqcn84t",
+      "city": "אשקלון",
+      "url": "https://www.yad2.co.il/realestate/item/8cqcn84t",
+      "old_price": 892555.0,
+      "new_price": 889000.0,
+      "drop_pct": 0.4,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:8d2cnm2m",
+      "city": "אשקלון",
+      "url": "https://www.yad2.co.il/realestate/item/8d2cnm2m",
+      "old_price": 989000.0,
+      "new_price": 980000.0,
+      "drop_pct": 0.91,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:8q03elq8",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/8q03elq8",
+      "old_price": 540000.0,
+      "new_price": 520000.0,
+      "drop_pct": 3.7,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:8qr5zheo",
+      "city": "אילת",
+      "url": "https://www.yad2.co.il/realestate/item/8qr5zheo",
+      "old_price": 920000.0,
+      "new_price": 895000.0,
+      "drop_pct": 2.72,
+      "changed_at": "2026-08-12",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:8zlc9zyt",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/8zlc9zyt",
+      "old_price": 1090000.0,
+      "new_price": 1050000.0,
+      "drop_pct": 3.67,
+      "changed_at": "2026-08-08",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:97ljcy8s",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/97ljcy8s",
+      "old_price": 926000.0,
+      "new_price": 918148.0,
+      "drop_pct": 0.85,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:97ljcy8s",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/97ljcy8s",
+      "old_price": 918148.0,
+      "new_price": 905026.0,
+      "drop_pct": 1.43,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:9sexpdxv",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/9sexpdxv",
+      "old_price": 845000.0,
+      "new_price": 805000.0,
+      "drop_pct": 4.73,
+      "changed_at": "2026-08-11",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:a4hc9vde",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/a4hc9vde",
+      "old_price": 1045000.0,
+      "new_price": 1030000.0,
+      "drop_pct": 1.44,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:c9cxoxzy",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/c9cxoxzy",
+      "old_price": 509950.0,
+      "new_price": 499979.0,
+      "drop_pct": 1.96,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:c9nqjp3q",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/c9nqjp3q",
+      "old_price": 1100000.0,
+      "new_price": 990000.0,
+      "drop_pct": 10.0,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ce7rspqy",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/ce7rspqy",
+      "old_price": 580000.0,
+      "new_price": 560000.0,
+      "drop_pct": 3.45,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:dk79q60y",
+      "city": "ערד",
+      "url": "https://www.yad2.co.il/realestate/item/dk79q60y",
+      "old_price": 900000.0,
+      "new_price": 888888.0,
+      "drop_pct": 1.23,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:dk79q60y",
+      "city": "ערד",
+      "url": "https://www.yad2.co.il/realestate/item/dk79q60y",
+      "old_price": 888888.0,
+      "new_price": 850000.0,
+      "drop_pct": 4.37,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:dq865qyo",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/dq865qyo",
+      "old_price": 995000.0,
+      "new_price": 955000.0,
+      "drop_pct": 4.02,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:e2wvbz3x",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/e2wvbz3x",
+      "old_price": 650000.0,
+      "new_price": 630000.0,
+      "drop_pct": 3.08,
+      "changed_at": "2026-08-11",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:eepx68pg",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/eepx68pg",
+      "old_price": 590000.0,
+      "new_price": 500000.0,
+      "drop_pct": 15.25,
+      "changed_at": "2026-08-12",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ef3x8x53",
+      "city": "אילת",
+      "url": "https://www.yad2.co.il/realestate/item/ef3x8x53",
+      "old_price": 699000.0,
+      "new_price": 680000.0,
+      "drop_pct": 2.72,
+      "changed_at": "2026-08-10",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:f8sujety",
+      "city": "אילת",
+      "url": "https://www.yad2.co.il/realestate/item/f8sujety",
+      "old_price": 1020000.0,
+      "new_price": 990000.0,
+      "drop_pct": 2.94,
+      "changed_at": "2026-08-05",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:g9odcuoa",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/g9odcuoa",
+      "old_price": 680000.0,
+      "new_price": 675000.0,
+      "drop_pct": 0.74,
+      "changed_at": "2026-08-14",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:gui3d8lz",
+      "city": "קרית גת",
+      "url": "https://www.yad2.co.il/realestate/item/gui3d8lz",
+      "old_price": 975000.0,
+      "new_price": 945000.0,
+      "drop_pct": 3.08,
+      "changed_at": "2026-08-12",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:imldnn18",
+      "city": "ערד",
+      "url": "https://www.yad2.co.il/realestate/item/imldnn18",
+      "old_price": 480000.0,
+      "new_price": 460000.0,
+      "drop_pct": 4.17,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:j910d09p",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/j910d09p",
+      "old_price": 920000.0,
+      "new_price": 890000.0,
+      "drop_pct": 3.26,
+      "changed_at": "2026-08-10",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:k2fbybve",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/k2fbybve",
+      "old_price": 650000.0,
+      "new_price": 610000.0,
+      "drop_pct": 6.15,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:k48cpg3k",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/k48cpg3k",
+      "old_price": 1480000.0,
+      "new_price": 1460000.0,
+      "drop_pct": 1.35,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:lbqw5ke8",
+      "city": "אשקלון",
+      "url": "https://www.yad2.co.il/realestate/item/lbqw5ke8",
+      "old_price": 1050000.0,
+      "new_price": 970000.0,
+      "drop_pct": 7.62,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:lhzpksap",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/lhzpksap",
+      "old_price": 520000.0,
+      "new_price": 505000.0,
+      "drop_pct": 2.88,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:mq7at20n",
+      "city": "אשדוד",
+      "url": "https://www.yad2.co.il/realestate/item/mq7at20n",
+      "old_price": 1430000.0,
+      "new_price": 1380000.0,
+      "drop_pct": 3.5,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:mxxx9r7h",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/mxxx9r7h",
+      "old_price": 790000.0,
+      "new_price": 739000.0,
+      "drop_pct": 6.46,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ol2m3ivm",
+      "city": "קרית גת",
+      "url": "https://www.yad2.co.il/realestate/item/ol2m3ivm",
+      "old_price": 890000.0,
+      "new_price": 840000.0,
+      "drop_pct": 5.62,
+      "changed_at": "2026-08-05",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ouypjs3v",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/ouypjs3v",
+      "old_price": 815000.0,
+      "new_price": 799000.0,
+      "drop_pct": 1.96,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:pdwkzgkb",
+      "city": "קרית מלאכי",
+      "url": "https://www.yad2.co.il/realestate/item/pdwkzgkb",
+      "old_price": 860000.0,
+      "new_price": 830000.0,
+      "drop_pct": 3.49,
+      "changed_at": "2026-08-12",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:piq7hioc",
+      "city": "נתיבות",
+      "url": "https://www.yad2.co.il/realestate/item/piq7hioc",
+      "old_price": 1200000.0,
+      "new_price": 1185000.0,
+      "drop_pct": 1.25,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:q8ileaz6",
+      "city": "אילת",
+      "url": "https://www.yad2.co.il/realestate/item/q8ileaz6",
+      "old_price": 1180000.0,
+      "new_price": 1120000.0,
+      "drop_pct": 5.08,
+      "changed_at": "2026-08-02",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:qknz39xl",
+      "city": "אופקים",
+      "url": "https://www.yad2.co.il/realestate/item/qknz39xl",
+      "old_price": 985000.0,
+      "new_price": 790000.0,
+      "drop_pct": 19.8,
+      "changed_at": "2026-08-12",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:r4aggss4",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/r4aggss4",
+      "old_price": 680000.0,
+      "new_price": 650000.0,
+      "drop_pct": 4.41,
+      "changed_at": "2026-08-14",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:tdhxnb4i",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/tdhxnb4i",
+      "old_price": 570000.0,
+      "new_price": 565000.0,
+      "drop_pct": 0.88,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:trnb4mqv",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/trnb4mqv",
+      "old_price": 610000.0,
+      "new_price": 590000.0,
+      "drop_pct": 3.28,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ueng4trp",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/ueng4trp",
+      "old_price": 1176000.0,
+      "new_price": 1152000.0,
+      "drop_pct": 2.04,
+      "changed_at": "2026-08-07",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:v02iuz2y",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/v02iuz2y",
+      "old_price": 1130000.0,
+      "new_price": 1120000.0,
+      "drop_pct": 0.88,
+      "changed_at": "2026-08-09",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:v2t0235x",
+      "city": "אשדוד",
+      "url": "https://www.yad2.co.il/realestate/item/v2t0235x",
+      "old_price": 1100000.0,
+      "new_price": 1050000.0,
+      "drop_pct": 4.55,
+      "changed_at": "2026-08-20",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:vae12a0u",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/vae12a0u",
+      "old_price": 650000.0,
+      "new_price": 620000.0,
+      "drop_pct": 4.62,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:vyhetb9f",
+      "city": "קרית גת",
+      "url": "https://www.yad2.co.il/realestate/item/vyhetb9f",
+      "old_price": 1180000.0,
+      "new_price": 1150000.0,
+      "drop_pct": 2.54,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:w83odhnj",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/w83odhnj",
+      "old_price": 1150000.0,
+      "new_price": 1130000.0,
+      "drop_pct": 1.74,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:w83odhnj",
+      "city": "באר שבע",
+      "url": "https://www.yad2.co.il/realestate/item/w83odhnj",
+      "old_price": 1130000.0,
+      "new_price": 1120000.0,
+      "drop_pct": 0.88,
+      "changed_at": "2026-08-11",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:w8y2wjx0",
+      "city": "אופקים",
+      "url": "https://www.yad2.co.il/realestate/item/w8y2wjx0",
+      "old_price": 950000.0,
+      "new_price": 900000.0,
+      "drop_pct": 5.26,
+      "changed_at": "2026-08-05",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:xgai1dd4",
+      "city": "דימונה",
+      "url": "https://www.yad2.co.il/realestate/item/xgai1dd4",
+      "old_price": 540000.0,
+      "new_price": 520000.0,
+      "drop_pct": 3.7,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:xpqopokq",
+      "city": "שדרות",
+      "url": "https://www.yad2.co.il/realestate/item/xpqopokq",
+      "old_price": 1090000.0,
+      "new_price": 1070000.0,
+      "drop_pct": 1.83,
+      "changed_at": "2026-08-13",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:ygj0fmpr",
+      "city": "שדרות",
+      "url": "https://www.yad2.co.il/realestate/item/ygj0fmpr",
+      "old_price": 1150000.0,
+      "new_price": 1100000.0,
+      "drop_pct": 4.35,
+      "changed_at": "2026-08-06",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:z9rq0fre",
+      "city": "אשקלון",
+      "url": "https://www.yad2.co.il/realestate/item/z9rq0fre",
+      "old_price": 999000.0,
+      "new_price": 889000.0,
+      "drop_pct": 11.01,
+      "changed_at": "2026-08-14",
+      "suspect": false
+    },
+    {
+      "listing_id": "yad2:zmbnav0i",
+      "city": "אשקלון",
+      "url": "https://www.yad2.co.il/realestate/item/zmbnav0i",
+      "old_price": 1200000.0,
+      "new_price": 1190000.0,
+      "drop_pct": 0.83,
+      "changed_at": "2026-08-10",
+      "suspect": false
+    }
+  ],
+  "cities": []
+}
