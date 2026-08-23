@@ -246,17 +246,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.7}
 
   /* ===== deal detail modal ===== */
-  .overlay{position:fixed;inset:0;background:rgba(16,10,28,.62);backdrop-filter:blur(4px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow:auto}
+  .overlay{position:fixed;inset:0;background:rgba(16,10,28,.62);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
   .overlay.show{display:flex}
-  .modal{background:var(--panel);border-radius:22px;max-width:820px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);margin:20px auto 40px}
-  .mhead{position:relative;background:var(--dark);color:#fff;padding:24px 26px;border-radius:22px 22px 0 0;overflow:hidden}
+  .modal{background:var(--panel);border-radius:22px;max-width:820px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden}
+  .mhead{position:relative;background:var(--dark);color:#fff;padding:24px 26px;border-radius:22px 22px 0 0;overflow:hidden;flex-shrink:0}
   .mhead::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 200px at 85% -30%,rgba(224,72,158,.4),transparent 60%),radial-gradient(500px 200px at 6% 0,rgba(123,63,242,.44),transparent 60%)}
   .mhead .z{position:relative;z-index:2}
   .mhead h2{margin:0;font-size:24px;font-weight:900}
   .mhead .loc{color:#cfc9dd;font-size:13.5px;margin-top:3px}
   .mhead .pr{font-size:26px;font-weight:900;font-family:"Frank Ruhl Libre",serif;margin-top:8px}
   .xbtn{position:absolute;top:16px;inset-inline-end:18px;z-index:3;background:rgba(255,255,255,.16);border:none;color:#fff;width:34px;height:34px;border-radius:999px;font-size:16px;cursor:pointer}
-  .mbody{padding:22px 26px 26px}
+  .mbody{padding:22px 26px 26px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
   .keynums{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
   .keynum{flex:1;min-width:96px;background:var(--hair2);border-radius:13px;padding:13px;text-align:center}
   .keynum b{display:block;font-size:22px;font-weight:900;font-family:"Frank Ruhl Libre",serif}
@@ -290,7 +290,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     .search input{width:88px}
     .sec-h h2{font-size:19px}
     .overlay{padding:0;align-items:stretch}
-    .modal{border-radius:0;min-height:100vh}
+    .modal{border-radius:0;min-height:100vh;max-height:100vh}
     .mhead{border-radius:0;padding:20px 18px}.mhead h2{font-size:21px}
     .mbody{padding:18px}
     .keynum{min-width:calc(50% - 5px);flex:1 1 calc(50% - 5px)}
@@ -682,9 +682,9 @@ function openDeal(id){
           <div><b id="rLoan">—</b><span>סכום המשכנתא</span></div>
         </div>
       </div>
-      <div class="dsec">
+      <div class="dsec roi">
         <h3>תחזית וערך — התמונה המלאה</h3>
-        <p class="ph">עלות הכניסה האמיתית (כולל מס רכישה) והקרנת שווי לפי קצב עליית הערך ההיסטורי של האזור.</p>
+        <p class="ph">עלות הכניסה האמיתית (כולל מס רכישה) והקרנת שווי שמרנית לטווח ארוך.</p>
         <div class="out" style="border-top:none;padding-top:0">
           <div><b id="pTax">—</b><span>מס רכישה (משקיע)</span></div>
           <div><b id="pEntry">—</b><span>מזומן נדרש בכניסה</span></div>
@@ -734,9 +734,10 @@ function calcRoi(id){
   const buyCosts=price*0.015;           // עו"ד + נלוות משוער ~1.5%
   const entryCash=equity+tax+buyCosts;  // המזומן שצריך בפועל בכניסה
   const net=gross*0.72;                 // אחרי ~28% עלויות: ארנונה/ניהול/ריקות/תחזוקה
-  const g=(d.cagr||0)/100;
-  const v5 = g? price*Math.pow(1+g,5):null;
-  const v10= g? price*Math.pow(1+g,10):null;
+  // הקרנה שמרנית: גם אם האזור עלה מהר לאחרונה, לא מניחים שקצב חם נשמר עשור.
+  const gRaw=(d.cagr||0)/100, g=Math.min(gRaw,0.06);
+  const v5 = g>0? price*Math.pow(1+g,5):null;
+  const v10= g>0? price*Math.pow(1+g,10):null;
   let tot=null;
   if(v10){
     const capGain=v10-price;
@@ -751,8 +752,9 @@ function calcRoi(id){
   SET('pV10', v10?('₪'+fmt(v10)):'—');
   SET('pTot', tot!=null?((tot>=0?'+':'')+tot.toFixed(0)+'%'):'—');
   const noteEl=document.getElementById('pNote');
-  if(noteEl) noteEl.textContent = g
-    ? `הקרנה לפי קצב היסטורי של ${(+d.cagr).toFixed(1)}% בשנה באזור — אומדן, לא הבטחה. התשואה הכוללת מחשבת רווח הון + שכ״ד נטו פחות החזרי משכנתא, על המזומן שהושקע.`
+  const capped = gRaw>0.06;
+  if(noteEl) noteEl.textContent = g>0
+    ? `הקרנה שמרנית של ${(g*100).toFixed(1)}% בשנה${capped?` (האזור עלה ${(+d.cagr).toFixed(1)}% לאחרונה, אך לא מניחים שקצב כזה נשמר עשור)`:''} — אומדן, לא הבטחה. התשואה הכוללת = רווח הון + שכ״ד נטו פחות החזרי משכנתא, על המזומן שהושקע. מס רכישה לפי מדרגת משקיע (8%).`
     : `אין נתוני עליית ערך לאזור זה — התחזית מבוססת על תזרים בלבד. מס רכישה לפי מדרגת משקיע (8%).`;
 }
 
