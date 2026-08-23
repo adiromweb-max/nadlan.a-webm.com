@@ -106,6 +106,8 @@ def best_relative_value(scored, cfg, top_n=None):
 
     cands = []
     for s in scored or []:
+        if s.get("disqualified"):       # מחיר-פיתיון/זכויות — לא הזדמנות
+            continue
         v = s.get("value") or {}
         gap = v.get("value_gap_pct")
         if gap is None or gap <= 0:
