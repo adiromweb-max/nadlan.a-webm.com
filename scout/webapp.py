@@ -14,6 +14,7 @@ webapp.py — מחולל ה-front-end הפרימיום של A-WEB.
 """
 import json
 import logging
+import os
 
 log = logging.getLogger("scout.webapp")
 
@@ -120,8 +121,14 @@ def write(out_dir):
         return None
     data = json.loads(latest.read_text(encoding="utf-8"))
     payload = build_payload(data)
-    html = HTML_TEMPLATE.replace(
-        "/*__DATA__*/", "window.DATA=" + json.dumps(payload, ensure_ascii=False))
+    # הגדרות Supabase (ציבוריות — מוגן ע"י RLS, לא ע"י הסתרת המפתח).
+    supa = {
+        "url": os.environ.get("SUPABASE_URL", "https://cnvqfnsumlvempnahbcm.supabase.co"),
+        "key": os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_nYTSEBzrELDwAgGItUWzFQ_qnZ_lgL1"),
+    }
+    inject = ("window.DATA=" + json.dumps(payload, ensure_ascii=False)
+              + ";window.SUPA=" + json.dumps(supa))
+    html = HTML_TEMPLATE.replace("/*__DATA__*/", inject)
     dest = out_dir / "app.html"
     dest.write_text(html, encoding="utf-8")
     log.info("נשמר app.html (%d מודעות, %d חדשות)",
@@ -302,8 +309,29 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
   @media(max-width:420px){.keynum{min-width:100%;flex-basis:100%}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+#authgate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a1030,#3a1f5a);display:flex;align-items:center;justify-content:center;direction:rtl;font-family:'Heebo',sans-serif}
+#authgate .card{background:#fff;border-radius:20px;padding:34px 30px;width:min(92vw,380px);box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center}
+#authgate .brand{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:30px;background:linear-gradient(120deg,#7b3ff2,#e0489e);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+#authgate .sub{color:#6b6580;font-size:14px;margin-bottom:22px}
+#authgate input{width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:12px;border:1px solid #e0dae8;border-radius:11px;font-size:15px;font-family:inherit;direction:rtl}
+#authgate button.main{width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(120deg,#7b3ff2,#e0489e);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
+#authgate .toggle{margin-top:16px;font-size:13px;color:#7b3ff2;cursor:pointer}
+#authgate .msg{font-size:13px;margin-top:12px;min-height:18px}
+#authgate .msg.err{color:#d0455e}#authgate .msg.ok{color:#12a150}
+</style>
 </head>
 <body>
+  <div id="authgate"><div class="card">
+    <div class="brand">נדל״ן סקאוט</div>
+    <div class="sub" id="agSub">התחברות לחשבון</div>
+    <input id="agEmail" type="email" placeholder="אימייל" autocomplete="email">
+    <input id="agPass" type="password" placeholder="סיסמה" autocomplete="current-password">
+    <button class="main" id="agBtn" onclick="awebAuth()">התחבר</button>
+    <div class="msg" id="agMsg"></div>
+    <div class="toggle" id="agToggle" onclick="awebToggle()">אין לך חשבון? הרשמה</div>
+  </div></div>
   <div class="appbar"><div class="in">
     <span class="wm serif" onclick="go('new')">A<i>-</i>WEB</span>
     <nav class="tabs" id="tabs"></nav>
@@ -311,6 +339,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
         <input id="q" placeholder="עיר / שכונה" oninput="render()"></div>
       <button class="iconbtn" onclick="toggleTheme()">◐</button>
+      <button class="iconbtn" id="agLogout" style="display:none" onclick="awebLogout()" title="יציאה">⎋</button>
     </div>
   </div></div>
 
@@ -823,6 +852,49 @@ function trends(){
 }
 
 render();
+</script>
+<script>
+/* ---- גל 1: שער הרשמה/התחברות (Supabase Auth) ---- */
+(function(){
+  var SUPA=window.SUPA||{}, sb=null, mode='login';
+  function gate(show){
+    var g=document.getElementById('authgate'); if(g) g.style.display=show?'flex':'none';
+    var lo=document.getElementById('agLogout'); if(lo) lo.style.display=show?'none':'inline-flex';
+    document.body.style.overflow=show?'hidden':'';
+  }
+  function msg(t,cls){ var m=document.getElementById('agMsg'); if(m){m.textContent=t||'';m.className='msg '+(cls||'');} }
+  window.awebToggle=function(){
+    mode=(mode==='login')?'signup':'login';
+    document.getElementById('agSub').textContent=mode==='login'?'התחברות לחשבון':'יצירת חשבון חדש';
+    document.getElementById('agBtn').textContent=mode==='login'?'התחבר':'הרשמה';
+    document.getElementById('agToggle').textContent=mode==='login'?'אין לך חשבון? הרשמה':'כבר יש לך חשבון? התחבר';
+    msg('');
+  };
+  window.awebAuth=async function(){
+    if(!sb){ msg('לא מחובר לשרת','err'); return; }
+    var email=(document.getElementById('agEmail').value||'').trim();
+    var pass=document.getElementById('agPass').value||'';
+    if(!email||!pass){ msg('נא למלא אימייל וסיסמה','err'); return; }
+    msg('רגע...','');
+    try{
+      var r = mode==='login'
+        ? await sb.auth.signInWithPassword({email:email,password:pass})
+        : await sb.auth.signUp({email:email,password:pass});
+      if(r.error){ msg(r.error.message,'err'); return; }
+      if(mode==='signup' && !(r.data&&r.data.session)){ msg('נשלח אליך מייל אימות — אשר ואז התחבר.','ok'); return; }
+      gate(false); msg('');
+    }catch(e){ msg('שגיאה: '+e.message,'err'); }
+  };
+  window.awebLogout=async function(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} gate(true); };
+  function init(){
+    if(!window.supabase || !SUPA.url || !SUPA.key){ console.warn('Supabase not configured — gate disabled'); gate(false); return; }
+    try{ sb=window.supabase.createClient(SUPA.url,SUPA.key); }
+    catch(e){ console.warn('supabase init failed',e); gate(false); return; }
+    sb.auth.getSession().then(function(res){ gate(!(res&&res.data&&res.data.session)); });
+    sb.auth.onAuthStateChange(function(_e,session){ gate(!session); });
+  }
+  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
+})();
 </script>
 </body>
 </html>
