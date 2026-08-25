@@ -182,26 +182,40 @@ def _reasons(x):
     else:
         area = city or "האזור"
     if g:
-        out.append(f"מחיר נמוך בכ-{g:.0f}% מחציון ה-₪/מ״ר של עסקאות שנסגרו ב{area} (מקור: רשות המיסים).")
+        out.append(f"מחיר נמוך בכ-{g:.0f}% בהשוואה לעסקאות שנסגרו בפועל באותו אזור, לפי נתוני רשות המיסים.")
     if x.get("yield_pct"):
-        out.append(f"תשואת שכירות ברוטו מוערכת ~{x['yield_pct']:.1f}% לשנה.")
+        out.append(f"תשואת שכירות ברוטו מוערכת כ-{x['yield_pct']:.1f}% בשנה.")
     if x.get("area_cagr_pct"):
-        out.append(f"האזור בעלייה: ~{x['area_cagr_pct']:.1f}% לשנה בממוצע (CAGR רב-שנתי).")
+        out.append(f"מגמת עלייה באזור: כ-{x['area_cagr_pct']:.1f}% בשנה בממוצע (רב-שנתי).")
     if x.get("total_drop_pct"):
-        out.append(f"המחיר כבר ירד ב-{x['total_drop_pct']:.0f}% מאז שעלה — המוכר גמיש.")
+        out.append(f"המחיר כבר ירד בכ-{x['total_drop_pct']:.0f}% מאז הפרסום, סימן שהמוכר גמיש.")
     if x.get("condition_text"):
         out.append(f"מצב הנכס: {x['condition_text']}.")
     dom = x.get("days_on_market")
     if dom and dom >= 60:
-        out.append(f"{int(dom)} יום באוויר — שהות ארוכה שמגדילה סיכוי למיקוח.")
+        out.append(f"{int(dom)} ימים באוויר, שהות ארוכה שמגדילה סיכוי למיקוח.")
     lt = x.get("listing_type")
     if lt == "private":
-        out.append("מודעה פרטית — ללא עמלת תיווך, המחיר הנקוב הוא העלות בפועל.")
+        out.append("מודעה פרטית, ללא עמלת תיווך. המחיר הנקוב הוא העלות בפועל.")
     elif lt == "agency":
-        out.append("עסקת תיווך — יש להוסיף ~2%+מע״מ עמלה לעלות הכניסה בפועל.")
+        out.append("עסקת תיווך: יש להוסיף כ-2% בתוספת מע״מ עמלה לעלות הכניסה בפועל.")
     if x.get("comp_count"):
-        out.append(f"מבוסס על {int(x['comp_count'])} תצפיות השוואה באזור (ביטחון גבוה).")
+        out.append(f"מבוסס על {int(x['comp_count'])} עסקאות השוואה באזור, רמת ביטחון גבוהה.")
     return out
+
+
+def _madlan_link(x):
+    """קישור לעמוד 'מחירי דירות שנמכרו' של מדלן (נוחת ישירות, בניגוד ל-SPA
+    של רשות המיסים). שכונה אם יש, אחרת רמת עיר."""
+    from urllib.parse import quote
+    def clean(s):
+        return re.sub(r'["\'׳״’]', '', str(s or '')).strip()
+    city = clean(x.get("city"))
+    if not city:
+        return "https://www.madlan.co.il/"
+    hood = clean(x.get("neighborhood"))
+    slug = (f"שכונה {hood} {city}" if hood else city).replace(" ", "-") + "-ישראל"
+    return "https://www.madlan.co.il/" + quote(slug)
 
 
 def build_text(x, cfg=None, run_date=None):
@@ -214,22 +228,23 @@ def build_text(x, cfg=None, run_date=None):
     price = x.get("price")
     ppm = x.get("price_per_sqm")
 
-    head = "🏠 *עסקת בוננזה — נדל\"ן סקאוט* 🏠"
-    line_where = f"📍 {where}"
-    spec = " · ".join(
+    head = "*עסקת בוננזה  |  נדל״ן סקאוט*"
+    loc = f"📍 *{where}*"
+    spec = "  ·  ".join(
         p for p in [
-            f"{rooms:g} חד׳" if rooms else None,
+            f"{rooms:g} חדרים" if rooms else None,
             f"{int(size)} מ״ר" if size else None,
-            _fmt_ils(price) if price else None,
         ] if p
     )
-    ppm_line = f"💰 {_fmt_ils(ppm)} למ״ר" if ppm else None
+    price_line = f"*מחיר:*  {_fmt_ils(price)}" if price else None
+    if ppm:
+        price_line = (price_line + f"   ·   {_fmt_ils(ppm)} למ״ר") if price_line else f"{_fmt_ils(ppm)} למ״ר"
 
     reasons = _reasons(x)
-    reasons_block = "\n".join(f"✅ {r}" for r in reasons)
+    reasons_block = "\n".join(f"•  {r}" for r in reasons)
 
     url = x.get("url") or ""
-    nadlan = x.get("nadlan_link") or ""
+    madlan = _madlan_link(x)
 
     # דגל טריות — אם last_seen ישן, מזכיר לאמת לפני שליחה
     stale_note = ""
@@ -238,27 +253,25 @@ def build_text(x, cfg=None, run_date=None):
         try:
             days = (date.fromisoformat(run_date) - date.fromisoformat(ls)).days
             if days >= int(_cfg(cfg, "bonanza_stale_days")):
-                stale_note = (f"\n⚠️ נראתה לאחרונה לפני {days} ימים — כדאי לוודא שהמודעה עדיין "
-                              f"פעילה ביד2 לפני שליחה.")
+                stale_note = (f"שים לב: המודעה נראתה לאחרונה לפני {days} ימים. "
+                              f"מומלץ לוודא שהיא עדיין פעילה ביד2.")
         except Exception:
             pass
 
-    disclaimer = ("————\n"
-                  "השוואה מבוססת ₪/מ״ר מול חציון האזור — אינה מנרמלת קומה/גיל בניין/מצב מדויק. "
-                  "בדוק את המודעה בפועל לפני החלטה. מידע, לא ייעוץ.")
+    disclaimer = ("ההשוואה מבוססת על ₪ למ״ר מול חציון האזור, ואינה מנרמלת קומה, גיל בניין "
+                  "או מצב הנכס. יש לבדוק את המודעה בפועל לפני החלטה. מידע בלבד, לא ייעוץ.")
 
-    parts = [head, "", f"{line_where}"]
+    parts = [head, "", loc]
     if spec:
-        parts.append(f"🔑 {spec}")
-    if ppm_line:
-        parts.append(ppm_line)
-    parts += ["", "*למה זו עסקה טובה:*", reasons_block]
+        parts.append(spec)
+    if price_line:
+        parts.append(price_line)
+    parts += ["", "*למה זו עסקה טובה*", reasons_block]
     if stale_note:
-        parts.append(stale_note)
-    parts += ["", f"🔗 המודעה: {url}"]
-    if nadlan:
-        parts.append(f"📊 עסקאות אזור: {nadlan}")
-    parts += ["", disclaimer]
+        parts += ["", stale_note]
+    parts += ["", f"*צפייה במודעה (יד2):*\n{url}",
+              f"*עסקאות שנמכרו באזור:*\n{madlan}",
+              "", disclaimer]
     return "\n".join(parts)
 
 
@@ -321,7 +334,7 @@ def build_card_html(x, photo_css="linear-gradient(135deg,#5a3a9a,#e0489e)"):
   <div class="h">למה זו עסקה טובה</div>
   {rows}
 </div>
-<div class="foot">השוואה לפי ₪/מ״ר מול חציון עסקאות שנסגרו באזור (רשות המיסים) — אינה מנרמלת קומה/גיל/מצב מדויק. <b>מידע, לא ייעוץ.</b></div>
+<div class="foot">השוואה לפי ₪/מ״ר מול חציון עסקאות שנסגרו באזור (רשות המיסים), ואינה מנרמלת קומה/גיל/מצב מדויק. <b>מידע, לא ייעוץ.</b></div>
 </body></html>"""
 
 
@@ -511,7 +524,7 @@ def email_bonanza(cfg, results):
     from html import escape
 
     texts = [Path(r["text_file"]).read_text(encoding="utf-8") for r in results]
-    body = "\n\n" + ("\n\n" + "—" * 20 + "\n\n").join(texts)
+    body = "\n\n" + ("\n\n·  ·  ·\n\n").join(texts)
     intro = ("מצורפת עסקת בוננזה טרייה שהמערכת בטוחה בה — הטקסט למטה מוכן "
              "להעתקה לקבוצת הוואטסאפ, והתמונות/כרטיס מצורפים.\n")
     text = intro + body
@@ -526,7 +539,7 @@ def email_bonanza(cfg, results):
         for img in (r.get("images") or []):
             atts.append(Path(img))
     n = len(results)
-    subject = "🏠 עסקת בוננזה חדשה — נדל\"ן סקאוט" + (f" ({n})" if n > 1 else "")
+    subject = "עסקת בוננזה חדשה  |  נדל\"ן סקאוט" + (f" ({n})" if n > 1 else "")
     return emailer.send(cfg, subject, text, html, attachments=atts)
 
 
