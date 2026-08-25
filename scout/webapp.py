@@ -340,6 +340,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <div class="abtools">
       <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
         <input id="q" placeholder="עיר / שכונה" oninput="render()"></div>
+      <span id="planBadge" style="display:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.1)"></span>
       <button class="iconbtn" onclick="toggleTheme()">◐</button>
       <button class="iconbtn" id="agLogout" style="display:none" onclick="awebLogout()" title="יציאה">⎋</button>
     </div>
@@ -568,6 +569,7 @@ function isOpp(d){ return !d.disq && d.stage==='final' && ((d.gap!=null && d.gap
 
 /* ---- CSV export (Excel, UTF-8 BOM) ---- */
 function exportCSV(){
+  if(!(window.AWEB&&window.AWEB.paid)){ return showUpgrade('ייצוא לאקסל'); }
   const arr=S._view||[];
   if(!arr.length){toast('אין מה לייצא בתצוגה הזו');return;}
   const own=d=>d.dtype==='agency'?'תיווך':d.dtype==='private'?'פרטי':'';
@@ -663,6 +665,7 @@ function priceTimeline(d){
 
 /* ---- deal detail modal ---- */
 function openDeal(id){
+  if(!(window.AWEB&&window.AWEB.paid)){ return showUpgrade('פרטי העסקה המלאים והקישור למודעה'); }
   const d=BYID[id]; if(!d) return;
   const area=areaFor(d);
   const marketPpm = d.mppm || (area && area.yearly && area.yearly.length? area.yearly[area.yearly.length-1].ppm : null);
@@ -775,6 +778,16 @@ function openDeal(id){
   calcRoi(id);
 }
 function closeDeal(){document.getElementById('ov').classList.remove('show');document.body.classList.remove('modal-open');}
+function showUpgrade(what){
+  const m=document.getElementById('modal');
+  m.innerHTML=`<div style="padding:44px 30px;text-align:center">
+    <div style="font-size:46px;margin-bottom:6px">🔒</div>
+    <h2 class="serif" style="margin:6px 0 10px;font-size:26px">תוכן לחברי פרו</h2>
+    <p style="color:var(--muted);font-size:15px;line-height:1.7;max-width:340px;margin:0 auto 24px">${what||'התוכן הזה'} זמין למנויי פרו. שדרג כדי לפתוח את כל פרטי העסקאות, הקישורים למודעות, הבוננזה והמעקב.</p>
+    <button class="prim" style="padding:13px 30px;border:none;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer" onclick="toast('שדרוג בתשלום — בקרוב')">שדרג לפרו</button>
+  </div>`;
+  document.getElementById('ov').classList.add('show'); document.body.classList.add('modal-open');
+}
 function calcRoi(id){
   const d=BYID[id]; if(!d) return;
   const price=d.price||1000000;
@@ -894,12 +907,25 @@ render();
     }catch(e){ msg('שגיאה: '+e.message,'err'); }
   };
   window.awebLogout=async function(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} gate(true); };
+  window.AWEB=window.AWEB||{paid:false};
+  async function loadPlan(session){
+    window.AWEB.paid=false;
+    var badge=document.getElementById('planBadge');
+    if(session){
+      try{
+        var r=await sb.from('profiles').select('plan,plan_until').eq('id',session.user.id).maybeSingle();
+        var p=r.data;
+        window.AWEB.paid=!!(p && p.plan==='paid' && (!p.plan_until || new Date(p.plan_until)>new Date()));
+      }catch(e){ window.AWEB.paid=false; }
+      if(badge){ badge.style.display='inline-flex'; badge.textContent=window.AWEB.paid?'פרו':'חינם'; }
+    } else if(badge){ badge.style.display='none'; }
+  }
   function init(){
     if(!window.supabase || !SUPA.url || !SUPA.key){ console.warn('Supabase not configured — gate disabled'); gate(false); return; }
     try{ sb=window.supabase.createClient(SUPA.url,SUPA.key); }
     catch(e){ console.warn('supabase init failed',e); gate(false); return; }
-    sb.auth.getSession().then(function(res){ gate(!(res&&res.data&&res.data.session)); });
-    sb.auth.onAuthStateChange(function(_e,session){ gate(!session); });
+    sb.auth.getSession().then(function(res){ var s=res&&res.data&&res.data.session; gate(!s); loadPlan(s); });
+    sb.auth.onAuthStateChange(function(_e,session){ gate(!session); loadPlan(session); });
   }
   if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
 })();
