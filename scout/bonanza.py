@@ -561,10 +561,21 @@ def main():
     if not res:
         print("אין עסקת בוננזה היום.")
         return
+
+    delivered = False
+    # 1) וואטסאפ (Green-API) — אם מוגדר
+    try:
+        from . import whatsapp
+        if whatsapp.configured():
+            delivered = whatsapp.send_bonanza(res) or delivered
+    except Exception as e:
+        log.warning("whatsapp delivery failed: %s", e)
+    # 2) מייל — אם מוגדר (אפשר גם וגם)
     if cfg.get("gmail_address") and cfg.get("gmail_app_password"):
-        email_bonanza(cfg, res)
-    else:
-        log.info("אין פרטי Gmail — הפלט נשמר ב-out/bonanza/ בלי שליחת מייל")
+        delivered = email_bonanza(cfg, res) or delivered
+    if not delivered:
+        log.info("לא הוגדר אף ערוץ שליחה — הפלט נשמר ב-out/bonanza/ בלבד")
+
     for r in res:
         print("\n" + "=" * 50)
         print(Path(r["text_file"]).read_text(encoding="utf-8"))
