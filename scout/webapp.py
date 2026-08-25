@@ -329,6 +329,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <input id="agEmail" type="email" placeholder="אימייל" autocomplete="email">
     <input id="agPass" type="password" placeholder="סיסמה" autocomplete="current-password">
     <button class="main" id="agBtn" onclick="awebAuth()">התחבר</button>
+    <div style="margin:14px 0 12px;color:#b8b2c8;font-size:12px">— או —</div>
+    <button class="main" style="background:#fff;color:#2a2140;border:1px solid #e0dae8" onclick="awebGoogle()">התחברות עם Google</button>
     <div class="msg" id="agMsg"></div>
     <div class="toggle" id="agToggle" onclick="awebToggle()">אין לך חשבון? הרשמה</div>
   </div></div>
@@ -883,6 +885,12 @@ render();
       if(r.error){ msg(r.error.message,'err'); return; }
       if(mode==='signup' && !(r.data&&r.data.session)){ msg('נשלח אליך מייל אימות — אשר ואז התחבר.','ok'); return; }
       gate(false); msg('');
+    }catch(e){ msg('שגיאה: '+e.message,'err'); }
+  };
+  window.awebGoogle=async function(){
+    if(!sb){ msg('לא מחובר לשרת','err'); return; }
+    try{ var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
+      if(r.error) msg(r.error.message,'err');
     }catch(e){ msg('שגיאה: '+e.message,'err'); }
   };
   window.awebLogout=async function(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} gate(true); };
