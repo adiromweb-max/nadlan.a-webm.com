@@ -18,12 +18,17 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install chromium for card render
         run: pip install playwright && python -m playwright install --with-deps chromium
-      - name: Generate and email bonanza
+      - name: Generate and send bonanza
         env:
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_TO: ${{ secrets.ALERT_TO }}
+          GREENAPI_ID: ${{ secrets.GREENAPI_ID }}
+          GREENAPI_TOKEN: ${{ secrets.GREENAPI_TOKEN }}
+          GREENAPI_TO: ${{ secrets.GREENAPI_TO }}
+          GREENAPI_URL: ${{ secrets.GREENAPI_URL }}
+          GREENAPI_MEDIA_URL: ${{ secrets.GREENAPI_MEDIA_URL }}
         run: python -m scout.bonanza
       - name: Commit outputs
         run: |
