@@ -67,10 +67,26 @@ def send_file(path, caption="", c=None):
     return r.json()
 
 
+def send_file_by_url(url_file, caption="", file_name="photo.jpg", c=None):
+    """שולח תמונה לפי URL — Green-API שולף אותה בעצמו (חסין לחסימות IP של הריצה)."""
+    c = c or _cfg()
+    url = f"{c['url']}/waInstance{c['id']}/sendFileByUrl/{c['token']}"
+    payload = {"chatId": _chat_id(c["to"]), "urlFile": url_file, "fileName": file_name}
+    if caption:
+        payload["caption"] = caption
+    r = requests.post(url, json=payload, timeout=TIMEOUT)
+    r.raise_for_status()
+    return r.json()
+
+
 def send_bonanza(results):
     """
-    לכל עסקה: שולח הודעה אחת ראשית = **הכרטיס הממותג + הטקסט ככיתוב** (כך שאפשר
-    להעביר אותה כמו שהיא לקבוצה), ואז את תמונות הנכס האמיתיות כהודעות נוספות.
+    לכל עסקה: הודעה ראשית אחת עם כיתוב (מוכנה להעברה לקבוצה), ואז תמונות נוספות.
+    סדר עדיפות לתמונה הראשית:
+      1. הכרטיס הממותג (PNG מקומי) — אם רונדר.
+      2. אחרת, תמונת יד2 הראשונה לפי URL — Green-API שולף אותה בעצמו (חסין).
+      3. אחרת, טקסט בלבד.
+    כך שגם אם chromium או הורדת התמונות נכשלו על הריצה, עדיין מגיעה תמונה אמיתית.
     """
     c = _cfg()
     if not configured(c):
@@ -82,23 +98,23 @@ def send_bonanza(results):
         try:
             text = Path(r["text_file"]).read_text(encoding="utf-8")
         except Exception:
-            text = "עסקת בוננזה חדשה — נדל\"ן סקאוט"
+            text = "עסקת בוננזה חדשה | נדל\"ן סקאוט"
 
         card = r.get("card_png")
-        photos = [p for p in (r.get("images") or []) if p and Path(p).exists()]
-        primary = card if (card and Path(card).exists()) else (photos[0] if photos else None)
-
+        urls = r.get("image_urls") or []
         try:
-            if primary:
-                send_file(primary, caption=text, c=c)
+            if card and Path(card).exists():
+                send_file(card, caption=text, c=c)                 # כרטיס ממותג + כיתוב
+            elif urls:
+                send_file_by_url(urls[0], caption=text, c=c)       # תמונת יד2 + כיתוב (חסין)
             else:
                 send_text(text, c=c)
             sent_any = True
-            # תמונות הנכס הנוספות (לא הראשית ששלחנו)
-            extras = [p for p in photos if p != primary][:3]
-            for img in extras:
+            # תמונות הנכס הנוספות מיד2 (לפי URL) — כדי שאפשר להעביר גם אותן
+            extras = urls[1:3] if (card and Path(card).exists()) else urls[1:3]
+            for u in extras:
                 try:
-                    send_file(img, c=c)
+                    send_file_by_url(u, c=c)
                 except Exception as e:
                     log.debug("whatsapp extra photo failed: %s", e)
             log.info("whatsapp: נשלחה עסקה %s", r.get("id"))
