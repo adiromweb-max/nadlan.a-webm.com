@@ -470,11 +470,15 @@ def run(out_dir="out", cfg=None, download=True, client=None):
         if download and urls:
             imgs = download_images(urls, bdir / safe)
 
-        # כרטiv ויזואלי — התמונה הראשונה שהורדה כרקע, אחרת גרדיאנט ממותג
-        if imgs:
-            photo_css = f"url('file://{Path(imgs[0]).resolve()}')"
+        # כרטיס: תמונת יד2 לפי URL (chromium שולף אותה כדפדפן, חסין יותר מהורדה),
+        # עם גרדיאנט ממותג כשכבת גיבוי אם התמונה לא נטענת.
+        grad = "linear-gradient(135deg,#5a3a9a,#e0489e)"
+        if urls:
+            photo_css = f"url('{urls[0]}'), {grad}"
+        elif imgs:
+            photo_css = f"url('file://{Path(imgs[0]).resolve()}'), {grad}"
         else:
-            photo_css = "linear-gradient(135deg,#5a3a9a,#e0489e)"
+            photo_css = grad
         card_path = bdir / f"card_{safe}.html"
         card_path.write_text(build_card_html(x, photo_css), encoding="utf-8")
         card_png = render_card_png(card_path, bdir / f"card_{safe}.png")
