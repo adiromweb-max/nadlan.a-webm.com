@@ -682,6 +682,7 @@ function openDeal(id){
           <div style="flex:1;min-width:200px">
             <label>הון עצמי: <span id="eqV">50%</span></label>
             <input type="range" id="eqp" min="25" max="100" value="50" oninput="calcRoi('${id}')">
+            <div class="ph" style="font-size:11px;margin:2px 0 6px">מקס׳ משכנתא לפי בנק ישראל: 75% דירה יחידה · 70% דירה חלופית · <b>50% למשקיע</b>. ברירת המחדל (50% הון) מתאימה למשקיע.</div>
             <label>ריבית משכנתא (שנתית): <span id="rateV">5.0%</span></label>
             <input type="range" id="rate" min="2" max="8" step="0.1" value="5" oninput="calcRoi('${id}')">
           </div>
@@ -706,8 +707,11 @@ function openDeal(id){
       <div class="dsec roi">
         <h3>תחזית וערך — התמונה המלאה</h3>
         <p class="ph">עלות הכניסה האמיתית (כולל מס רכישה) והקרנת שווי שמרנית לטווח ארוך.</p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 10px;cursor:pointer">
+          <input type="checkbox" id="firstHome" onchange="calcRoi('${id}')"> דירה יחידה (מדרגות מופחתות — לרוב פטור מלא בפריפריה)
+        </label>
         <div class="out" style="border-top:none;padding-top:0">
-          <div><b id="pTax">—</b><span>מס רכישה (משקיע)</span></div>
+          <div><b id="pTax">—</b><span id="pTaxLbl">מס רכישה (משקיע)</span></div>
           <div><b id="pEntry">—</b><span>מזומן נדרש בכניסה</span></div>
           <div><b id="pNet">—</b><span>תשואה נטו משוערת</span></div>
         </div>
@@ -753,7 +757,14 @@ function calcRoi(id){
   document.getElementById('rLoan').textContent='₪'+fmt(loan);
 
   // ── תחזית וערך ──
-  const tax=price*0.08;                 // מדרגת משקיע (דירה שנייה) — 8%
+  // מדרגות מס רכישה (2025, מתעדכן שנתית). דירה יחידה: פטור עד ~1.98M ואז מדרגות.
+  const firstHome=(document.getElementById('firstHome')||{}).checked;
+  const ptax=(p,fh)=>{ let t=0,prev=0;
+    const b = fh ? [[1978745,0],[2347040,.035],[6055070,.05],[20183565,.08],[Infinity,.10]]
+                 : [[6055070,.08],[Infinity,.10]];
+    for(const seg of b){ if(p>prev){ t+=(Math.min(p,seg[0])-prev)*seg[1]; prev=seg[0]; } else break; }
+    return t; };
+  const tax=ptax(price,firstHome);
   const buyCosts=price*0.015;           // עו"ד + נלוות משוער ~1.5%
   const entryCash=equity+tax+buyCosts;  // המזומן שצריך בפועל בכניסה
   const net=gross*0.72;                 // אחרי ~28% עלויות: ארנונה/ניהול/ריקות/תחזוקה
@@ -769,6 +780,7 @@ function calcRoi(id){
   }
   const SET=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
   SET('pTax','₪'+fmt(tax));
+  SET('pTaxLbl', firstHome ? 'מס רכישה (דירה יחידה)' : 'מס רכישה (משקיע)');
   SET('pEntry','₪'+fmt(entryCash));
   SET('pNet',net.toFixed(1)+'%');
   SET('pV5', v5?('₪'+fmt(v5)):'—');
@@ -776,9 +788,10 @@ function calcRoi(id){
   SET('pTot', tot!=null?((tot>=0?'+':'')+tot.toFixed(0)+'%'):'—');
   const noteEl=document.getElementById('pNote');
   const capped = gRaw>0.06;
+  const taxNote = firstHome ? 'מס רכישה לפי מדרגות דירה יחידה (פטור עד ~1.98M ₪).' : 'מס רכישה לפי מדרגת משקיע (8%).';
   if(noteEl) noteEl.textContent = g>0
-    ? `הקרנה שמרנית של ${(g*100).toFixed(1)}% בשנה${capped?` (האזור עלה ${(+d.cagr).toFixed(1)}% לאחרונה, אך לא מניחים שקצב כזה נשמר עשור)`:''} — אומדן, לא הבטחה. התשואה הכוללת = רווח הון + שכ״ד נטו פחות החזרי משכנתא, על המזומן שהושקע. מס רכישה לפי מדרגת משקיע (8%).`
-    : `אין נתוני עליית ערך לאזור זה — התחזית מבוססת על תזרים בלבד. מס רכישה לפי מדרגת משקיע (8%).`;
+    ? `הקרנה שמרנית של ${(g*100).toFixed(1)}% בשנה${capped?` (האזור עלה ${(+d.cagr).toFixed(1)}% לאחרונה, אך לא מניחים שקצב כזה נשמר עשור)`:''} — אומדן, לא הבטחה. התשואה הכוללת = רווח הון + שכ״ד נטו פחות החזרי משכנתא, על המזומן שהושקע. ${taxNote}`
+    : `אין נתוני עליית ערך לאזור זה — התחזית מבוססת על תזרים בלבד. ${taxNote}`;
 }
 
 function trends(){
