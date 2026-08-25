@@ -382,6 +382,16 @@ function nadlanLink(d){
   const q=encodeURIComponent(parts.join(', '));
   return 'https://www.nadlan.gov.il/?search='+q;
 }
+// מדלן נוחת ישירות על עמוד "מחירי דירות שנמכרו" של השכונה/העיר (בניגוד ל-SPA
+// של נדל"ן ממשלתי שנוחת על עמוד ריק). שכונה אם יש, אחרת רמת עיר.
+function madlanLink(d){
+  const clean=s=>String(s||'').replace(/["'׳״’]/g,'').trim();
+  const city=clean(d.city);
+  if(!city) return 'https://www.madlan.co.il/';
+  const hood=clean(d.hood);
+  const slug=(hood?('שכונה '+hood+' '+city):city).replace(/\s+/g,'-')+'-ישראל';
+  return 'https://www.madlan.co.il/'+encodeURIComponent(slug);
+}
 
 const TAB_IC={
   new:'<svg viewBox="0 0 24 24"><path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.5z"/></svg>',
@@ -724,7 +734,7 @@ function openDeal(id){
       </div>
       <div class="mrow">
         ${d.url?`<a class="prim" href="${d.url}" target="_blank" rel="noopener">פתח ביד2 ↗</a>`:''}
-        <a href="${nadlanLink(d)}" target="_blank" rel="noopener">עסקאות באזור ↗</a>
+        <a href="${madlanLink(d)}" target="_blank" rel="noopener">עסקאות שנמכרו באזור ↗</a>
         <button onclick="toggleSave('${id}');closeDeal()">${WL.has(id)?'★ במעקב':'☆ הוסף למעקב'}</button>
       </div>
     </div>`;
