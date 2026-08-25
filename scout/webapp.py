@@ -246,7 +246,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.7}
 
   /* ===== deal detail modal ===== */
-  .overlay{position:fixed;inset:0;background:rgba(16,10,28,.62);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+  body.modal-open{overflow:hidden}
+  .overlay{position:fixed;inset:0;background:rgba(16,10,28,.78);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
   .overlay.show{display:flex}
   .modal{background:var(--panel);border-radius:22px;max-width:820px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);max-height:calc(100vh - 40px);display:flex;flex-direction:column;overflow:hidden}
   .mhead{position:relative;background:var(--dark);color:#fff;padding:24px 26px;border-radius:22px 22px 0 0;overflow:hidden;flex-shrink:0}
@@ -282,8 +283,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   @media(max-width:760px){
     .appbar .in{gap:8px;padding:10px 12px;flex-wrap:wrap}
     .appbar .wm{order:1}.abtools{order:2;margin-inline-start:auto}
-    .tabs{order:3;flex-basis:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:2px}
-    .tabs::-webkit-scrollbar{display:none}
+    .tabs{order:3;flex-basis:100%;flex-wrap:wrap;justify-content:flex-start;gap:6px;padding-top:4px}
+    .tabs a{font-size:13px;padding:7px 11px;background:rgba(255,255,255,.06)}
     .hero .in{padding:16px 14px 22px;flex-direction:column;align-items:stretch;gap:16px}.hero h1{font-size:22px}
     .hstat{width:100%}.kpi b{font-size:20px}
     .wrap{padding:16px 14px 70px}
@@ -625,8 +626,28 @@ function openDeal(id){
   const area=areaFor(d);
   const marketPpm = d.mppm || (area && area.yearly && area.yearly.length? area.yearly[area.yearly.length-1].ppm : null);
   const flags=[];
-  flags.push(d.comps && d.comps>=3 ? ['ok','המחיר מושווה מול עסקאות אמיתיות שנסגרו באזור'] : ['warn','עדיין אין מספיק עסקאות סגורות להשוואה מלאה']);
-  flags.push(d.size && d.rooms && d.size/d.rooms>=15 && d.size/d.rooms<=60 ? ['ok','גודל הדירה סביר למספר החדרים'] : ['warn','בדוק את יחס גודל/חדרים']);
+  // 1) על מה מבוססת ההשוואה — עסקאות שנסגרו (אמין) מול מחירי מבוקש (ראשוני)
+  flags.push(d.stage==='final'
+    ? ['ok','מושווה מול עסקאות שנסגרו בפועל ברשות המיסים — הבסיס האמין ביותר']
+    : ['warn','מושווה מול מחירי המבוקש של מודעות יד2 באזור — לא מול עסקאות שנסגרו. אינדיקציה ראשונית בלבד']);
+  // 2) רמת האזור בהשוואה
+  const specific = d.complevel && String(d.complevel).indexOf('שכונה')>=0;
+  flags.push(d.comps && d.comps>=3
+    ? (specific ? ['ok','ההשוואה ברמת השכונה — מדויקת יחסית']
+                : ['warn','ההשוואה ברמת '+(d.complevel||'יישוב')+' (לא שכונה) — פחות מדויקת לאזור הספציפי'])
+    : ['warn','עדיין אין מספיק עסקאות סגורות להשוואה מלאה']);
+  // 3) אנומליית גודל — דירה גדולה יחסית לחדרים זולה יותר למ״ר, ולכן חלק מהפער אינו הנחה
+  const spr = (d.size && d.rooms) ? d.size/d.rooms : null;
+  if(spr && spr>45) flags.push(['warn',`הדירה גדולה יחסית למספר החדרים (${Math.round(spr)} מ״ר לחדר) — ₪/מ״ר נמוך כאן צפוי, וחלק מהפער אינו הנחה אמיתית`]);
+  else if(spr && spr<13) flags.push(['warn','הדירה קטנה מאוד יחסית לחדרים — ייתכן אי-דיוק בנתוני הגודל']);
+  else if(spr) flags.push(['ok','יחס גודל/חדרים סביר']);
+  // 4) מצב הנכס — לא מנורמל בפער; משופץ = אות חזק יותר, דרוש שיפוץ = המחיר הנמוך צפוי
+  if(d.cond){ const c=String(d.cond);
+    if(c.indexOf('משופץ')>=0 || c.indexOf('חדש')>=0) flags.push(['ok',`הנכס ${c} — פער מהשוק כאן הוא אות חזק יותר`]);
+    else if(c.indexOf('שיפוץ')>=0 || c.indexOf('דרוש')>=0 || c.indexOf('דורש')>=0) flags.push(['warn',`מצב הנכס: ${c} — המחיר הנמוך עשוי לשקף את מצב הנכס, לא הנחה`]);
+    else flags.push(['warn',`מצב הנכס: ${c} — אינו מנורמל בפער; בדוק מול תמונות המודעה`]);
+  }
+  flags.push(['warn','הפער אינו מנרמל קומה או גיל בניין — בדוק במודעה']);
   flags.push((d.drop||0)<60 ? ['ok', (d.drop>0?`ירידת המחיר (${(+d.drop).toFixed(0)}%) בטווח הגיוני`:'אין קפיצות מחיר חשודות')] : ['warn','ירידת מחיר חריגה — ייתכן שגיאת נתונים']);
   if(d.suspect) flags.push(['warn','הפער מהשוק גדול מהרגיל — ודא שאין הבדל גודל/קטגוריה']);
   flags.push(['warn','ודא היטל השבחה / חובות ועד בית לפני חתימה']);
@@ -704,9 +725,11 @@ function openDeal(id){
       </div>
     </div>`;
   document.getElementById('ov').classList.add('show');
+  document.body.classList.add('modal-open');
+  const mb=document.querySelector('.mbody'); if(mb) mb.scrollTop=0;
   calcRoi(id);
 }
-function closeDeal(){document.getElementById('ov').classList.remove('show');}
+function closeDeal(){document.getElementById('ov').classList.remove('show');document.body.classList.remove('modal-open');}
 function calcRoi(id){
   const d=BYID[id]; if(!d) return;
   const price=d.price||1000000;
