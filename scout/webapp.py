@@ -342,7 +342,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <input id="q" placeholder="עיר / שכונה" oninput="render()"></div>
       <span id="planBadge" style="display:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.1)"></span>
       <button class="iconbtn" onclick="toggleTheme()">◐</button>
-      <button class="iconbtn" id="agLogout" style="display:none" onclick="awebLogout()" title="יציאה">⎋</button>
+      <button class="iconbtn" id="agLogout" style="display:none;width:auto;padding:0 12px;font-size:12.5px;font-weight:700" onclick="awebLogout()">יציאה</button>
     </div>
   </div></div>
 
@@ -912,12 +912,13 @@ render();
     window.AWEB.paid=false;
     var badge=document.getElementById('planBadge');
     if(session){
-      try{
-        var r=await sb.from('profiles').select('plan,plan_until').eq('id',session.user.id).maybeSingle();
-        var p=r.data;
-        window.AWEB.paid=!!(p && p.plan==='paid' && (!p.plan_until || new Date(p.plan_until)>new Date()));
-      }catch(e){ window.AWEB.paid=false; }
-      if(badge){ badge.style.display='inline-flex'; badge.textContent=window.AWEB.paid?'פרו':'חינם'; }
+      try{ var r=await sb.rpc('is_paid'); window.AWEB.paid=(r && r.data===true); }
+      catch(e){ window.AWEB.paid=false; }
+      if(badge){ badge.style.display='inline-flex';
+        var em=((session.user&&session.user.email)||'').split('@')[0];
+        badge.textContent=em+' · '+(window.AWEB.paid?'פרו':'חינם');
+        badge.style.background=window.AWEB.paid?'linear-gradient(120deg,#7b3ff2,#e0489e)':'rgba(255,255,255,.1)';
+      }
     } else if(badge){ badge.style.display='none'; }
   }
   function init(){
