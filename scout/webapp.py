@@ -783,12 +783,32 @@ function openDeal(id){
 }
 function closeDeal(){document.getElementById('ov').classList.remove('show');document.body.classList.remove('modal-open');}
 function showUpgrade(what){
+  const chk='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#12a150" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px"><path d="M20 6 9 17l-5-5"/></svg>';
+  const feat=t=>`<li style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--hair2);font-size:14.5px;color:var(--ink);text-align:right">${chk}<span>${t}</span></li>`;
   const m=document.getElementById('modal');
-  m.innerHTML=`<div style="padding:44px 30px;text-align:center">
-    <div style="font-size:46px;margin-bottom:6px">🔒</div>
-    <h2 class="serif" style="margin:6px 0 10px;font-size:26px">תוכן לחברי פרו</h2>
-    <p style="color:var(--muted);font-size:15px;line-height:1.7;max-width:340px;margin:0 auto 24px">${what||'התוכן הזה'} זמין למנויי פרו. שדרג כדי לפתוח את כל פרטי העסקאות, הקישורים למודעות, הבוננזה והמעקב.</p>
-    <button class="prim" style="padding:13px 30px;border:none;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer" onclick="toast('שדרוג בתשלום — בקרוב')">שדרג לפרו</button>
+  m.innerHTML=`<div style="padding:0">
+    <div style="background:linear-gradient(135deg,#7b3ff2,#e0489e);padding:34px 30px 30px;text-align:center;color:#fff;position:relative;overflow:hidden">
+      <div style="position:absolute;left:-30px;top:-50px;width:180px;height:180px;background:rgba(255,255,255,.10);border-radius:50%"></div>
+      <button class="xbtn" onclick="closeDeal()" style="position:absolute;top:14px;left:14px">✕</button>
+      <div style="position:relative;z-index:2">
+        <div style="width:66px;height:66px;margin:0 auto 14px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+        </div>
+        <h2 class="serif" style="margin:0 0 6px;font-size:25px;font-weight:900">הגישה המלאה של נדל״ן סקאוט</h2>
+        <p style="margin:0;font-size:14px;opacity:.92;line-height:1.6">${what||'התוכן הזה'} פתוח למנויי <b>פרו</b></p>
+      </div>
+    </div>
+    <div style="padding:22px 30px 26px">
+      <ul style="list-style:none;padding:0;margin:0 0 22px">
+        ${feat('כל פרטי העסקה + קישור ישיר למודעה ביד2')}
+        ${feat('עסקת בוננזה נבחרת — מדי יום')}
+        ${feat('מעקב נכסים אישי והתראות')}
+        ${feat('ייצוא לאקסל של כל ההזדמנויות')}
+        ${feat('נתונים טריים כל יום — בלי עיכוב')}
+      </ul>
+      <button onclick="toast('שדרוג בתשלום — בקרוב')" style="width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(120deg,#7b3ff2,#e0489e);color:#fff;font-weight:800;font-size:16.5px;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(123,63,242,.32)">שדרגו לפרו</button>
+      <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:12px">ביטול בכל עת · חשבונית אוטומטית · ללא התחייבות</div>
+    </div>
   </div>`;
   document.getElementById('ov').classList.add('show'); document.body.classList.add('modal-open');
 }
