@@ -708,6 +708,7 @@ function openDeal(id){
   document.getElementById('modal').innerHTML = `
     <div class="mhead"><button class="xbtn" onclick="closeDeal()">✕</button><div class="z">
       <h2 class="serif">${d.city||''} ${d.hood?'· '+d.hood:''}</h2>
+      ${d.street?`<div class="loc" style="font-weight:700;color:#fff">📍 ${d.street}</div>`:''}
       <div class="loc">${d.rooms||'?'} חדרים · ${d.size||'?'} מ״ר${d.cond?' · '+d.cond:''}${d.dtype?(' · '+(d.dtype==='agency'?'תיווך':'מוכר פרטי')):''}${d.tier?' · '+d.tier:''}${d.isnew?' · ✦ חדש היום':''}</div>
       <div class="pr serif">${fmt(d.price)} ₪</div>
     </div></div>
@@ -722,6 +723,9 @@ function openDeal(id){
       ${histBlock}${posBlock}${trendBlock}
       <div class="dsec"><h3>צ׳ק־ליסט דגלים אדומים</h3><ul class="flags">${flags.map(f=>`<li><span class="${f[0]}">${f[0]==='ok'?'✓':'!'}</span> ${f[1]}</li>`).join('')}</ul></div>
       <div class="dsec roi"><h3>מחשבון השקעה ומשכנתא</h3><p class="ph">כל הפרמטרים אינטראקטיביים — גרור וראה איך התשואה משתנה.</p>
+        <label>מחיר לאחר משא ומתן: <span id="negV"></span></label>
+        <input type="range" id="negp" min="${Math.round((d.price||1000000)*0.8/1000)*1000}" max="${d.price||1000000}" step="5000" value="${d.price||1000000}" oninput="calcRoi('${id}')">
+        <div class="ph" style="font-size:11px;margin:2px 0 10px">גרור כדי לבדוק תרחישי מיקוח — כל המספרים למטה מתעדכנים לפי המחיר החדש.</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap">
           <div style="flex:1;min-width:200px">
             <label>הון עצמי: <span id="eqV">50%</span></label>
@@ -752,7 +756,7 @@ function openDeal(id){
         <h3>תחזית וערך — התמונה המלאה</h3>
         <p class="ph">עלות הכניסה האמיתית (כולל מס רכישה) והקרנת שווי שמרנית לטווח ארוך.</p>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 10px;cursor:pointer">
-          <input type="checkbox" id="firstHome" onchange="calcRoi('${id}')"> דירה יחידה (מדרגות מופחתות — לרוב פטור מלא בפריפריה)
+          <input type="checkbox" id="investorChk" onchange="calcRoi('${id}')"> משקיע — לא דירה ראשונה (חל מס רכישה 8%)
         </label>
         <div class="out" style="border-top:none;padding-top:0">
           <div><b id="pTax">—</b><span id="pTaxLbl">מס רכישה (משקיע)</span></div>
@@ -790,7 +794,13 @@ function showUpgrade(what){
 }
 function calcRoi(id){
   const d=BYID[id]; if(!d) return;
-  const price=d.price||1000000;
+  const askPrice=d.price||1000000;
+  const negEl=document.getElementById('negp');
+  const price=negEl?(+negEl.value||askPrice):askPrice;
+  const negV=document.getElementById('negV');
+  if(negV){ const mppm=d.mppm||0, mg=(mppm&&d.size)?((mppm-(price/d.size))/mppm*100):null;
+    negV.textContent='₪'+fmt(price)+(mg!=null&&mg>0?`  ·  ${mg.toFixed(0)}% מתחת לשוק`:'')
+      +(price<askPrice?`  ·  הנחה ${(((askPrice-price)/askPrice)*100).toFixed(0)}% מהמבוקש`:''); }
   const eqp=+document.getElementById('eqp').value, rate=+document.getElementById('rate').value;
   const term=+document.getElementById('term').value, rent=+document.getElementById('rent').value;
   document.getElementById('eqV').textContent=eqp+'%';
@@ -812,7 +822,7 @@ function calcRoi(id){
 
   // ── תחזית וערך ──
   // מדרגות מס רכישה (2025, מתעדכן שנתית). דירה יחידה: פטור עד ~1.98M ואז מדרגות.
-  const firstHome=(document.getElementById('firstHome')||{}).checked;
+  const firstHome=!((document.getElementById('investorChk')||{}).checked);  // ברירת מחדל: דירה ראשונה (בלי מס)
   const ptax=(p,fh)=>{ let t=0,prev=0;
     const b = fh ? [[1978745,0],[2347040,.035],[6055070,.05],[20183565,.08],[Infinity,.10]]
                  : [[6055070,.08],[Infinity,.10]];
