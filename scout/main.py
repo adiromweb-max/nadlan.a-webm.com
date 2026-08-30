@@ -350,6 +350,43 @@ def build_city_rows(conn, cfg, area_svc, listings, today, observed, area_cache):
 # ריצה מלאה
 # ------------------------------------------------------------------
 
+def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
+    """
+    שומר את latest.json כ**מצטבר**: כל ההזדמנויות הפעילות שנצברו עד היום,
+    לא רק הריצה האחרונה. הריצה הנוכחית מעדכנת/מוסיפה; מודעות קודמות שעדיין
+    פעילות (active=1 ב-DB) נשמרות; מודעות שירדו מהאוויר נזרקות.
+    כך "חדש היום" נשאר יומי, ו"הזדמנויות"/"ירידות מחיר" מציגים את כל המאגר.
+    """
+    p = out_dir / "latest.json"
+    data = json.loads(p.read_text(encoding="utf-8"))
+    cur = data.get("listings") or []
+    cur_ids = {x.get("id") for x in cur}
+    active = None
+    try:
+        c = db.connect(db_path)
+        try:
+            active = {r["id"] for r in c.execute(
+                "SELECT id FROM listings WHERE active=1").fetchall()}
+        finally:
+            c.close()
+    except Exception:
+        active = None
+    carried = []
+    for lid, x in prev_listings.items():
+        if lid in cur_ids:
+            continue
+        if active is not None and lid not in active:
+            continue
+        fs = str(x.get("first_seen") or "")
+        x["is_new"] = bool(fs.startswith(run_day))   # לא חדש אם נראה לראשונה מזמן
+        x["dropped_today"] = False
+        carried.append(x)
+    data["listings"] = cur + carried
+    p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    log.info('צבירה: %d מהריצה + %d שנצברו = %d סה"כ',
+             len(cur), len(carried), len(cur) + len(carried))
+
+
 def _level_counts(scored):
     """התפלגות רמות ההשוואה — נכנסת לדו"ח כדי שרואים על מה מבוסס כל פער."""
     out = {}
@@ -719,6 +756,17 @@ def run(cfg, dry_run=False, today=None):
     except Exception:
         log.error("כשל בסימון 'חדש':\n%s", traceback.format_exc())
 
+    # קרא את המצטבר הקודם לפני שה-jsonout דורס את latest.json
+    _prev_listings = {}
+    try:
+        _pj = cfg["paths"]["out"] / "latest.json"
+        if _pj.exists():
+            for _x in (json.loads(_pj.read_text(encoding="utf-8")).get("listings") or []):
+                if _x.get("id"):
+                    _prev_listings[_x["id"]] = _x
+    except Exception:
+        pass
+
     try:
         jsonout.write(scored, area_cache, drops, city_rows, report,
                       cfg["paths"]["out"], report["notes"],
@@ -726,6 +774,13 @@ def run(cfg, dry_run=False, today=None):
     except Exception:
         log.error("כשל בכתיבת ה-JSON:\n%s", traceback.format_exc())
         report["notes"].append("כתיבת latest.json נכשלה — ראה לוג.")
+
+    # מזג לכדי מאגר מצטבר (כל ההזדמנויות הפעילות, לא רק הריצה הזו)
+    try:
+        _merge_accumulated(cfg["paths"]["out"], cfg["paths"]["db"],
+                           today.isoformat(), _prev_listings)
+    except Exception:
+        log.error("כשל בצבירת latest.json:\n%s", traceback.format_exc())
 
     # ── front-end פרימיום (app.html) — קורא את latest.json ──
     try:
