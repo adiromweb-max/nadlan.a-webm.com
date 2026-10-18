@@ -180,13 +180,7 @@ def write(out_dir, cfg=None):
         return None
     data = json.loads(latest.read_text(encoding="utf-8"))
     payload = build_payload(data, cfg)
-    # הגדרות Supabase (ציבוריות — מוגן ע"י RLS, לא ע"י הסתרת המפתח).
-    supa = {
-        "url": os.environ.get("SUPABASE_URL", "https://cnvqfnsumlvempnahbcm.supabase.co"),
-        "key": os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_nYTSEBzrELDwAgGItUWzFQ_qnZ_lgL1"),
-    }
-    inject = ("window.DATA=" + json.dumps(payload, ensure_ascii=False)
-              + ";window.SUPA=" + json.dumps(supa))
+    inject = "window.DATA=" + json.dumps(payload, ensure_ascii=False)
     html = HTML_TEMPLATE.replace("/*__DATA__*/", inject)
     dest = out_dir / "app.html"
     dest.write_text(html, encoding="utf-8")
@@ -370,40 +364,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
   @media(max-width:420px){.keynum{min-width:100%;flex-basis:100%}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-#authgate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a1030,#3a1f5a);display:flex;align-items:center;justify-content:center;direction:rtl;font-family:'Heebo',sans-serif}
-#authgate .card{background:#fff;border-radius:20px;padding:34px 30px;width:min(92vw,380px);box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center}
-#authgate .brand{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:30px;background:linear-gradient(120deg,#7b3ff2,#e0489e);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
-#authgate .sub{color:#6b6580;font-size:14px;margin-bottom:22px}
-#authgate input{width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:12px;border:1px solid #e0dae8;border-radius:11px;font-size:15px;font-family:inherit;direction:rtl}
-#authgate button.main{width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(120deg,#7b3ff2,#e0489e);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
-#authgate .toggle{margin-top:16px;font-size:13px;color:#7b3ff2;cursor:pointer}
-#authgate .msg{font-size:13px;margin-top:12px;min-height:18px}
-#authgate .msg.err{color:#d0455e}#authgate .msg.ok{color:#12a150}
 </style>
 </head>
 <body>
-  <div id="authgate"><div class="card">
-    <div class="brand">נדל״ן סקאוט</div>
-    <div class="sub" id="agSub">התחברות לחשבון</div>
-    <input id="agEmail" type="email" placeholder="אימייל" autocomplete="email">
-    <input id="agPass" type="password" placeholder="סיסמה" autocomplete="current-password">
-    <button class="main" id="agBtn" onclick="awebAuth()">התחבר</button>
-    <div style="margin:14px 0 12px;color:#b8b2c8;font-size:12px">— או —</div>
-    <button class="main" style="background:#fff;color:#2a2140;border:1px solid #e0dae8" onclick="awebGoogle()">התחברות עם Google</button>
-    <div class="msg" id="agMsg"></div>
-    <div class="toggle" id="agToggle" onclick="awebToggle()">אין לך חשבון? הרשמה</div>
-  </div></div>
   <div class="appbar"><div class="in">
     <span class="wm serif" onclick="go('new')">A<i>-</i>WEB</span>
     <nav class="tabs" id="tabs"></nav>
     <div class="abtools">
       <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
         <input id="q" placeholder="עיר / שכונה" oninput="render()"></div>
-      <span id="planBadge" style="display:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.1)"></span>
       <button class="iconbtn" onclick="toggleTheme()">◐</button>
-      <button class="iconbtn" id="agLogout" style="display:none;width:auto;padding:0 12px;font-size:12.5px;font-weight:700" onclick="awebLogout()">יציאה</button>
     </div>
   </div></div>
 
@@ -648,7 +619,6 @@ function isOpp(d){ return !d.disq && d.stage==='final' && d.evid && !(d.risk&&d.
 
 /* ---- CSV export (Excel, UTF-8 BOM) ---- */
 function exportCSV(){
-  if(!(window.AWEB&&window.AWEB.paid)){ return showUpgrade('ייצוא לאקסל'); }
   const arr=S._view||[];
   if(!arr.length){toast('אין מה לייצא בתצוגה הזו');return;}
   const own=d=>d.dtype==='agency'?'תיווך':d.dtype==='private'?'פרטי':'';
@@ -744,7 +714,6 @@ function priceTimeline(d){
 
 /* ---- deal detail modal ---- */
 function openDeal(id){
-  if(!(window.AWEB&&window.AWEB.paid)){ return showUpgrade('פרטי העסקה המלאים והקישור למודעה'); }
   const d=BYID[id]; if(!d) return;
   const area=areaFor(d);
   const marketPpm = d.mppm || (area && area.yearly && area.yearly.length? area.yearly[area.yearly.length-1].ppm : null);
@@ -861,36 +830,6 @@ function openDeal(id){
   calcRoi(id);
 }
 function closeDeal(){document.getElementById('ov').classList.remove('show');document.body.classList.remove('modal-open');}
-function showUpgrade(what){
-  const chk='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#12a150" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px"><path d="M20 6 9 17l-5-5"/></svg>';
-  const feat=t=>`<li style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--hair2);font-size:14.5px;color:var(--ink);text-align:right">${chk}<span>${t}</span></li>`;
-  const m=document.getElementById('modal');
-  m.innerHTML=`<div style="padding:0">
-    <div style="background:linear-gradient(135deg,#7b3ff2,#e0489e);padding:34px 30px 30px;text-align:center;color:#fff;position:relative;overflow:hidden">
-      <div style="position:absolute;left:-30px;top:-50px;width:180px;height:180px;background:rgba(255,255,255,.10);border-radius:50%"></div>
-      <button class="xbtn" onclick="closeDeal()" style="position:absolute;top:14px;left:14px">✕</button>
-      <div style="position:relative;z-index:2">
-        <div style="width:66px;height:66px;margin:0 auto 14px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
-        </div>
-        <h2 class="serif" style="margin:0 0 6px;font-size:25px;font-weight:900">הגישה המלאה של נדל״ן סקאוט</h2>
-        <p style="margin:0;font-size:14px;opacity:.92;line-height:1.6">${what||'התוכן הזה'} פתוח למנויי <b>פרו</b></p>
-      </div>
-    </div>
-    <div style="padding:22px 30px 26px">
-      <ul style="list-style:none;padding:0;margin:0 0 22px">
-        ${feat('כל פרטי העסקה + קישור ישיר למודעה ביד2')}
-        ${feat('עסקת בוננזה נבחרת — מדי יום')}
-        ${feat('מעקב נכסים אישי והתראות')}
-        ${feat('ייצוא לאקסל של כל ההזדמנויות')}
-        ${feat('נתונים טריים כל יום — בלי עיכוב')}
-      </ul>
-      <button onclick="toast('שדרוג בתשלום — בקרוב')" style="width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(120deg,#7b3ff2,#e0489e);color:#fff;font-weight:800;font-size:16.5px;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(123,63,242,.32)">שדרגו לפרו</button>
-      <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:12px">ביטול בכל עת · חשבונית אוטומטית · ללא התחייבות</div>
-    </div>
-  </div>`;
-  document.getElementById('ov').classList.add('show'); document.body.classList.add('modal-open');
-}
 function calcRoi(id){
   const d=BYID[id]; if(!d) return;
   const askPrice=d.price||1000000;
@@ -976,69 +915,6 @@ function trends(){
 }
 
 render();
-</script>
-<script>
-/* ---- גל 1: שער הרשמה/התחברות (Supabase Auth) ---- */
-(function(){
-  var SUPA=window.SUPA||{}, sb=null, mode='login';
-  function gate(show){
-    var g=document.getElementById('authgate'); if(g) g.style.display=show?'flex':'none';
-    var lo=document.getElementById('agLogout'); if(lo) lo.style.display=show?'none':'inline-flex';
-    document.body.style.overflow=show?'hidden':'';
-  }
-  function msg(t,cls){ var m=document.getElementById('agMsg'); if(m){m.textContent=t||'';m.className='msg '+(cls||'');} }
-  window.awebToggle=function(){
-    mode=(mode==='login')?'signup':'login';
-    document.getElementById('agSub').textContent=mode==='login'?'התחברות לחשבון':'יצירת חשבון חדש';
-    document.getElementById('agBtn').textContent=mode==='login'?'התחבר':'הרשמה';
-    document.getElementById('agToggle').textContent=mode==='login'?'אין לך חשבון? הרשמה':'כבר יש לך חשבון? התחבר';
-    msg('');
-  };
-  window.awebAuth=async function(){
-    if(!sb){ msg('לא מחובר לשרת','err'); return; }
-    var email=(document.getElementById('agEmail').value||'').trim();
-    var pass=document.getElementById('agPass').value||'';
-    if(!email||!pass){ msg('נא למלא אימייל וסיסמה','err'); return; }
-    msg('רגע...','');
-    try{
-      var r = mode==='login'
-        ? await sb.auth.signInWithPassword({email:email,password:pass})
-        : await sb.auth.signUp({email:email,password:pass});
-      if(r.error){ msg(r.error.message,'err'); return; }
-      if(mode==='signup' && !(r.data&&r.data.session)){ msg('נשלח אליך מייל אימות — אשר ואז התחבר.','ok'); return; }
-      gate(false); msg('');
-    }catch(e){ msg('שגיאה: '+e.message,'err'); }
-  };
-  window.awebGoogle=async function(){
-    if(!sb){ msg('לא מחובר לשרת','err'); return; }
-    try{ var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
-      if(r.error) msg(r.error.message,'err');
-    }catch(e){ msg('שגיאה: '+e.message,'err'); }
-  };
-  window.awebLogout=async function(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} gate(true); };
-  window.AWEB=window.AWEB||{paid:false};
-  async function loadPlan(session){
-    window.AWEB.paid=false;
-    var badge=document.getElementById('planBadge');
-    if(session){
-      try{ var r=await sb.rpc('is_paid'); window.AWEB.paid=(r && r.data===true); }
-      catch(e){ window.AWEB.paid=false; }
-      if(badge){ badge.style.display='inline-flex';
-        var em=((session.user&&session.user.email)||'').split('@')[0];
-        badge.textContent=em+' · '+(window.AWEB.paid?'פרו':'חינם');
-        badge.style.background=window.AWEB.paid?'linear-gradient(120deg,#7b3ff2,#e0489e)':'rgba(255,255,255,.1)';
-      }
-    } else if(badge){ badge.style.display='none'; }
-  }
-  function init(){
-    if(!window.supabase || !SUPA.url || !SUPA.key){ console.warn('Supabase not configured — gate disabled'); gate(false); return; }
-    try{ sb=window.supabase.createClient(SUPA.url,SUPA.key); }
-    catch(e){ console.warn('supabase init failed',e); gate(false); return; }
-    sb.auth.getSession().then(function(res){ var s=res&&res.data&&res.data.session; gate(!s); loadPlan(s); });
-    sb.auth.onAuthStateChange(function(_e,session){ gate(!session); loadPlan(session); });
-  }
-  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
-})();
 </script>
 </body>
 </html>
