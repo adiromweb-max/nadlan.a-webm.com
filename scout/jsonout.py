@@ -68,6 +68,7 @@ def listing_record(s, ladder=None):
         "id": s.get("id"),
         "source": s.get("source"),
         "url": s.get("url"),
+        "images": s.get("images") or [],
         "nadlan_link": s.get("nadlan_link"),
         "first_seen": s.get("first_seen"),
         "last_seen": s.get("last_seen"),

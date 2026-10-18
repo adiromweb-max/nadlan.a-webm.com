@@ -127,6 +127,24 @@ def _to_float(v):
         return None
 
 
+# ── תמונות המודעה ──────────────────────────────────────────────────
+# הכתובות כבר יושבות ב-‎__NEXT_DATA__‎ של יד2 ומשם ב-‎raw_json‎ שב-DB, ולכן
+# אין כאן אף בקשה נוספת. שרת התמונות של יד2 אינו חוסם הצגה מאתר אחר
+# (נבדק: 200 גם עם Referer חיצוני), אז הדשבורד מציג אותן ישירות משם —
+# בלי הורדה, בלי אחסון ובלי לנפח את הריפו.
+IMG_RE = re.compile(r'https?://img\.yad2\.co\.il/[^\s"\\]+?\.(?:jpe?g|png|webp)')
+MAX_IMAGES = 6
+
+
+def image_urls(item, limit=MAX_IMAGES):
+    """כתובות התמונות של מודעה, לפי סדר הופעתן ובלי כפילויות."""
+    try:
+        blob = json.dumps(item, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return []
+    return list(dict.fromkeys(IMG_RE.findall(blob)))[:limit]
+
+
 def _text(node):
     """מוציא .text ממבנה {'text': ...} או מחזיר את הערך עצמו."""
     if isinstance(node, dict):
@@ -237,6 +255,7 @@ def parse_item(item, fallback_city):
         "condition_id": cond_id,
         "condition_text": cond.get("text") or CONDITION_TEXT.get(cond_id),
         "ad_type": item.get("adType"),
+        "images": image_urls(item),
         "previous_price": prev_price,
         "drop_reported_by_source": drop_reported,
         "tags": tags,

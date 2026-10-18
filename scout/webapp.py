@@ -122,6 +122,7 @@ def _trim(listings, cfg=None):
             "dropped": bool(s.get("dropped_today")),
             "stage": s.get("stage"),
             "suspect": suspect,
+            "imgs": (s.get("images") or [])[:6],
             "url": s.get("url"),
             "nadlan": s.get("nadlan_link"),
             "first_seen": s.get("first_seen"),
@@ -281,6 +282,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .facts{display:flex;gap:13px;margin:10px 0;color:var(--ink2);font-size:13px;flex-wrap:wrap}
   .facts .f{display:flex;align-items:center;gap:5px}
   .facts svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:1.7}
+  /* תמונת המודעה. onerror מסיר את האלמנט ואז הגרדיאנט של .thumb נשאר
+     מאחוריו — כך מודעה בלי תמונה או עם תמונה שנמחקה נראית תקין. */
+  .thumbimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .thumb .ribbon,.thumb .newbadge,.thumb .tierbadge,.thumb .savebtn{z-index:2}
+  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin:0 0 16px}
+  .gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:11px;cursor:zoom-in;background:var(--hair2)}
   .kv{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
   .kv .b{background:var(--greenbg);color:var(--green);font-weight:800;font-size:12px;padding:4px 9px;border-radius:8px}
   .kv .n{background:var(--hair2);color:var(--accent);font-weight:700;font-size:12px;padding:4px 9px;border-radius:8px}
@@ -529,7 +536,10 @@ function card(d,i){
   const saved=WL.has(d.id);
   return `<article class="card">
     <div class="thumb" style="background:${g}" onclick="openDeal('${d.id}')">${rib}${d.tier?`<span class="tierbadge">${d.tier}</span>`:''}
-      <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>${bld()}</div>
+      <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>${
+        d.imgs&&d.imgs.length
+          ? `<img class="thumbimg" src="${d.imgs[0]}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
+          : bld()}</div>
     <div class="cbody">
       <div class="ctop"><div class="cplace" onclick="openDeal('${d.id}')">${d.city||''} ${d.hood?`<span>· ${d.hood}</span>`:''}</div>
         <div class="cprice serif">${fmt(d.price)} ₪</div></div>
@@ -761,6 +771,7 @@ function openDeal(id){
       <div class="pr serif">${fmt(d.price)} ₪</div>
     </div></div>
     <div class="mbody">
+      ${d.imgs&&d.imgs.length?`<div class="gal">${d.imgs.map(u=>`<img src="${u}" alt="" loading="lazy" referrerpolicy="no-referrer" onclick="window.open('${u}','_blank')" onerror="this.remove()">`).join('')}</div>`:''}
       <div class="keynums">
         <div class="keynum"><b class="grad-text">${d.suspect?'⚠':(d.netgap!=null&&d.evid?(+d.netgap).toFixed(0)+'%':(d.gap!=null?(+d.gap).toFixed(0)+'%':'—'))}</b><span>${d.suspect?'פער לאימות':(d.netgap!=null&&d.evid?'פער נטו אחרי עלויות':gapLabel(d))}</span></div>
         <div class="keynum"><b class="grad-text">${d.cagr!=null?(+d.cagr).toFixed(1)+'%':'—'}</b><span>עליית ערך שנתית</span></div>
