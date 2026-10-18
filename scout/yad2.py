@@ -134,6 +134,45 @@ def _text(node):
     return node
 
 
+# ── ירידת מחיר שיד2 עצמו מדווח ──────────────────────────────────────
+# הבאג שזה מתקן: המנוע ספר ירידות מחיר רק מהרגע שהוא ראה את המודעה
+# בפעם הראשונה. מודעה שהמחיר בה ירד לפני שבועיים, ונסרקה היום לראשונה,
+# נרשמה כ"בלי ירידת מחיר" — בעוד שיד2 מציג עליה תג ירידת מחיר ולעתים גם
+# את המחיר הקודם. זו בדיוק "ירידת הרפאים".
+#
+# יד2 מעביר את זה בשני אופנים, ושניהם נבדקים כאן: שדה מחיר קודם
+# ב-‎__NEXT_DATA__‎ (שמות משתנים בין גרסאות, ולכן רשימת מועמדים), ותג
+# טקסטואלי בעברית. התג לבדו מוכיח שהייתה ירידה גם בלי לדעת את גודלה.
+PREV_PRICE_KEYS = ("priceBeforeDiscount", "previousPrice", "priceBefore",
+                   "oldPrice", "prevPrice", "originalPrice", "lastPrice")
+DROP_TAG_HINTS = ("ירידת מחיר", "מחיר ירד", "המחיר ירד", "הופחת", "הוזל")
+
+
+def _previous_price(item):
+    """המחיר הקודם כפי שיד2 מדווח, אם קיים באיזה מהמבנים המקוננים."""
+    if not isinstance(item, dict):
+        return None
+    pools = [item, item.get("metaData") or {}, item.get("additionalDetails") or {},
+             item.get("price") if isinstance(item.get("price"), dict) else {}]
+    for pool in pools:
+        if not isinstance(pool, dict):
+            continue
+        for key in PREV_PRICE_KEYS:
+            val = _to_float(pool.get(key))
+            if val and val > 0:
+                return val
+    return None
+
+
+def _reported_drop(tags):
+    """האם אחת מתגיות יד2 מכריזה על ירידת מחיר."""
+    for t in tags or []:
+        text = str(t)
+        if any(h in text for h in DROP_TAG_HINTS):
+            return True
+    return False
+
+
 def parse_item(item, fallback_city):
     """ממפה רשומת feed של יד2 למודל הפנימי. מחזיר dict או None."""
     if not isinstance(item, dict):
@@ -165,6 +204,12 @@ def parse_item(item, fallback_city):
     neighborhood = _text(addr.get("neighborhood"))
     street = _text(addr.get("street"))
 
+    # ירידת מחיר שיד2 מדווח — מתועדת גם אם זו הפעם הראשונה שראינו את המודעה
+    prev_price = _previous_price(item)
+    if prev_price and price and prev_price <= price:
+        prev_price = None          # לא ירידה; מתעלמים
+    drop_reported = _reported_drop(tags) or bool(prev_price)
+
     # הטקסט שעליו רץ ניקוד מילות ההזדמנות. בשלב הסריקה אין תיאור חופשי —
     # יש תגיות ("בהזדמנות", "גמיש במחיר") ומצב נכס. התיאור המלא מתווסף
     # בשלב ההעשרה, רק למועמדות.
@@ -192,6 +237,8 @@ def parse_item(item, fallback_city):
         "condition_id": cond_id,
         "condition_text": cond.get("text") or CONDITION_TEXT.get(cond_id),
         "ad_type": item.get("adType"),
+        "previous_price": prev_price,
+        "drop_reported_by_source": drop_reported,
         "tags": tags,
         "text": free_text,
         "description": None,       # מתמלא בהעשרה

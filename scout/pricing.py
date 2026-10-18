@@ -128,6 +128,151 @@ def cagr_pct(first_value, last_value, years):
     return ((last / first) ** (1.0 / n) - 1.0) * 100.0
 
 
+# ------------------------------------------------------------------
+# עלויות רכישה בפועל — "פער נטו"
+# ------------------------------------------------------------------
+# למה זה כאן: פער של 8% מול חציון האזור אינו עסקה. מס רכישה למשקיע לבדו
+# הוא 8%, ולפניו עוד עו"ד ותיווך. כלומר מודעה שעברה את הסף המינימלי הקודם
+# הייתה מובטחת כהפסד ברגע החתימה. כל ההכתרות נגזרות מכאן והלאה מהפער
+# **אחרי** עלויות העסקה, לא מהפער המוצג.
+#
+# מס רכישה — שני מסלולים, וברירת המחדל היא **דירה ראשונה**.
+#
+# למה זה קריטי: במדרגות דירה יחידה יש פטור מלא עד ~1.98 מיליון ₪, וכל
+# טווח המחירים שהמנוע סורק בדרום נמצא מתחת לתקרה הזאת. כלומר לקונה דירה
+# ראשונה מס הרכישה הוא **אפס**, ועלויות העסקה יורדות מ-11% לכ-3%.
+# הנחה שכל המשתמשים קונים דירה שנייה מעוותת את הפער נטו של כל מודעה
+# בדרום בשמונה נקודות אחוז. המסלול נקבע ב-‎buyer_track‎ ב-config, וניתן
+# לחישוב לכל מסלול בנפרד לצורך תצוגה.
+FIRST_HOME_BRACKETS = [(1_978_745.0, 0.0), (2_347_040.0, 3.5),
+                       (6_055_070.0, 5.0), (20_183_565.0, 8.0),
+                       (None, 10.0)]
+SECOND_HOME_BRACKETS = [(6_055_070.0, 8.0), (None, 10.0)]
+DEFAULT_TRACK = "first_home"
+LEGAL_PCT = 0.5
+BROKERAGE_PCT = 2.0
+VAT_PCT = 18.0
+TRACK_HE = {"first_home": "דירה ראשונה", "second_home": "דירה שנייה ומעלה"}
+
+
+def _cfg_float(cfg, key, default):
+    try:
+        return float((cfg or {}).get(key, default))
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _brackets(cfg, track):
+    """מדרגות מס רכישה למסלול. ניתנות לדריסה מה-config כשהחוק משתנה."""
+    conf = ((cfg or {}).get("purchase_tax_brackets") or {}).get(track)
+    if conf:
+        out = []
+        for row in conf:
+            cap = row[0]
+            out.append((None if cap in (None, "", 0) else float(cap), float(row[1])))
+        return out
+    return FIRST_HOME_BRACKETS if track == "first_home" else SECOND_HOME_BRACKETS
+
+
+def buyer_track(cfg=None, track=None):
+    """המסלול בתוקף: מה שהועבר במפורש, אחרת מה-config, אחרת דירה ראשונה."""
+    t = track or (cfg or {}).get("buyer_track") or DEFAULT_TRACK
+    return t if t in ("first_home", "second_home") else DEFAULT_TRACK
+
+
+def purchase_tax_ils(price, cfg=None, track=None):
+    """
+    מס רכישה בשקלים, מדרגתי, לפי המסלול.
+
+    דירה ראשונה על 599,000 ₪ → 0 ₪.
+    דירה שנייה על אותו מחיר   → 47,920 ₪.
+    """
+    try:
+        p = float(price)
+    except (TypeError, ValueError):
+        return None
+    if p <= 0:
+        return None
+    tax, prev = 0.0, 0.0
+    for cap, rate in _brackets(cfg, buyer_track(cfg, track)):
+        top = p if cap is None else min(p, cap)
+        if top > prev:
+            tax += (top - prev) * rate / 100.0
+            prev = top
+        if cap is not None and p <= cap:
+            break
+    return tax
+
+
+def acquisition_costs(price, cfg=None, is_agency=False, track=None):
+    """
+    עלויות הרכישה שנשלמות במזומן בנוסף למחיר: מס רכישה, עו"ד, תיווך.
+
+    תיווך נספר **רק** במודעת תיווך — מודעה פרטית חוסכת אותו, וזה הפרש
+    אמיתי של יותר מ-2% בין שתי מודעות באותו מחיר.
+    שיפוץ אינו נכלל כאן: הוא אינו עלות עסקה ודאית אלא רזרבה, ומדווח בנפרד.
+
+    מחזיר dict עם הסכומים בשקלים והאחוז הכולל מהמחיר.
+    """
+    try:
+        p = float(price)
+    except (TypeError, ValueError):
+        p = 0.0
+    tr = buyer_track(cfg, track)
+    if p <= 0:
+        return {"total_ils": None, "total_pct": None, "tax_ils": None,
+                "legal_ils": None, "brokerage_ils": None,
+                "is_agency": bool(is_agency), "track": tr,
+                "track_he": TRACK_HE[tr]}
+
+    vat = 1.0 + _cfg_float(cfg, "vat_pct", VAT_PCT) / 100.0
+    tax = purchase_tax_ils(p, cfg, tr) or 0.0
+    legal = p * _cfg_float(cfg, "legal_pct", LEGAL_PCT) / 100.0 * vat
+    brokerage = (p * _cfg_float(cfg, "brokerage_pct", BROKERAGE_PCT) / 100.0 * vat
+                 if is_agency else 0.0)
+    total = tax + legal + brokerage
+    return {
+        "tax_ils": round(tax),
+        "legal_ils": round(legal),
+        "brokerage_ils": round(brokerage),
+        "total_ils": round(total),
+        "total_pct": round(total / p * 100.0, 2),
+        "is_agency": bool(is_agency),
+        "track": tr,
+        "track_he": TRACK_HE[tr],
+    }
+
+
+def net_gap_pct(gap, cost_pct):
+    """
+    הפער שנשאר אחרי עלויות הרכישה.
+
+    הפער המוצג משווה מחיר מבוקש לחציון. אבל מה שהקונה משלם בפועל הוא
+    המחיר כפול (1+עלויות), ולכן:
+        נטו = 1 − (1 − פער) × (1 + עלויות)
+    פער 21% עם עלויות 11% → 12.3% נטו, לא 21%. זו הנוסחה שמונעת את
+    "נראתה עסקה, התפוגגה כשחפרנו".
+    """
+    try:
+        g = float(gap) / 100.0
+        c = float(cost_pct) / 100.0
+    except (TypeError, ValueError):
+        return None
+    return round((1.0 - (1.0 - g) * (1.0 + c)) * 100.0, 2)
+
+
+def sqm_per_room(size_sqm, rooms):
+    """מ"ר לחדר — אצבע לזיהוי אנומליית גודל/חדרים. None כשחסר נתון."""
+    try:
+        s = float(size_sqm)
+        r = float(rooms)
+    except (TypeError, ValueError):
+        return None
+    if s <= 0 or r <= 0:
+        return None
+    return s / r
+
+
 def gross_yield_pct(annual_rent, price):
     """תשואת שכירות ברוטו: שכ"ד שנתי / מחיר × 100."""
     try:

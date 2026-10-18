@@ -109,6 +109,14 @@ def connect(db_path):
     return conn
 
 
+def _day_before(day):
+    """התאריך שלפני ‎day‎ (ISO). נופל חזרה ל-day עצמו אם הפורמט לא נקרא."""
+    try:
+        return (date.fromisoformat(str(day)) - timedelta(days=1)).isoformat()
+    except (TypeError, ValueError):
+        return day
+
+
 def upsert_listing(conn, listing, today=None):
     """
     Upsert של מודעה. מחזיר dict עם:
@@ -143,6 +151,20 @@ def upsert_listing(conn, listing, today=None):
              listing.get("property_type"), listing.get("condition_text"),
              listing.get("lat"), listing.get("lon")),
         )
+        # ── זריעת ירידת המחיר שיד2 עצמו מדווח ──
+        # תיקון "ירידת הרפאים": בלי זה ההיסטוריה מתחילה מהמחיר של היום,
+        # וירידה שקרתה לפני שראינו את המודעה נעלמת לחלוטין. כאן נרשמת
+        # קודם נקודת המחיר הקודם, מתוארכת יום אחד לפני ההופעה הראשונה,
+        # ואחריה המחיר הנוכחי — כך שהחישוב הקיים של ‎price_history‎
+        # מזהה ירידה אמיתית כבר בריצה הראשונה, בלי שינוי בלוגיקה.
+        prev = listing.get("previous_price")
+        if prev and price and float(prev) > float(price):
+            conn.execute(
+                "INSERT INTO price_history (listing_id, price, seen_at) VALUES (?,?,?)",
+                (lid, float(prev), _day_before(today)),
+            )
+            result["old_price"] = float(prev)
+            result["drop_from_source"] = True
         # שורת בסיס בהיסטוריה כדי שנוכל להשוות בעתיד
         conn.execute(
             "INSERT INTO price_history (listing_id, price, seen_at) VALUES (?,?,?)",

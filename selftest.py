@@ -50,6 +50,83 @@ def main():
           not pricing.is_drop_sane(90.0))
     check("ירידה של 3.7% נחשבת תקינה", pricing.is_drop_sane(3.7))
 
+    print("\n=== 1ב. עלויות רכישה והפער נטו ===")
+    # ברירת המחדל היא דירה ראשונה: בטווח הדרומי המס הוא אפס
+    check("ברירת המחדל היא דירה ראשונה",
+          pricing.buyer_track(cfg) == "first_home", pricing.buyer_track(cfg))
+    check("דירה ראשונה על 599,000 — מס רכישה אפס",
+          round(pricing.purchase_tax_ils(599000, cfg)) == 0,
+          f"{pricing.purchase_tax_ils(599000, cfg):,.0f} ₪")
+    check("דירה ראשונה על 2.5 מיליון — כבר יש מס",
+          pricing.purchase_tax_ils(2_500_000, cfg) > 20000,
+          f"{pricing.purchase_tax_ils(2_500_000, cfg):,.0f} ₪")
+    tax = pricing.purchase_tax_ils(599000, cfg, "second_home")
+    check("דירה שנייה על אותו מחיר — 8%", round(tax) == 47920, f"{tax:,.0f} ₪")
+    c_fh = pricing.acquisition_costs(599000, cfg, is_agency=True)
+    check("עלויות דירה ראשונה בתיווך ≈ 2.9%",
+          2.5 < c_fh["total_pct"] < 3.2, f'{c_fh["total_pct"]}%')
+    c_ag = pricing.acquisition_costs(599000, cfg, is_agency=True, track="second_home")
+    c_pr = pricing.acquisition_costs(599000, cfg, is_agency=False, track="second_home")
+    check("מודעת תיווך יקרה ביותר מ-2% ממודעה פרטית",
+          c_ag["total_pct"] - c_pr["total_pct"] > 2.0,
+          f'תיווך {c_ag["total_pct"]}% מול פרטי {c_pr["total_pct"]}%')
+    ng = pricing.net_gap_pct(21.0, c_ag["total_pct"])
+    check("פער 21% מצטמק אחרי עלויות", ng is not None and 10 < ng < 15,
+          f'21% גולמי → {ng}% נטו (עלויות {c_ag["total_pct"]}%)')
+    check("פער 8% (הסף הישן) הופך שלילי",
+          pricing.net_gap_pct(8.0, c_ag["total_pct"]) < 0,
+          f'8% גולמי → {pricing.net_gap_pct(8.0, c_ag["total_pct"])}% נטו')
+    check('אנומליית 144 מ"ר / 3 חדרים מזוהה',
+          pricing.sqm_per_room(144, 3) > cfg.get("sqm_per_room_max", 45),
+          f'{pricing.sqm_per_room(144, 3):.0f} מ"ר לחדר')
+
+    print("\n=== 1ד. אימות ברמת רחוב ===")
+    subject = {"id": "t:s0", "city": "באר שבע", "street": "דרך מצדה",
+               "rooms": 3, "size_sqm": 75, "price_per_sqm": 7987}
+    pool_conf = [{"id": f"t:s{i}", "city": "באר שבע", "street": "דרך מצדה",
+                  "rooms": 3, "price_per_sqm": p}
+                 for i, p in enumerate([10133, 10135, 13462], start=1)]
+    sc = comps.street_check(subject, pool_conf, cfg)
+    check("הפער נשמר מול הרחוב → אישור", sc["street_status"] == "confirm",
+          f'{sc["street_gap_pct"]:.0f}% מול {sc["street_peers"]} מודעות')
+    pool_veto = [dict(x, price_per_sqm=8100) for x in pool_conf]
+    sv = comps.street_check(subject, pool_veto, cfg)
+    check("הרחוב זול כמו הדירה → וטו", sv["street_status"] == "veto",
+          sv["street_note"])
+    sn = comps.street_check(subject, pool_conf[:1], cfg)
+    check("מעט מדי שכנים → נאמר במפורש שאין אימות",
+          sn["street_status"] == "no_data", sn["street_note"])
+    r_veto = scoring.score_listing(
+        {**subject, "price": 599000, "text": "", "listing_type": "private"},
+        cfg, stage="final",
+        comp={"sufficient": True, "can_crown": True, "gap_pct": 25.0,
+              "suspect": False, "comp_median_ppm": 10113,
+              "comp_match_level": "שכונה", "comp_area": "יא"},
+        street=sv, first_seen=(today - timedelta(days=70)).isoformat(),
+        today=today)
+    check("וטו רחוב חוסם הכתרה", r_veto["tier"] != scoring.TIER_URGENT,
+          r_veto["data_quality"])
+
+    print("\n=== 1ג. חסימת הכתרה על סיכון בנכס ===")
+    risky = {"id": "t:risk", "city": "דימונה", "price": 500000, "rooms": 3,
+             "size_sqm": 75, "price_per_sqm": 500000 / 75,
+             "text": "דירה 3 חדרים עם דייר מוגן", "listing_type": "private"}
+    good_comp = {"sufficient": True, "can_crown": True, "gap_pct": 25.0,
+                 "suspect": False, "comp_median_ppm": 8888.0,
+                 "comp_match_level": "שכונה", "comp_area": "מרכז"}
+    r_risk = scoring.score_listing(risky, cfg, stage="final", comp=good_comp,
+                                   first_seen=(today - timedelta(days=70)).isoformat(),
+                                   today=today, drop=None)
+    check("דייר מוגן חוסם הכתרה", r_risk["tier"] != scoring.TIER_URGENT
+          and r_risk["asset_risk"], r_risk["data_quality"])
+    city_comp = dict(good_comp, can_crown=False,
+                     crown_block_reason="חציון ברמת יישוב")
+    r_city = scoring.score_listing(
+        {**risky, "text": "דירה 3 חדרים"}, cfg, stage="final", comp=city_comp,
+        first_seen=(today - timedelta(days=70)).isoformat(), today=today)
+    check("השוואה שאסור לה להכתיר לא מגיעה ל'לבדוק דחוף'",
+          r_city["tier"] != scoring.TIER_URGENT, r_city["tier_he"])
+
     print("\n=== 2. התמדה וזיהוי ירידת מחיר ===")
     conn = db.connect(cfg["paths"]["db"])
 
@@ -214,8 +291,21 @@ def main():
     v = comps.cascade(listing2, c, market, cfg)
     check("סולם: נבחרה רמת השוואה", v["comp_level"] is not None,
           f'{v["comp_level_he"]} ({v["value_count"]} תצפיות)')
-    check("סולם: רמה מקומית → ביטחון גבוה",
-          v["confidence"] == comps.CONF_HIGH, v["confidence_he"])
+    # ביטחון גבוה נשמר לרמת שכונה בלבד. חציון עירוני בבאר שבע (יותר
+    # מ-200 אלף תושבים, 23 שכונות) מערבב שכונות שאין ביניהן קשר, ולכן
+    # הוא הקשר — לא ראיה. הבדיקה מאמתת שהמנוע לא מנפח ביטחון.
+    if v["comp_level"] == comps.LEVEL_NEIGHBORHOOD:
+        check("סולם: רמת שכונה → ביטחון גבוה",
+              v["confidence"] == comps.CONF_HIGH,
+              f'{v["confidence_he"]} — {v.get("confidence_reason")}')
+    else:
+        check("סולם: חציון עירוני ביישוב גדול אינו ביטחון גבוה",
+              v["confidence"] != comps.CONF_HIGH,
+              f'{v["comp_level_he"]} → {v["confidence_he"]} — {v.get("confidence_reason")}')
+    check("סולם: רמה לא-מקומית אינה מכתירה",
+          all(not r.get("can_crown") for r in v["ladder"]
+              if r["level"] in (comps.LEVEL_TIER, comps.LEVEL_REGION)),
+          "מדרגה/מרחב חסומים להכתרה")
     check("סולם: יש 4 שלבים בסולם", len(v["ladder"]) >= 3,
           str([f'{r["level_he"]}:{r["count"]}' for r in v["ladder"]]))
     check("סולם: חושב פער", v["value_gap_pct"] is not None,

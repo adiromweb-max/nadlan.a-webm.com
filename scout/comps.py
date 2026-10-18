@@ -173,6 +173,8 @@ def like_for_like(baseline, listing, cfg, observed_sizes=None):
         "gap_pct": None, "sufficient": False, "suspect": False,
         "data_quality": "אין נתוני השוואה",
         "comp_version": None,
+        "size_deviation_pct": None, "can_crown": False,
+        "crown_block_reason": None,
     }
     if not baseline:
         return out
@@ -229,12 +231,31 @@ def like_for_like(baseline, listing, cfg, observed_sizes=None):
         out["size_deviation_pct"] = dev
         size_ok = dev <= size_tol
 
+    # ── האם ההשוואה הזאת טובה מספיק כדי להכתיר מודעה ──
+    # חציון ברמת יישוב ביישוב גדול מערבב שכונות שאין ביניהן קשר. הוא בסיס
+    # סביר להקשר, אבל לא ראיה שדירה ספציפית מתחת לשוק. ביישוב גדול, רמת
+    # יישוב יורדת מהכתרה — ורק שכונה מכתירה.
+    big_city = float(cfg.get("city_heterogeneous_population", 100000))
+    try:
+        pop = float(baseline.get("population") or 0)
+    except (TypeError, ValueError):
+        pop = 0.0
+    level_ok = (level_raw == "neighborhood"
+                or (level_raw == "settlement" and pop < big_city))
+    out["can_crown"] = bool(level_ok and out["sufficient"] and size_ok)
+    if not level_ok:
+        out["crown_block_reason"] = (
+            f"חציון ברמת יישוב ב{baseline.get('city') or ''} "
+            f"({pop:,.0f} תושבים) — לא ראיה מקומית מספקת")
+
     if out["gap_pct"] is not None and out["gap_pct"] > suspect_at:
         out["suspect"] = True
         out["data_quality"] = f"פער חשוד ({out['gap_pct']:.0f}%) — בדיקה ידנית"
     elif not size_ok:
         out["data_quality"] = (f"גודל חריג לקטגוריה "
                                f"({out.get('size_deviation_pct', 0):.0f}% מהטיפוסי)")
+    elif not level_ok:
+        out["data_quality"] = "השוואה ברמת יישוב בלבד — אין נתון שכונה"
     else:
         out["data_quality"] = "תקין"
     return out
@@ -487,6 +508,13 @@ class MarketIndex:
         return sorted(c for c, t in self.tiers.items() if t == tier)
 
 
+# רק שתי הרמות המקומיות הן בסיס השוואה אמיתי. "יישובים דומים" ו"מרחב"
+# משווים דירה בבאר שבע לחציון של עשרות יישובים אחרים ומייצרים פערים של
+# 40–50% שאינם קיימים. הם נשארים בפלט כהקשר — ואסור להם להכתיר מודעה
+# או לזכות אותה בנקודות פער.
+CROWNING_LEVELS = (LEVEL_NEIGHBORHOOD, LEVEL_CITY)
+
+
 def _rung(level, name, values, listing_ppm, min_count):
     """שלב אחד בסולם — חציון, מספר תצפיות, פער, והאם הוא מספיק."""
     med = _median(values or [])
@@ -498,7 +526,137 @@ def _rung(level, name, values, listing_ppm, min_count):
         "count": len(values or []),
         "gap_pct": gap_pct(med, listing_ppm) if med else None,
         "sufficient": len(values or []) >= min_count,
+        "can_crown": level in CROWNING_LEVELS,
     }
+
+
+def _size_matches_category(listing, comp, cfg):
+    """האם גודל המודעה בטווח הסביר לקטגוריית החדרים שהושוותה."""
+    typical = (comp or {}).get("comp_size_used")
+    size = listing.get("size_sqm")
+    if not typical or not size:
+        return True, None
+    try:
+        tol = float(cfg.get("comps_size_tolerance_pct", SIZE_TOLERANCE_PCT))
+        dev = abs(float(size) - float(typical)) / float(typical) * 100.0
+    except (TypeError, ValueError, ZeroDivisionError):
+        return True, None
+    return dev <= tol, round(dev, 1)
+
+
+def _confidence(level, count, min_count, size_ok, population, cfg):
+    """
+    רמת הביטחון בהשוואה — ומה שחשוב יותר, מה היא **לא**.
+
+    המקור אינו חושף עסקה בודדת: ‎count‎ הוא מספר תצפיות רבעון של אותו
+    ממוצע מפורסם, ולכן הוא אינו גודל מדגם ואי אפשר לגזור ממנו פיזור.
+    לכן הביטחון נגזר ממה שכן ידוע — כמה האזור מקומי, כמה עמוק הנתון,
+    והאם הדירה בכלל דומה לקטגוריה שהושוותה:
+
+      * גבוה   — רמת שכונה, נתון עמוק, גודל תקין. רק כאן.
+      * בינוני — רמת יישוב קטן והומוגני, נתון עמוק, גודל תקין.
+      * נמוך   — יישוב גדול והטרוגני (חציון עירוני מערבב שכונות שונות
+                 לגמרי), נתון דל, גודל חריג, או רמת מדרגה/מרחב.
+
+    מחזיר (confidence, סיבה בעברית).
+    """
+    if not level or not count:
+        return CONF_LOW, "אין בסיס השוואה מקומי"
+    deep = count >= min_count
+    if not size_ok:
+        return CONF_LOW, "גודל הדירה חורג מהטיפוסי בקטגוריה — ההשוואה אינה like-for-like"
+    if level == LEVEL_NEIGHBORHOOD and deep:
+        return CONF_HIGH, "השוואה ברמת שכונה עם נתון עמוק"
+    if level == LEVEL_CITY and deep:
+        big = float(cfg.get("city_heterogeneous_population", 100000))
+        try:
+            pop = float(population or 0)
+        except (TypeError, ValueError):
+            pop = 0.0
+        if pop >= big:
+            return CONF_LOW, (f"חציון עירוני ביישוב של {pop:,.0f} תושבים — "
+                              f"מערבב שכונות שונות מדי")
+        return CONF_MEDIUM, "השוואה ברמת יישוב הומוגני"
+    if level in CROWNING_LEVELS:
+        return CONF_LOW, "נתון רדוד ברמת ההשוואה המקומית"
+    return CONF_LOW, "השוואה מול יישובים אחרים — לא בסיס מקומי"
+
+
+def street_check(listing, pool, cfg):
+    """
+    בדיקת רחוב — שכבת האימות שרצה **רק על מי שעבר את השער**.
+
+    למה זו שכבה נפרדת ולא בסיס ההשוואה הראשי: הנתון כאן הוא מחירי
+    **מבוקש** של מודעות יד2 באותו רחוב, לא עסקאות שנסגרו. הוא חלש יותר
+    כבסיס — אבל הוא הדבר היחיד שזמין ברמת רחוב בלי לעקוף שום הגנה, והוא
+    עונה בדיוק על השאלה שהורגת עסקאות: "האם הדירה זולה *לרחוב שלה*, או
+    שהרחוב פשוט זול מהשכונה".
+
+    לכן התפקיד שלו הוא וטו ואישור, לא חישוב הפער:
+      * ‎confirm‎  — הפער נשמר גם מול הרחוב.
+      * ‎veto‎     — הפער מתאדה: הרחוב זול מהשכונה, וה"הנחה" היא מיקום.
+      * ‎no_data‎  — אין די מודעות באותו רחוב. נאמר במפורש, לא מנוחש.
+
+    עלות: אפס בקשות. ה-pool הוא המודעות שכבר נסרקו.
+    """
+    min_peers = int(cfg.get("street_min_peers", 3))
+    tol = float(cfg.get("comps_rooms_tolerance", ROOMS_TOLERANCE))
+    keep_pct = float(cfg.get("street_keep_gap_pct", 8.0))
+
+    out = {"street_status": "no_data", "street_name": listing.get("street"),
+           "street_peers": 0, "street_median_ppm": None, "street_gap_pct": None,
+           "street_note": None}
+
+    street, city, ppm = listing.get("street"), listing.get("city"), listing.get("price_per_sqm")
+    if not street or not city or not ppm:
+        out["street_note"] = "אין רחוב במודעה — אי אפשר לאמת ברמת רחוב"
+        return out
+
+    try:
+        rooms = float(listing.get("rooms"))
+    except (TypeError, ValueError):
+        rooms = None
+
+    peers = []
+    for other in pool or []:
+        if other is listing or other.get("id") == listing.get("id"):
+            continue
+        if other.get("city") != city or other.get("street") != street:
+            continue
+        p = other.get("price_per_sqm")
+        if not p:
+            continue
+        if rooms is not None:
+            try:
+                if abs(float(other.get("rooms")) - rooms) > tol:
+                    continue
+            except (TypeError, ValueError):
+                continue
+        peers.append(p)
+
+    out["street_peers"] = len(peers)
+    if len(peers) < min_peers:
+        out["street_note"] = (f"רק {len(peers)} מודעות נוספות ב{street} "
+                              f"(נדרשות {min_peers}) — אין אימות רחוב")
+        return out
+
+    med = _median(peers)
+    gap = gap_pct(med, ppm)
+    out["street_median_ppm"] = med
+    out["street_gap_pct"] = gap
+    if gap is None:
+        out["street_note"] = "לא ניתן לחשב פער מול הרחוב"
+        return out
+    if gap >= keep_pct:
+        out["street_status"] = "confirm"
+        out["street_note"] = (f"גם מול המבוקש ב{street} הדירה זולה ב-{gap:.0f}% "
+                              f"({len(peers)} מודעות) — הפער אינו מיקום")
+    else:
+        out["street_status"] = "veto"
+        out["street_note"] = (f"מול המבוקש ב{street} הפער הוא {gap:.0f}% בלבד "
+                              f"({len(peers)} מודעות) — הרחוב זול מהשכונה, "
+                              f"וה\"הנחה\" היא מיקום ולא מחיר")
+    return out
 
 
 def cascade(listing, comp, index, cfg):
@@ -524,6 +682,7 @@ def cascade(listing, comp, index, cfg):
         "value_gap_pct": None, "confidence": CONF_LOW,
         "confidence_he": CONF_HE[CONF_LOW], "suspect": False,
         "unverified_attractive": False, "value_tag": None, "ladder": [],
+        "can_crown": False, "confidence_reason": None, "size_deviation_pct": None,
     }
     if not index or not ppm:
         out["value_tag"] = "אין מחיר למ\"ר לחישוב"
@@ -541,6 +700,7 @@ def cascade(listing, comp, index, cfg):
             "gap_pct": comp.get("gap_pct") if comp.get("gap_pct") is not None
             else gap_pct(comp.get("comp_median_ppm"), ppm),
             "sufficient": (comp.get("comp_count") or 0) >= min_count,
+            "can_crown": True,
         })
 
     rungs.append(_rung(LEVEL_CITY, city, index.city_level(city, listing.get("rooms")),
@@ -567,16 +727,25 @@ def cascade(listing, comp, index, cfg):
     # הרמה הספציפית ביותר שיש בה די תצפיות; אם אין כזו — הספציפית ביותר
     # שיש בה בכלל נתון, וסימון ביטחון נמוך.
     chosen = next((r for r in rungs if r["sufficient"] and r["median_ppm"]), None)
-    if chosen:
-        out["confidence"] = (CONF_HIGH if chosen["level"] in
-                             (LEVEL_NEIGHBORHOOD, LEVEL_CITY) else CONF_MEDIUM)
-    else:
+    if not chosen:
         chosen = next((r for r in rungs if r["median_ppm"]), None)
-        out["confidence"] = CONF_LOW
 
     if not chosen:
         out["value_tag"] = "אין עסקאות מפורסמות באף רמת השוואה"
         return out
+
+    size_ok, size_dev = _size_matches_category(listing, comp, cfg)
+    population = (getattr(index, "cities", {}).get(city) or {}).get("population")
+    conf, conf_reason = _confidence(
+        chosen["level"], chosen["count"] if chosen["sufficient"] else 0,
+        min_count, size_ok, population, cfg)
+    out["confidence"] = conf
+    out["confidence_reason"] = conf_reason
+    out["size_deviation_pct"] = size_dev
+    # הכתרה מותרת רק מרמה מקומית, עם נתון עמוק וגודל תואם. זה, ולא הציון,
+    # הוא מה שמונע מ"יישובים דומים" ו"מרחב" לייצר כותרות.
+    out["can_crown"] = bool(chosen.get("can_crown") and chosen["sufficient"]
+                            and size_ok)
 
     out.update({
         "comp_level": chosen["level"],

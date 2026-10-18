@@ -195,7 +195,7 @@ def prescreen(listings, cfg, meta, latest_drop, today):
 # ------------------------------------------------------------------
 
 def finalize(candidates, client, area_svc, cfg, meta, latest_drop, observed_sizes,
-             counts, today, status, area_cache):
+             counts, today, status, area_cache, pool=None):
     """
     לכל מועמדת: העשרה מדף המודעה (ScraperAPI) + השוואה like-for-like מול
     עסקאות שנסגרו באזור הספציפי + תשואה + עליית ערך → ציון סופי ודירוג.
@@ -239,6 +239,10 @@ def finalize(candidates, client, area_svc, cfg, meta, latest_drop, observed_size
             rent, rent_level = area_svc.rent_for(baseline)
             yield_info = comps.rental_yield(s, rent, cfg, rent_level)
 
+            # בדיקת רחוב — רק למועמדות שעברו את השער, ולכן זולה בפועל.
+            # אפס בקשות: מושווה מול המודעות שכבר נסרקו בריצה הזאת.
+            street_info = comps.street_check(s, pool or candidates, cfg)
+
             info = meta.get(s["id"], {})
             res = scoring.score_listing(
                 s, cfg,
@@ -251,9 +255,11 @@ def finalize(candidates, client, area_svc, cfg, meta, latest_drop, observed_size
                 comp=comp,
                 yield_info=yield_info,
                 area_info=area_info,
+                street=street_info,
             )
             s.update(res)      # prescreen_score נשמר — res לא כולל אותו
             s["comp"] = comp
+            s["street"] = street_info
             s["yield_info"] = yield_info
             s["area_info"] = area_info
             s["comps_area"] = comp.get("comp_area") or s.get("city")
@@ -557,7 +563,8 @@ def run(cfg, dry_run=False, today=None):
         if candidates:
             try:
                 finalize(candidates, client, area_svc, cfg, meta, latest_drop,
-                         observed, counts, today, y2status, area_cache)
+                         observed, counts, today, y2status, area_cache,
+                         pool=scored)
             except Exception:
                 log.error("כשל בשלב הציון הסופי:\n%s", traceback.format_exc())
                 report["notes"].append("שלב הציון הסופי נכשל חלקית — ראה לוג.")
@@ -784,7 +791,7 @@ def run(cfg, dry_run=False, today=None):
 
     # ── front-end פרימיום (app.html) — קורא את latest.json ──
     try:
-        webapp.write(cfg["paths"]["out"])
+        webapp.write(cfg["paths"]["out"], cfg)
     except Exception:
         log.error("כשל בכתיבת app.html:\n%s", traceback.format_exc())
         report["notes"].append("כתיבת app.html נכשלה — ראה לוג.")

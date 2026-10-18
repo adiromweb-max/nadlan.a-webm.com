@@ -19,13 +19,62 @@ import os
 log = logging.getLogger("scout.webapp")
 
 
-def _trim(listings):
+def _basis(s, cfg=None):
+    """
+    בוחר **בסיס השוואה אחד** לכרטיס, ומחזיר אותו שלם.
+
+    הבאג שזה מתקן: עד כה ‎gap‎, ‎mppm‎, ‎conf‎ ו-‎complevel‎ נלקחו מהסולם
+    המדורג (‎value_*‎) בעוד ‎comps‎ נלקח מההשוואה like-for-like (‎comp_*‎).
+    כלומר כרטיס אחד הציג מספרים משתי השוואות שונות: פער שחושב מול "מרחב"
+    (חציון כל היישובים שנסרקו) לצד ‎comps: null‎ מההשוואה המקומית. כך
+    מודעה בערד קיבלה באדג' ירוק של "40% מתחת למבוקש" מול חציון ארצי, כשמול
+    ערד עצמה היא זולה ב-5% ולמנוע לא היה על מה להשוות בכלל.
+
+    מכאן: או שהכול מגיע מההשוואה המקומית (עסקאות שנסגרו, מכתירה), או שהכול
+    מגיע מהסולם — ואז זה מסומן כהקשר ולא כראיה.
+
+    מחזיר (gap, mppm, count, level, basis, evidence).
+      basis == "deals"  — עסקאות שנסגרו באזור מקומי. ראיה.
+      basis == "ladder" — חציון של אזור רחב יותר. הקשר בלבד.
+      basis == "asks"   — חציון מבוקש של יד2 (שלב הסינון המקדים). הקשר בלבד.
+    """
+    min_comps = int((cfg or {}).get("comps_min_count", 5))
+    local = s.get("comp_match_level_raw") in ("neighborhood", "settlement")
+    count = s.get("comp_count") or 0
+    # ‎can_chrown=False‎ מהמנוע שולל ראיה; היעדר השדה (פלט מגרסה קודמת) לא
+    # שולל — אחרת כל באדג' היה נעלם על נתונים ישנים.
+    blocked = s.get("can_crown") is False
+    if (s.get("stage") == "final" and local and count >= min_comps
+            and s.get("comp_median_ppm")):
+        return (s.get("gap_pct"), s.get("comp_median_ppm"), count,
+                s.get("comp_match_level"), "deals", not blocked)
+    if s.get("value_median_ppm"):
+        return (s.get("value_gap_pct"), s.get("value_median_ppm"),
+                s.get("value_count") or 0, s.get("comp_level_he"),
+                "ladder", False)
+    return (s.get("gap_pct"), s.get("benchmark_ppsqm"), count,
+            s.get("comp_match_level"), "asks", False)
+
+
+def _conf_he(s, count, basis, cfg=None):
+    """
+    רמת ביטחון שלא יכולה לסתור את הנתונים שמוצגים לידה.
+
+    בייצור היו 927 מודעות עם "ביטחון גבוה" ובלי אף קומפ. השדה הגיע מהסולם
+    המדורג ולא נבדק מול מספר התצפיות שהכרטיס עצמו מציג.
+    """
+    min_comps = int((cfg or {}).get("comps_min_count", 5))
+    conf = s.get("confidence_he")
+    if basis != "deals" or count < min_comps:
+        return "נמוך" if conf == "גבוה" else (conf or "נמוך")
+    return conf or "בינוני"
+
+
+def _trim(listings, cfg=None):
     """מצמצם כל מודעה לשדות שה-front-end צריך (קובץ קטן)."""
     out = []
     for s in listings:
-        gap = s.get("value_gap_pct")
-        if gap is None:
-            gap = s.get("gap_pct")
+        gap, mppm, count, level, basis, evidence = _basis(s, cfg)
         tier = s.get("tier_he")
         if tier in (None, "", "—", "-"):
             tier = None
@@ -43,8 +92,18 @@ def _trim(listings):
             "rooms": s.get("rooms"),
             "size": s.get("size_sqm"),
             "ppm": s.get("price_per_sqm"),
-            "mppm": s.get("value_median_ppm") or s.get("comp_median_ppm"),
+            "mppm": mppm,
             "gap": gap,
+            "basis": basis,          # deals / ladder / asks — על מה הפער מבוסס
+            "evid": evidence,        # האם יש ראיה מקומית מספקת להציג הנחה
+            "netgap": s.get("net_gap_pct"),
+            "costpct": (s.get("acquisition_costs") or {}).get("total_pct"),
+            "track": (s.get("acquisition_costs") or {}).get("track"),
+            "sstat": s.get("street_status"),
+            "sgap": s.get("street_gap_pct"),
+            "speers": s.get("street_peers"),
+            "snote": s.get("street_note"),
+            "risk": s.get("asset_risk_reasons") or [],
             "drop": s.get("total_drop_pct") or s.get("drop_pct") or 0,
             "yield": s.get("yield_pct"),
             "rent": s.get("monthly_rent_est"),
@@ -54,9 +113,9 @@ def _trim(listings):
             "tier": tier,
             "otype": s.get("opportunity_type_he"),
             "reason": s.get("reason"),
-            "conf": s.get("confidence_he"),
-            "comps": s.get("comp_count"),
-            "complevel": s.get("comp_level_he"),
+            "conf": _conf_he(s, count, basis, cfg),
+            "comps": count,
+            "complevel": level,
             "dtype": s.get("listing_type"),
             "disq": bool(s.get("disqualified")),
             "isnew": bool(s.get("is_new")),
@@ -72,9 +131,9 @@ def _trim(listings):
     return out
 
 
-def build_payload(data):
+def build_payload(data, cfg=None):
     """בונה את אובייקט הנתונים הרזה שמוטמע בעמוד."""
-    listings = _trim(data.get("listings") or [])
+    listings = _trim(data.get("listings") or [], cfg)
     return {
         "run_date": data.get("run_date"),
         "data_version": _official_version(data),
@@ -113,14 +172,14 @@ def _official_version(data):
     return None
 
 
-def write(out_dir):
+def write(out_dir, cfg=None):
     """קורא latest.json ומייצר app.html. מחזיר את הנתיב או None."""
     latest = out_dir / "latest.json"
     if not latest.exists():
         log.warning("webapp: latest.json לא נמצא — מדלג")
         return None
     data = json.loads(latest.read_text(encoding="utf-8"))
-    payload = build_payload(data)
+    payload = build_payload(data, cfg)
     # הגדרות Supabase (ציבוריות — מוגן ע"י RLS, לא ע"י הסתרת המפתח).
     supa = {
         "url": os.environ.get("SUPABASE_URL", "https://cnvqfnsumlvempnahbcm.supabase.co"),
@@ -232,6 +291,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .kv .b{background:var(--greenbg);color:var(--green);font-weight:800;font-size:12px;padding:4px 9px;border-radius:8px}
   .kv .n{background:var(--hair2);color:var(--accent);font-weight:700;font-size:12px;padding:4px 9px;border-radius:8px}
   .kv .s{background:var(--redbg);color:var(--red);font-weight:700;font-size:12px;padding:4px 9px;border-radius:8px}
+  /* תווית ניטרלית למודעה שיש בה פער אבל אין ראיה מקומית — לא ירוק, לא אדום */
+  .kv .u{background:var(--hair);color:var(--muted);font-weight:700;font-size:12px;padding:4px 9px;border-radius:8px}
   .own{font-weight:800;font-size:12px;padding:4px 9px;border-radius:8px;background:var(--greenbg);color:var(--green)}
   .own.ag{background:var(--goldbg,#fbf1dc);color:var(--gold)}
   .why{color:var(--ink2);font-size:12.5px;line-height:1.55;border-top:1px solid var(--hair);padding-top:10px;min-height:32px}
@@ -465,7 +526,15 @@ function statPanel(c){
 function bld(){return '<svg class="bld" viewBox="0 0 100 80"><g stroke="#7b3ff2" fill="none" stroke-width="2" opacity=".8"><rect x="20" y="26" width="42" height="50"/><rect x="62" y="36" width="22" height="40"/><line x1="28" y1="36" x2="54" y2="36"/><line x1="28" y1="48" x2="54" y2="48"/><line x1="28" y1="60" x2="54" y2="60"/><line x1="68" y1="48" x2="80" y2="48"/><line x1="68" y1="60" x2="80" y2="60"/></g></svg>';}
 function iR(){return '<svg viewBox="0 0 24 24"><path d="M3 21V10l9-6 9 6v11"/><rect x="9" y="14" width="6" height="7"/></svg>';}
 function iS(){return '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/></svg>';}
-function gapLabel(d){return d.stage==='final'?'מתחת לשוק':'מתחת למבוקש';}
+function gapLabel(d){return d.basis==='deals'?'מתחת לשוק':(d.basis==='asks'?'מתחת למבוקש':'מתחת לחציון האזור');}
+/* basisNote — אומר על מה הפער מבוסס, במקום להציג אותו כאילו הוא עסקה.
+   התיקון נובע מכך שבייצור 715 מודעות קיבלו באדג' ירוק של הנחה בעוד
+   שהמנוע עצמו לא דירג אותן, ו-686 מהן בלי אף קומפ מקומי. */
+function basisNote(d){
+  if(d.basis==='deals') return `מול ${d.comps} תצפיות עסקאות ב${d.complevel}`;
+  if(d.basis==='ladder') return `מול חציון ${d.complevel||'אזור רחב'} — הקשר, לא ראיה`;
+  return 'מול מחירי מבוקש ביד2 — טרם אומת מול עסקאות';
+}
 
 function card(d,i){
   const g=GRADS[i%GRADS.length];
@@ -474,8 +543,15 @@ function card(d,i){
   else if(d.isnew) rib=`<span class="newbadge">✦ חדש היום</span>`;
   else if(d.cagr) rib=`<span class="ribbon gold">עליית ערך ${(+d.cagr).toFixed(1)}%</span>`;
   const chips=[];
-  if(d.gap!=null && d.gap>0 && !d.suspect) chips.push(`<span class="b">${gapLabel(d)} ${(+d.gap).toFixed(0)}%</span>`);
+  /* באדג' ההנחה דורש ראיה: השוואה מקומית לעסקאות שנסגרו, די תצפיות,
+     ו-stage=final. בלי זה המודעה נשארת בפיד — אבל בלי להתחזות לעסקה. */
+  if(d.gap!=null && d.gap>0 && !d.suspect && d.evid)
+    chips.push(`<span class="b">${gapLabel(d)} ${(+d.gap).toFixed(0)}%</span>`);
+  else if(d.gap!=null && d.gap>0 && !d.suspect)
+    chips.push(`<span class="u">טרם אומת מול עסקאות</span>`);
   if(d.suspect) chips.push(`<span class="s">לאימות</span>`);
+  if(d.risk && d.risk.length) chips.push(`<span class="s">סיכון בנכס</span>`);
+  if(d.sstat==='confirm') chips.push(`<span class="b">רחוב ✓ ${(+d.sgap).toFixed(0)}%</span>`);
   if(d['yield']) chips.push(`<span class="n">תשואה ${(+d['yield']).toFixed(1)}%</span>`);
   else if(d.cagr) chips.push(`<span class="n">אזור צומח</span>`);
   const why = smartWhy(d);
@@ -565,7 +641,10 @@ function render(){
     `הנתונים מ‑${D.run_date||''} · עסקאות רשות המיסים גרסה ${D.data_version||'—'}<br>מופעל על ידי מנוע נדל״ן סקאוט של A‑WEB.`;
   if(!S._noscroll) window.scrollTo(0,0); S._noscroll=false;
 }
-function isOpp(d){ return !d.disq && d.stage==='final' && ((d.gap!=null && d.gap>=5 && !d.suspect) || d.tier); }
+/* הזדמנות = ראיה מקומית, לא רק פער. לפני התיקון 28 מתוך 38 ה"הזדמנויות"
+   לא היו מדורגות ע"י המנוע בכלל. */
+function isOpp(d){ return !d.disq && d.stage==='final' && d.evid && !(d.risk&&d.risk.length)
+  && ((d.netgap!=null?d.netgap>=5:(d.gap!=null&&d.gap>=5)) && !d.suspect || d.tier); }
 
 /* ---- CSV export (Excel, UTF-8 BOM) ---- */
 function exportCSV(){
@@ -714,7 +793,7 @@ function openDeal(id){
     </div></div>
     <div class="mbody">
       <div class="keynums">
-        <div class="keynum"><b class="grad-text">${d.suspect?'⚠':(d.gap!=null?(+d.gap).toFixed(0)+'%':'—')}</b><span>${d.suspect?'פער לאימות':gapLabel(d)}</span></div>
+        <div class="keynum"><b class="grad-text">${d.suspect?'⚠':(d.netgap!=null&&d.evid?(+d.netgap).toFixed(0)+'%':(d.gap!=null?(+d.gap).toFixed(0)+'%':'—'))}</b><span>${d.suspect?'פער לאימות':(d.netgap!=null&&d.evid?'פער נטו אחרי עלויות':gapLabel(d))}</span></div>
         <div class="keynum"><b class="grad-text">${d.cagr!=null?(+d.cagr).toFixed(1)+'%':'—'}</b><span>עליית ערך שנתית</span></div>
         <div class="keynum"><b class="grad-text">${d['yield']!=null?(+d['yield']).toFixed(1)+'%':'—'}</b><span>תשואת שכירות</span></div>
         <div class="keynum"><b class="grad-text">${d.ppm?fmt(d.ppm):'—'}</b><span>₪ למ״ר</span></div>

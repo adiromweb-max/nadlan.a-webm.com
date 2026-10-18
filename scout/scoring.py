@@ -22,7 +22,8 @@ import logging
 import statistics
 from datetime import date, datetime
 
-from .pricing import is_drop_sane
+from .pricing import (acquisition_costs, is_drop_sane, net_gap_pct,
+                      sqm_per_room)
 
 log = logging.getLogger(__name__)
 
@@ -103,17 +104,42 @@ def score_price_drop(drop, weight, today=None, sanity_limit=None):
     return round(magnitude * freshness * weight, 2), pct
 
 
-def score_days_on_market(first_seen, weight, full_at_days, today=None):
-    """מעל full_at_days (90 כברירת מחדל) → ניקוד מלא; מדורג לינארית מתחתיו."""
+def score_days_on_market(first_seen, weight, full_at_days, today=None,
+                         drop_pct=None, cfg=None):
+    """
+    ותק המודעה — אבל רק כשהמחיר זז.
+
+    למה: ותק לבדו הוא אות דו-משמעי, והגרסה הקודמת תגמלה אותו תמיד. מודעה
+    שעומדת 200 יום **בלי** שהמחיר ירד אינה הזדמנות — השוק דחה את המחיר,
+    או שיש בנכס בעיה שלא רואים במודעה. מודעה שעומדת 200 יום **עם** ירידות
+    היא מוכר שנשחק, וזה בדיוק האות שמשקיע מחפש.
+
+    לכן: ותק מזכה בניקוד מלא רק בשילוב ירידת מחיר. בלי ירידה, הניקוד נחתך
+    ב-‎stale_no_drop_factor‎ (ברירת מחדל 0.25), ומעל ‎stale_suspect_days‎
+    (ברירת מחדל 180) יורד לאפס ומסומן.
+
+    מחזיר (ניקוד, ימים, דגל_עומד_בלי_ירידה).
+    """
+    cfg = cfg or {}
     if not first_seen:
-        return 0.0, 0
+        return 0.0, 0, False
     today = today or date.today()
     try:
         seen = datetime.fromisoformat(str(first_seen)).date()
     except (TypeError, ValueError):
-        return 0.0, 0
+        return 0.0, 0, False
     days = max((today - seen).days, 0)
-    return round(_clamp(days / float(full_at_days), 0.0, 1.0) * weight, 2), days
+    base = _clamp(days / float(full_at_days), 0.0, 1.0) * weight
+
+    has_drop = bool(drop_pct and float(drop_pct) > 0)
+    if has_drop:
+        return round(base, 2), days, False
+
+    stale_at = int(cfg.get("stale_suspect_days", 180))
+    if days >= stale_at:
+        return 0.0, days, True
+    factor = float(cfg.get("stale_no_drop_factor", 0.25))
+    return round(base * factor, 2), days, False
 
 
 def score_keywords(listing, keywords, weight):
@@ -278,11 +304,15 @@ def supporting_signal(drop_pct, dom_days, liq_score, cfg, liq_weight):
     """
     signals = []
     sane_drop = is_drop_sane(drop_pct, cfg.get("max_plausible_drop_pct") or 60)
-    if (drop_pct and sane_drop
-            and drop_pct >= float(cfg.get("signal_min_drop_pct", 3))):
+    real_drop = bool(drop_pct and sane_drop
+                     and drop_pct >= float(cfg.get("signal_min_drop_pct", 3)))
+    if real_drop:
         signals.append(f"ירידת מחיר {drop_pct:.1f}%")
-    if dom_days and dom_days >= int(cfg.get("signal_min_days_on_market", 60)):
-        signals.append(f"{dom_days} יום באוויר")
+    # ותק הוא אות תומך **רק** יחד עם ירידת מחיר. מודעה שעומדת חודשים
+    # במחיר שלא זז אינה מוכר שנשחק — היא מחיר שהשוק דחה.
+    if real_drop and dom_days and dom_days >= int(
+            cfg.get("signal_min_days_on_market", 60)):
+        signals.append(f"{dom_days} יום באוויר, והמחיר ירד")
     if liq_weight and liq_score >= float(cfg.get("signal_liquidity_frac", 0.7)) * liq_weight:
         signals.append("אזור נזיל")
     return bool(signals), signals
@@ -302,32 +332,47 @@ def classify(gap_pct, yield_pct, cagr, cfg):
     return TYPE_PRICE_FIND
 
 
-def assign_tier(score, comp, has_signal, cfg, manual_check=False):
+def assign_tier(score, comp, has_signal, cfg, manual_check=False,
+                net_gap=None, asset_risk=False):
     """
     הדירוג שמחליף את סף ההתראה הבודד.
 
     הכללים, לפי סדר קדימות:
       * בלי קומפים מספיקים — אין ראיית מחיר, ולכן לכל היותר "למעקב".
+      * ‎can_crown=False‎ — ההשוואה אינה ראיה מקומית מספקת (חציון עירוני
+        ביישוב גדול, גודל חריג לקטגוריה). לכל היותר "למעקב".
+      * ‎asset_risk‎ — נמצא סיכון בנכס עצמו (דייר מוגן, חכירה לא מהוונת,
+        חריגת בנייה, כינוס). מחיר נמוך כאן הוא **המחיר הנכון**, לא הנחה.
+        לכל היותר "למעקב", וסיבת החסימה מוצגת.
       * פער חשוד (>30%) — כמעט תמיד שגיאת נתונים או נכס לא-השוואתי.
         לעולם לא בכותרת; לכל היותר "שווה בדיקה".
       * ‎manual_check‎ (למשל ירידת מחיר חריגה) — גם כן לא בכותרת.
-      * "לבדוק דחוף" דורש **גם** פער אמיתי (8–30%) **וגם** אות תומך.
+      * "לבדוק דחוף" דורש פער **נטו** חיובי מעל הסף, אות תומך, והשוואה
+        שמותר לה להכתיר.
+
+    למה נטו ולא גולמי: הסף הקודם היה 8% גולמי, בעוד שעלויות הרכישה של
+    משקיע (מס רכישה 8% + עו"ד + תיווך) הן 9–11%. כלומר מודעה שעמדה בסף
+    הייתה הפסד ודאי. ‎net_gap‎ הוא הפער אחרי העלויות; כשהוא לא חושב
+    (חסר מחיר) נופלים חזרה לפער הגולמי כדי לא להפיל שורה.
     """
     tiers = cfg.get("tiers") or {}
     t_urgent = float(tiers.get("check_urgent", 78))
     t_worth = float(tiers.get("worth_checking", 66))
     t_watch = float(tiers.get("watch", 55))
-    gap_min = float(cfg.get("comps_gap_min_pct", 8))
+    gap_min = float(cfg.get("comps_net_gap_min_pct", 5))
 
     comp = comp or {}
     gap = comp.get("gap_pct")
     sufficient = bool(comp.get("sufficient"))
     suspect = bool(comp.get("suspect"))
+    # ברירת מחדל True כדי לא לשבור קריאות ישנות שלא מעבירות את השדה
+    can_crown = comp.get("can_crown", True) is not False
 
-    if not sufficient:
+    if not sufficient or not can_crown or asset_risk:
         return TIER_WATCH if score >= t_watch else TIER_NONE
 
-    real_gap = gap is not None and gap >= gap_min and not suspect
+    effective = net_gap if net_gap is not None else gap
+    real_gap = effective is not None and effective >= gap_min and not suspect
 
     if real_gap and has_signal and score >= t_urgent and not manual_check:
         return TIER_URGENT
@@ -339,7 +384,8 @@ def assign_tier(score, comp, has_signal, cfg, manual_check=False):
 
 
 def plain_reason(city, area, comp, drop_pct, dom_days, yield_info, area_info,
-                 signals, tier, opp_type):
+                 signals, tier, opp_type, net_gap=None, costs=None,
+                 risk_hits=None):
     """
     שורת הסבר בעברית פשוטה — למה השורה הזאת כאן, בלי ז'רגון.
     זו העמודה שמישהו קורא לפני שהוא מרים טלפון.
@@ -359,6 +405,23 @@ def plain_reason(city, area, comp, drop_pct, dom_days, yield_info, area_info,
                         f"{area or city}")
     else:
         bits.append(comp.get("data_quality") or "אין מספיק עסקאות להשוואה")
+
+    # הפער נטו — זה המספר שקובע אם יש כאן עסקה
+    if net_gap is not None and (costs or {}).get("total_pct") is not None:
+        c = costs["total_pct"]
+        kind = "כולל תיווך" if costs.get("is_agency") else "בלי תיווך (מודעה פרטית)"
+        if net_gap >= 0:
+            bits.append(f"פער נטו {net_gap:.0f}% אחרי עלויות רכישה "
+                        f"{c:.1f}% ({kind})")
+        else:
+            bits.append(f"אחרי עלויות רכישה {c:.1f}% ({kind}) הפער נמחק "
+                        f"({net_gap:.0f}%) — זו לא עסקה")
+
+    if risk_hits:
+        bits.append("סיכון בנכס: " + ", ".join(risk_hits[:2]))
+
+    if comp.get("crown_block_reason"):
+        bits.append(comp["crown_block_reason"])
 
     if signals:
         bits.append("אות תומך: " + ", ".join(signals[:3]))
@@ -384,7 +447,7 @@ def plain_reason(city, area, comp, drop_pct, dom_days, yield_info, area_info,
 def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
                   baseline=None, active_listings=0, drop=None, first_seen=None,
                   today=None, stage="prescreen", comp=None, yield_info=None,
-                  area_info=None):
+                  area_info=None, street=None):
     """
     מחשב ציון 0..100 למודעה אחת ומחזיר dict עם הציון, הדירוג והפירוט.
 
@@ -420,8 +483,9 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             w["price_gap"], cfg["price_gap_full_at_pct"])
 
     drop_score, drop_pct = score_price_drop(drop, w["price_drop"], today, sanity)
-    dom_score, dom_days = score_days_on_market(
-        first_seen, w["days_on_market"], cfg["days_on_market_full_at"], today)
+    dom_score, dom_days, stale_no_drop = score_days_on_market(
+        first_seen, w["days_on_market"], cfg["days_on_market_full_at"], today,
+        drop_pct=drop_pct, cfg=cfg)
     kw_score, kw_found = score_keywords(
         listing, cfg.get("keywords") or [], w["opportunity_keywords"])
     liq_score = score_area_liquidity(baseline, w["area_liquidity"], active_listings)
@@ -450,8 +514,45 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
     if bad_drop:
         quality = f"ירידת מחיר חריגה ({drop_pct:.0f}%) — בדיקה ידנית"
 
-    tier = assign_tier(total, comp if stage == "final" else None, has_signal,
-                       cfg, manual_check=bad_drop)
+    # ── עלויות רכישה והפער נטו ──
+    # זה מה שמפריד "נראה זול" מ"זול בפועל". מודעת תיווך נושאת עוד ~2.4%.
+    is_agency = str(listing.get("listing_type") or listing.get("ad_type") or "") == "agency"
+    costs = acquisition_costs(listing.get("price"), cfg, is_agency=is_agency)
+    net_gap = (net_gap_pct(gap_pct, costs["total_pct"])
+               if gap_pct is not None and costs.get("total_pct") is not None else None)
+
+    # ── סיכון בנכס עצמו ──
+    # שני סוגים. (1) מילות סיכון: דייר מוגן, חכירה לא מהוונת, חריגות בנייה,
+    #     כינוס. המחיר הנמוך שם הוא המחיר הנכון — לא הנחה.
+    # (2) אנומליית גודל/חדרים: 144 מ"ר עם 3 חדרים אינה טעות נתונים אלא
+    #     חתימה של תוספת בנייה/פיצול, ולכן גם ₪/מ"ר נמוך שם אינו הנחה.
+    #     הדגל הזה היה עד היום כיתוב בדשבורד בלבד ולא נגע בדירוג.
+    blob = " ".join(str(x) for x in (listing.get("text"),
+                    listing.get("description"), listing.get("condition_text")) if x)
+    risk_hits = [k for k in (cfg.get("risk_keywords") or []) if k and k in blob]
+    spr = sqm_per_room(listing.get("size_sqm"), listing.get("rooms"))
+    spr_high = float(cfg.get("sqm_per_room_max", 45))
+    spr_low = float(cfg.get("sqm_per_room_min", 13))
+    size_anomaly = bool(spr and (spr > spr_high or spr < spr_low))
+    if size_anomaly:
+        risk_hits = risk_hits + [
+            f'{spr:.0f} מ"ר לחדר — חשד לתוספת בנייה/פיצול'
+            if spr > spr_high else f'{spr:.0f} מ"ר לחדר — נתוני גודל חשודים']
+    asset_risk = bool(risk_hits)
+
+    # ── וטו רחוב ──
+    # אם מול המבוקש באותו רחוב הפער מתאדה, ה"הנחה" היא מיקום ולא מחיר.
+    # זו הבדיקה שרצה רק על מי שעבר את השער, ולכן מותר לה להיות יקרה.
+    street = street or {}
+    street_veto = street.get("street_status") == "veto"
+    comp_for_tier = comp if stage == "final" else None
+    if street_veto and comp_for_tier:
+        comp_for_tier = dict(comp_for_tier, can_crown=False,
+                             crown_block_reason=street.get("street_note"))
+
+    tier = assign_tier(total, comp_for_tier, has_signal,
+                       cfg, manual_check=bad_drop, net_gap=net_gap,
+                       asset_risk=asset_risk)
     opp_type = classify(gap_pct, y_pct, cagr, cfg)
 
     # ── שומר תצוגה לפער שלילי חריג ──
@@ -474,8 +575,6 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
     suspicious_price = bool(gap_pct is not None and gap_pct > manip_gap)
     # (2) מילות פסילה: זכויות/קבוצת רכישה/מגרש/מסחרי/ללא טאבו וכו' —
     #     אינדיקציה שזו לא דירת יד-שנייה סטנדרטית.
-    blob = " ".join(str(x) for x in (listing.get("text"),
-                    listing.get("description"), listing.get("condition_text")) if x)
     bad_kw = [k for k in (cfg.get("disqualify_keywords") or []) if k and k in blob]
     disqualified = suspicious_price or bool(bad_kw)
     if disqualified:
@@ -485,10 +584,22 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
         elif bad_kw:
             quality = "לא דירת יד-שנייה סטנדרטית (%s)" % ", ".join(bad_kw[:2])
 
+    # דגלי איכות שנובעים מהבדיקות החדשות — אחרי הדירוג, לפני ההסבר
+    if street_veto and quality == "תקין":
+        quality = street.get("street_note") or "הפער מתאדה מול הרחוב"
+    elif asset_risk and quality in ("תקין", "סינון מקדים — טרם הושווה לעסקאות"):
+        quality = "סיכון בנכס (%s)" % ", ".join(risk_hits[:2])
+    elif stale_no_drop and quality == "תקין":
+        quality = f"{dom_days} יום באוויר והמחיר לא זז — המחיר נדחה בשוק"
+    elif (net_gap is not None and gap_pct is not None and net_gap < 0
+          and quality == "תקין"):
+        quality = "הפער נמוך מעלויות הרכישה — אין עסקה"
+
     area_name = (comp or {}).get("comp_area") or (baseline or {}).get("area_name")
     reason = plain_reason(listing.get("city"), area_name, comp if stage == "final" else None,
                           drop_pct, dom_days, yield_info, area_info, signals,
-                          tier, opp_type)
+                          tier, opp_type, net_gap=net_gap, costs=costs,
+                          risk_hits=risk_hits)
 
     return {
         "score": total,
@@ -513,7 +624,20 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             "area_appreciation": apprec_score,
         },
         "days_on_market": dom_days,
+        "stale_no_drop": stale_no_drop,
         "drop_pct": drop_pct,
+        "net_gap_pct": net_gap,
+        "acquisition_costs": costs,
+        "asset_risk": asset_risk,
+        "asset_risk_reasons": risk_hits,
+        "size_anomaly": size_anomaly,
+        "sqm_per_room": round(spr, 1) if spr else None,
+        "street_status": street.get("street_status"),
+        "street_gap_pct": street.get("street_gap_pct"),
+        "street_peers": street.get("street_peers"),
+        "street_note": street.get("street_note"),
+        "can_crown": (comp_for_tier or {}).get("can_crown") if stage == "final" else None,
+        "crown_block_reason": (comp or {}).get("crown_block_reason") if stage == "final" else None,
         "disqualified": disqualified,
         "suspicious_price": suspicious_price,
         "disqualify_keywords": bad_kw,
