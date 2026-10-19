@@ -397,22 +397,56 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
     לא רק הריצה האחרונה. הריצה הנוכחית מעדכנת/מוסיפה; מודעות קודמות שעדיין
     פעילות (active=1 ב-DB) נשמרות; מודעות שירדו מהאוויר נזרקות.
     כך "חדש היום" נשאר יומי, ו"הזדמנויות"/"ירידות מחיר" מציגים את כל המאגר.
+
+    **הרשומות הנגררות מרועננות מה-DB ולא מועתקות כמות שהן.** הבאג שזה
+    מתקן נמדד בפרודקשן: יד2 חוסם את רוב הערים בכל ריצה (בריצה שנמדדה
+    37 מתוך 50 נכשלו), ולכן רק ~18% מהמודעות נסרקות מחדש. השאר נגררו
+    מה-‎latest.json‎ של אתמול — רשומות שנוצרו לפני שהשדות החדשים היו
+    קיימים, וחזרו בלי ‎listed_at‎ ובלי זיהוי מחיר למשתכן. התוצאה: תכונה
+    שעובדת על 196 מודעות במקום על 1,091, והיא הייתה מתקנת את עצמה רק
+    אחרי שבועות של סריקות.
+
+    הריענון מקומי לגמרי — ‎listed_at‎ כבר ב-DB (ראה ‎db.backfill_listed_at‎)
+    והזיהוי המרחבי נגזר מ-lat/lon מול קבצי השכבות. אפס בקשות, אפס קרדיטים.
     """
     p = out_dir / "latest.json"
     data = json.loads(p.read_text(encoding="utf-8"))
     cur = data.get("listings") or []
     cur_ids = {x.get("id") for x in cur}
-    active = None
+    active, rows = None, {}
     try:
         c = db.connect(db_path)
         try:
-            active = {r["id"] for r in c.execute(
-                "SELECT id FROM listings WHERE active=1").fetchall()}
+            active = set()
+            for r in c.execute("SELECT id, listed_at, lat, lon, price, size_sqm, "
+                               "city, neighborhood, raw_json "
+                               "FROM listings WHERE active=1"):
+                active.add(r["id"])
+                d = dict(r)
+                # מצב הנכס נקרא מה-raw ולא מעמודת ‎condition_text‎: העמודה
+                # נכתבה בגרסה שמיפתה 3 קודים בלבד, וקוד 6 ("חדש (גרו בנכס)")
+                # נשמר בה כ-NULL. הוא הראיה השלישית בדירוג הוודאות, ובלעדיו
+                # מודעות אמיתיות יורדות מ"גבוהה" ל"בינונית" בלי סיבה.
+                try:
+                    raw = json.loads(d.pop("raw_json", None) or "{}")
+                    d["condition_id"] = ((raw.get("additionalDetails") or {})
+                                         .get("propertyCondition") or {}).get("id")
+                except (ValueError, TypeError):
+                    d["condition_id"] = None
+                rows[r["id"]] = d
         finally:
             c.close()
     except Exception:
-        active = None
-    carried = []
+        log.error("כשל בקריאת ה-DB לריענון הצבירה:\n%s", traceback.format_exc())
+        active, rows = None, {}
+
+    try:
+        projects, lots = mlm.Projects(), mlm.Lots()
+    except Exception:
+        projects = lots = None
+
+    today = date.today()
+    carried, refreshed = [], 0
     for lid, x in prev_listings.items():
         if lid in cur_ids:
             continue
@@ -421,7 +455,34 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
         fs = str(x.get("first_seen") or "")
         x["is_new"] = bool(fs.startswith(run_day))   # לא חדש אם נראה לראשונה מזמן
         x["dropped_today"] = False
+
+        row = rows.get(lid)
+        if row:
+            # ותק אמיתי מה-DB, והימים נגזרים ממנו מחדש
+            la = row.get("listed_at")
+            if la and not x.get("listed_at"):
+                x["listed_at"] = la
+                try:
+                    x["days_on_market"] = max(
+                        (today - date.fromisoformat(str(la)[:10])).days, 0)
+                    x["dom_estimated"] = bool(fs and str(la) < fs)
+                except ValueError:
+                    pass
+                refreshed += 1
+            # זיהוי מחיר למשתכן — חישוב מקומי מול השכבות
+            if projects is not None and not x.get("mlm"):
+                try:
+                    info = mlm.describe(row, projects, today, lots=lots)
+                    if info:
+                        x.update(info)
+                except Exception:
+                    pass
         carried.append(x)
+    if refreshed:
+        log.info("צבירה: רועננו %d רשומות מה-DB (ותק אמיתי + מחיר למשתכן)",
+                 refreshed)
+    if carried and projects is not None:
+        mlm.supply_pressure(carried + cur)
     data["listings"] = cur + carried
     p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     log.info('צבירה: %d מהריצה + %d שנצברו = %d סה"כ',

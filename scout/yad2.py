@@ -23,6 +23,7 @@ import json
 import logging
 import re
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 
@@ -526,7 +527,47 @@ def _city_mismatch(listings, expected):
 def fetch_city(client, city, code, cfg, status):
     """
     מביא את כל העמודים המוגדרים לעיר אחת. לא זורק חריגות (פרט לתקרת קרדיטים).
+
+    **ניסיון חוזר ברמת העיר.** נמדד בפרודקשן: 37 מתוך 50 ערים חזרו ריקות
+    בריצה אחת. ScraperAPI דווקא הצליח — 55 מתוך 66 הבקשות החזירו דף —
+    אבל יד2 החזיר דף חסימה במקום תוצאות. זו התנהגות הסתברותית ומתועדת:
+    אותו URL מצליח בניסיון אחד ונכשל בבא.
+
+    הגרסה הקודמת ויתרה על העיר ברגע שהעמוד הראשון נכשל, עד הריצה הבאה.
+    כלומר ההבדל בין 8 ערים ל-30 היה ניסיון שני. התקציב מאפשר את זה
+    בנוחות: ריצה מלאה צרכה 1,650 קרדיטים מתוך תקרה של 3,000, ובחשבון
+    יש עשרות אלפים.
     """
+    attempts = max(1, int(cfg.get("yad2_city_retries", 3)))
+    out, err, total_results = [], None, None
+    for attempt in range(1, attempts + 1):
+        out, err, total_results = _fetch_city_once(client, city, code, cfg, status)
+        if out:
+            break
+        if total_results == 0 and not err:
+            break               # יד2 ענה כשורה, פשוט אין דירות — אין מה לנסות
+        if attempt < attempts:
+            log.info("יד2 %s: ניסיון %d/%d נכשל (%s) — מנסה שוב",
+                     city, attempt, attempts, err or "אין תוצאות")
+            time.sleep(float(cfg.get("yad2_retry_delay_sec", 4)) * attempt)
+
+    # הספירה לדו"ח נעשית פעם אחת לעיר, לא פעם לכל ניסיון
+    if out:
+        status.ok_cities.append(city)
+        status.listings += len(out)
+        log.info("יד2 %s: %d מודעות רלוונטיות", city, len(out))
+    elif not err and total_results == 0:
+        status.empty_cities.append(city)
+        log.info("יד2 %s: אין מודעות בטווח המבוקש", city)
+    else:
+        status.failed_cities.append(city)
+        log.warning("יד2 %s: 0 מודעות אחרי %d ניסיונות (%s)",
+                    city, attempts, err or "אין תוצאות")
+    return out
+
+
+def _fetch_city_once(client, city, code, cfg, status):
+    """ניסיון יחיד לעיר. מחזיר (מודעות, שגיאה, סך תוצאות שיד2 דיווח)."""
     max_pages = int(cfg.get("yad2_max_pages_per_city", 3))
     collected = {}
     total_pages = None
@@ -557,19 +598,7 @@ def fetch_city(client, city, code, cfg, status):
         if not listings:
             break
 
-    out = list(collected.values())
-    if out:
-        status.ok_cities.append(city)
-        status.listings += len(out)
-        log.info("יד2 %s: %d מודעות רלוונטיות", city, len(out))
-    elif not err and total_results == 0:
-        # יד2 ענה כשורה, פשוט אין דירות בטווח המחירים — זו לא תקלה
-        status.empty_cities.append(city)
-        log.info("יד2 %s: אין מודעות בטווח המבוקש", city)
-    else:
-        status.failed_cities.append(city)
-        log.warning("יד2 %s: 0 מודעות (%s)", city, err or "אין תוצאות")
-    return out
+    return list(collected.values()), err, total_results
 
 
 def fetch_all(client, cities_with_codes, cfg, status=None):

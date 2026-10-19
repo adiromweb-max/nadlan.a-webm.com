@@ -124,6 +124,7 @@ def _trim(listings, cfg=None):
             "mlmdate": s.get("mlm_release"),
             "mlmconf": s.get("mlm_confidence"),
             "mlmlot": bool(s.get("mlm_in_lot")),
+            "szbad": bool(s.get("mlm_size_suspect")),
             "cond": s.get("condition_text"),
             "tier": tier,
             "otype": s.get("opportunity_type_he"),
@@ -513,11 +514,13 @@ function madlanLink(d){
 
 const TAB_IC={
   new:'<svg viewBox="0 0 24 24"><path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.5z"/></svg>',
+  mlm:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/></svg>',
   drops:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-4h-4"/></svg>',
   opps:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
   watch:'<svg viewBox="0 0 24 24"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.6 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8z"/></svg>',
   trends:'<svg viewBox="0 0 24 24"><path d="M4 19V5M4 15l5-4 4 3 7-7"/></svg>'};
-const TABS=[{k:'new',label:'חדש היום'},{k:'drops',label:'ירידות מחיר'},
+const TABS=[{k:'new',label:'חדש היום'},{k:'mlm',label:'מחיר למשתכן'},
+  {k:'drops',label:'ירידות מחיר'},
   {k:'opps',label:'הזדמנויות'},{k:'watch',label:'המעקב שלי'},{k:'trends',label:'מגמות'}];
 function go(k){S.tab=k;render();}
 
@@ -590,6 +593,7 @@ function card(d,i){
   else if(d.mlmrel && d.cushpct) chips.push(`<span class="n">כרית ${(+d.cushpct).toFixed(0)}% · מחיר למשתכן (ודאות ${d.mlmconf||'חלקית'})</span>`);
   else if(d.mlm && !d.mlmrel) chips.push(`<span class="u">מחיר למשתכן — עוד מוגבל</span>`);
   if((d.mlmsup||0)>=2) chips.push(`<span class="n">${d.mlmsale} מהמתחם למכירה</span>`);
+  if(d.szbad) chips.push(`<span class="s">גודל לא-סביר ביד2</span>`);
   const why = smartWhy(d);
   const saved=WL.has(d.id);
   return `<article class="card">
@@ -656,11 +660,14 @@ function render(){
   const c=D.summary_counts||{};
   document.getElementById('tabs').innerHTML = TABS.map(t=>{
     let n='';
-    if(t.k==='new') n=c.new; else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
+    if(t.k==='new') n=c.new;
+    else if(t.k==='mlm') n=D.listings.filter(d=>d.mlm).length;
+    else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
     return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${TAB_IC[t.k]||''}<span>${t.label}</span>${(n!==''&&n!=null)?`<span class="cnt">${n}</span>`:''}</a>`;
   }).join('');
   const H={new:['מה חדש היום','רק מודעות שהתגלו או השתנו מאז אתמול — לא אותה רשימה כל יום.'],
+    mlm:['דירות מחיר למשתכן','רק דירות שזוהו בתוך פרויקט מחיר למשתכן, מסודרות לפי כמה המוכר יכול לרדת. ✓ = שתי שכבות רשמיות ובניין חדש מסכימים.'],
     drops:['ראדאר ירידות מחיר','כל מודעה שירדה במחיר — כמה ירדה וכמה היא מתחת לשוק.'],
     opps:['ההזדמנויות','מתומחר מתחת לעסקאות סגורות דומות באזור, אחרי אימות מול רשות המיסים.'],
     watch:['המעקב שלי','הנכסים ששמרת. נשמרים במכשיר שלך.'],
@@ -675,6 +682,16 @@ function render(){
   else {
     let list, empty;
     if(S.tab==='new'){ list=D.listings.filter(d=>d.isnew && !d.disq); empty='אין מודעות חדשות בריצה האחרונה — חזור מחר.'; }
+    /* טאב מחיר למשתכן: רק מודעות שזוהו, ממוינות לפי כרית המוכר. הטאב
+       הזה נוסף כי ברירת המחדל הראתה את כל המלאי, ומודעת מחיר למשתכן
+       אחת מתוך 64 פשוט לא נראתה. */
+    else if(S.tab==='mlm'){
+      list=D.listings.filter(d=>d.mlm).sort((a,b)=>{
+        const r=(x)=>({'גבוהה':3,'בינונית':2,'נמוכה':1})[x.mlmconf]||0;
+        return (r(b)-r(a)) || ((b.cush||0)-(a.cush||0));
+      });
+      empty='עדיין לא זוהו דירות מחיר למשתכן. הסריקה מכסה חלק מהערים בכל ריצה.';
+    }
     else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq); empty='אין ירידות מחיר כרגע.'; }
     else if(S.tab==='watch'){ list=D.listings.filter(d=>WL.has(d.id)); empty='עדיין לא שמרת נכסים. לחץ על ★ בכל כרטיס.'; }
     else { list=D.listings.filter(isOpp); empty='אין הזדמנויות מאומתות בריצה הזו.'; }

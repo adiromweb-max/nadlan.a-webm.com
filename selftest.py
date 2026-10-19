@@ -165,6 +165,16 @@ def test_mlm():
     big = mlm.describe({"lat": 0.5, "lon": 0.5, "price": 900000, "size_sqm": 900},
                        T, date(2026, 10, 18))
     check("גודל לא-סביר אינו מייצר כרית", "mlm_cushion" not in big)
+    # 369 מ"ר עם 4 חדרים = 92 מ"ר לחדר. זו לא דירה — זה שטח מגרש שיד2
+    # מדווח בטעות, והכרית מוכפלת בגודל ולכן הייתה יוצאת שגויה.
+    odd = mlm.describe({"lat": 0.5, "lon": 0.5, "price": 1850000,
+                        "size_sqm": 369, "rooms": 4}, T, date(2026, 10, 18))
+    check("גודל חריג ביחס לחדרים מסומן", odd.get("mlm_size_suspect") is True)
+    check("גודל חריג אינו מייצר כרית", "mlm_cushion" not in odd)
+    good = mlm.describe({"lat": 0.5, "lon": 0.5, "price": 900000,
+                         "size_sqm": 90, "rooms": 3.5}, T, date(2026, 10, 18))
+    check("גודל סביר אינו מסומן", not good.get("mlm_size_suspect"))
+    check("גודל סביר כן מייצר כרית", good.get("mlm_cushion") == 360000)
     # מגבלה שטרם פגה אינה מזכה בניקוד
     sq["features"][0]["properties"]["release"] = "2031-01-01"
     tmpf.write_text(_json.dumps(sq), encoding="utf-8")
@@ -247,6 +257,37 @@ def test_mlm():
     check("הסריקה בתוך תקציב הקרדיטים",
           credits <= int(c["scraperapi_max_credits_per_run"]),
           f"{credits} מתוך {c['scraperapi_max_credits_per_run']}")
+
+    # ── ריענון הצבירה ──
+    # הבאג שנתפס בפרודקשן: יד2 חוסם את רוב הערים בכל ריצה (37 מתוך 50),
+    # ולכן רק ~18% מהמודעות נסרקות מחדש. השאר נגררות מה-latest.json של
+    # אתמול — ואם נגררות כמות שהן, הן חוזרות בלי ותק אמיתי ובלי זיהוי.
+    import json as _json, tempfile as _tf
+    from scout.main import _merge_accumulated
+    tdir = Path(_tf.mkdtemp())
+    dbp = tdir / "acc.db"
+    conn2 = db.connect(dbp)
+    # מודעה אחת "נגררת": ב-DB עם ותק אמיתי, בלי שנסרקה בריצה
+    conn2.execute(
+        "INSERT INTO listings (id, source, city, url, price, size_sqm, "
+        "first_seen, listed_at, last_seen, active, raw_json, lat, lon) "
+        "VALUES ('yad2:acc','yad2','בדיקה','u',900000,90,'2026-09-01',"
+        "'2023-01-01','2026-10-19',1,'{}',0.5,0.5)")
+    conn2.commit()
+    conn2.close()
+    (tdir / "latest.json").write_text(
+        _json.dumps({"listings": []}, ensure_ascii=False), encoding="utf-8")
+    prev = {"yad2:acc": {"id": "yad2:acc", "city": "בדיקה",
+                         "first_seen": "2026-09-01", "price": 900000}}
+    _merge_accumulated(tdir, dbp, "2026-10-19", prev)
+    got = _json.loads((tdir / "latest.json").read_text(encoding="utf-8"))["listings"]
+    check("מודעה נגררת נשמרת בצבירה", len(got) == 1, f"{len(got)} רשומות")
+    if got:
+        g = got[0]
+        check("הצבירה מחזירה ותק אמיתי מה-DB",
+              g.get("listed_at") == "2023-01-01", str(g.get("listed_at")))
+        check("הימים בשוק נגזרים מחדש מהוותק",
+              (g.get("days_on_market") or 0) > 1000, str(g.get("days_on_market")))
 
 
 def scoring_src():

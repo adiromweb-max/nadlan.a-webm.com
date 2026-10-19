@@ -129,6 +129,7 @@ def listing_record(s, ladder=None):
         "mlm_confidence": s.get("mlm_confidence"),
         "mlm_in_lot": bool(s.get("mlm_in_lot")),
         "mlm_lot_units": s.get("mlm_lot_units"),
+        "mlm_size_suspect": bool(s.get("mlm_size_suspect")),
         "yield_pct": _num(s.get("yield_pct"), 2),
         "monthly_rent_est": _num(s.get("monthly_rent_est")),
         "rent_basis": s.get("rent_basis"),

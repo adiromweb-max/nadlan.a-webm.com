@@ -54,8 +54,32 @@ log = logging.getLogger(__name__)
 LAYER = Path(__file__).resolve().parent.parent / "data" / "mlm_projects.geojson"
 LOTS = Path(__file__).resolve().parent.parent / "data" / "mlm_lots.json"
 
-# דירה ותיקה שגודלה חריג לא תקבל כרית אבסורדית מהכפלה בגודל שגוי
+# ── שומר שפיות על הגודל ──
+# יד2 מדווח לפעמים שטח מגרש או שטח כולל במקום שטח הדירה. נמדד על
+# המודעות שזוהו: 7 מתוך 62 מעל 160 מ"ר, ואחת 369 מ"ר עם 4 חדרים —
+# 92 מ"ר לחדר, שזו לא דירה. הכרית מוכפלת בגודל, ולכן גודל שגוי מייצר
+# כרית שגויה: 188 מ"ר הניבו "כרית" של 428 אלף ₪ שאין לה בסיס.
+#
+# אותם ספים שהמנוע כבר משתמש בהם (‎sqm_per_room_max/min‎ ב-config).
+# מודעה שנכשלת בהם מסומנת, לא מקבלת כרית, והוודאות שלה יורדת — כי אם
+# אי אפשר לאמת שזו בכלל דירה, אי אפשר לטעון שזו דירת מחיר למשתכן.
 MAX_SANE_SQM = 400.0
+SQM_PER_ROOM_MAX = 45.0
+SQM_PER_ROOM_MIN = 13.0
+
+
+def size_is_sane(size, rooms):
+    """האם הגודל שיד2 מדווח סביר ביחס למספר החדרים."""
+    try:
+        size, rooms = float(size or 0), float(rooms or 0)
+    except (TypeError, ValueError):
+        return False
+    if not size or size > MAX_SANE_SQM:
+        return False
+    if not rooms:
+        return True                 # בלי חדרים אין מה להצליב
+    per = size / rooms
+    return SQM_PER_ROOM_MIN <= per <= SQM_PER_ROOM_MAX
 
 
 def _rings(geom):
@@ -273,7 +297,13 @@ def describe(listing, projects, today=None, lots=None):
     price = listing.get("price")
     size = listing.get("size_sqm")
     ppm = p.get("orig_ppm")
-    if price and size and ppm and 0 < float(size) <= MAX_SANE_SQM:
+    sane = size_is_sane(size, listing.get("rooms"))
+    out["mlm_size_suspect"] = bool(size) and not sane
+    if out["mlm_size_suspect"] and out.get("mlm_confidence") == "גבוהה":
+        # גודל לא-סביר מוריד ודאות: אם לא ברור שזו דירה, לא ניתן לטעון
+        # שזו דירת מחיר למשתכן
+        out["mlm_confidence"] = "בינונית"
+    if price and size and ppm and sane:
         paid = float(ppm) * float(size)
         cushion = float(price) - paid
         if cushion > 0:
