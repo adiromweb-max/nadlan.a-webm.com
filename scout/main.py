@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 from . import (alerts, charts, comps, dashboard, db, emailer, excel, jsonout,
-               nadlan, pricing, scoring, sections, webapp, yad2)
+               mlm, nadlan, pricing, scoring, sections, webapp, yad2)
 from .config import load_config
 from .http import Fetcher
 from .scraperapi import CreditBudgetExceeded, ScraperApiClient, account_info
@@ -74,8 +74,17 @@ def resolve_city_codes(fetcher, cfg, report):
             "אינדקס היישובים של נדל\"ן ממשלתי לא נטען — אי אפשר לגזור קודי ערים ליד2.")
         return [], {}
 
+    # ערי המסלול הארצי מצטרפות לרשימה. עיר שמופיעה בשתיהן נסרקת פעם אחת
+    # (טווח המחיר שלה נקבע ב-‎yad2.price_band‎ ולא כאן), ולכן אין כפל קרדיטים.
+    wanted = list(cfg["cities"])
+    seen = set(wanted)
+    for city in (cfg.get("mlm_cities") or []):
+        if city not in seen:
+            wanted.append(city)
+            seen.add(city)
+
     pairs = []
-    for city in cfg["cities"]:
+    for city in wanted:
         setl = nadlan.resolve_city(index, city)
         if not setl:
             log.warning("לא נמצא קוד יישוב עבור %r — מדלג", city)
@@ -148,7 +157,8 @@ def load_from_db(conn, cfg):
             continue
         listings.append(l)
         meta[l["id"]] = {"is_new": False, "old_price": None,
-                         "first_seen": row.get("first_seen")}
+                         "first_seen": row.get("first_seen"),
+                         "listed_at": row.get("listed_at")}
     drops = db.price_drop_history(conn)
     log.info("ריצה ללא סריקה: נטענו %d מודעות פעילות מה-DB (0 קרדיטים)",
              len(listings))
@@ -165,6 +175,29 @@ def prescreen(listings, cfg, meta, latest_drop, today):
     for l in listings:
         counts[l.get("city")] = counts.get(l.get("city"), 0) + 1
 
+    # ── מחיר למשתכן ──
+    # רץ כאן, לפני הניקוד, כי הוא אות של שלב א': חישוב מקומי מול קובץ
+    # פוליגונים ו-lat/lon שכבר בידינו — אפס בקשות ואפס קרדיטים. לחץ
+    # ההיצע נמדד על כל המודעות יחד, ולכן אחרי שכולן זוהו.
+    try:
+        projects = mlm.Projects()
+        lots = mlm.Lots()
+        if projects or lots:
+            tagged = 0
+            for l in listings:
+                info = mlm.describe(l, projects, today, lots=lots)
+                if info:
+                    l.update(info)
+                    tagged += 1
+            mlm.supply_pressure(listings)
+            released = sum(1 for l in listings if l.get("mlm_released"))
+            hi = sum(1 for l in listings if l.get("mlm_confidence") == "גבוהה")
+            log.info("מחיר למשתכן: %d מודעות זוהו, %d בוודאות גבוהה, "
+                     "%d שהמגבלה עליהן פגה", tagged, hi, released)
+    except Exception:
+        # שכבה חסרה או פגומה לא מפילה ריצה — המנוע ממשיך בלי האות הזה
+        log.error("כשל בזיהוי מחיר למשתכן:\n%s", traceback.format_exc())
+
     scored = []
     for l in listings:
         try:
@@ -179,6 +212,7 @@ def prescreen(listings, cfg, meta, latest_drop, today):
                 active_listings=counts.get(l.get("city"), 0),
                 drop=latest_drop.get(l["id"]),
                 first_seen=info.get("first_seen", today.isoformat()),
+                listed_at=info.get("listed_at") or l.get("listed_at"),
                 today=today,
                 stage="prescreen",
             )
@@ -250,6 +284,7 @@ def finalize(candidates, client, area_svc, cfg, meta, latest_drop, observed_size
                 active_listings=counts.get(s.get("city"), 0),
                 drop=latest_drop.get(s["id"]),
                 first_seen=info.get("first_seen", today.isoformat()),
+                listed_at=info.get("listed_at") or s.get("listed_at"),
                 today=today,
                 stage="final",
                 comp=comp,

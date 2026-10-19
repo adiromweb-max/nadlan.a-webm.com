@@ -105,41 +105,86 @@ def score_price_drop(drop, weight, today=None, sanity_limit=None):
 
 
 def score_days_on_market(first_seen, weight, full_at_days, today=None,
-                         drop_pct=None, cfg=None):
+                         drop_pct=None, cfg=None, listed_at=None):
     """
-    ותק המודעה — אבל רק כשהמחיר זז.
+    כמה זמן המודעה יושבת בשוק — וותק ארוך הוא הזדמנות, לא פסול.
 
-    למה: ותק לבדו הוא אות דו-משמעי, והגרסה הקודמת תגמלה אותו תמיד. מודעה
-    שעומדת 200 יום **בלי** שהמחיר ירד אינה הזדמנות — השוק דחה את המחיר,
-    או שיש בנכס בעיה שלא רואים במודעה. מודעה שעומדת 200 יום **עם** ירידות
-    היא מוכר שנשחק, וזה בדיוק האות שמשקיע מחפש.
+    למה הכיוון התהפך: הגרסה הקודמת קנסה מודעה שעומדת חודשים בלי שהמחיר
+    זז, בהנחה שהשוק דחה אותה. ההנחה הזאת נכונה למי שקונה במחיר המבוקש —
+    אבל קונה שמגיש הצעה נמוכה מחפש בדיוק את המוכר הזה: מי שפרסם לפני
+    שנה, לא מכר, ועדיין משלם ארנונה. מוכר כזה לא חייב להוריד את המחיר
+    בפרסום כדי להסכים להוריד אותו במשא ומתן.
+    לכן ותק מזכה בניקוד לפי עצמו, וירידת מחיר היא תוספת ולא תנאי.
 
-    לכן: ותק מזכה בניקוד מלא רק בשילוב ירידת מחיר. בלי ירידה, הניקוד נחתך
-    ב-‎stale_no_drop_factor‎ (ברירת מחדל 0.25), ומעל ‎stale_suspect_days‎
-    (ברירת מחדל 180) יורד לאפס ומסומן.
+    הוותק נמדד מ-‎listed_at‎ — תאריך הפרסום בשוק, מוערך מתאריכי התמונות —
+    ולא מ-‎first_seen‎, שהוא רק מתי *אנחנו* ראינו לראשונה. ההבדל נמדד על
+    המודעות הפעילות: ממוצע 79 ימי ותק שפוספסו, במקרה הקצה מעל שלוש שנים.
+    ‎first_seen‎ נשאר נפילה-חזרה למודעה בלי תמונות.
+
+    ‎stale_no_drop‎ עדיין מוחזר — אבל כדגל תצוגה בלבד ("עומד זמן רב והמחיר
+    לא זז"), לא כקנס. זו אזהרה שהקונה שוקל, לא פסילה אוטומטית.
 
     מחזיר (ניקוד, ימים, דגל_עומד_בלי_ירידה).
     """
     cfg = cfg or {}
-    if not first_seen:
+    basis = listed_at or first_seen
+    if not basis:
         return 0.0, 0, False
     today = today or date.today()
     try:
-        seen = datetime.fromisoformat(str(first_seen)).date()
+        seen = datetime.fromisoformat(str(basis)).date()
     except (TypeError, ValueError):
         return 0.0, 0, False
     days = max((today - seen).days, 0)
-    base = _clamp(days / float(full_at_days), 0.0, 1.0) * weight
+    # חסם שפיות: תאריך תמונה שגוי לא ייצר "מודעה בת 20 שנה"
+    cap = int(cfg.get("max_plausible_days_on_market", 1825))
+    if days > cap:
+        days = cap
+    score = _clamp(days / float(full_at_days), 0.0, 1.0) * weight
 
     has_drop = bool(drop_pct and float(drop_pct) > 0)
-    if has_drop:
-        return round(base, 2), days, False
-
     stale_at = int(cfg.get("stale_suspect_days", 180))
-    if days >= stale_at:
-        return 0.0, days, True
-    factor = float(cfg.get("stale_no_drop_factor", 0.25))
-    return round(base * factor, 2), days, False
+    stale_no_drop = bool(days >= stale_at and not has_drop)
+    return round(score, 2), days, stale_no_drop
+
+
+def score_mlm(listing, weight, cfg=None):
+    """
+    מינוף מול מוכר של דירת מחיר למשתכן שהמגבלה עליה פגה.
+
+    למה זה אות נפרד ולא עוד "פער מחיר": הפער מודד כמה הדירה זולה מול
+    השוק. זה מודד משהו אחר לגמרי — **כמה המוכר יכול להתפשר**. מי שקנה
+    במחיר מסובסד ויושב על מאות אלפי שקלים רווח יכול לרדת במחיר ועדיין
+    לצאת ברווח גדול; מוכר שקנה במחיר שוק לא יכול להגיע לשם בכלל. שני
+    מוכרים עם אותו מחיר מבוקש אינם אותו מוכר.
+
+    שני רכיבים:
+      כרית (60%)     — הרווח הגלום כאחוז מהמחיר המבוקש.
+      לחץ היצע (40%) — כמה דירות מאותו מתחם מוצעות עכשיו. זו התחרות
+                       בפועל בין דירות זהות, ולא ממוצע עירוני שמטשטש
+                       מתחם בודד.
+
+    מגבלה פגה היא תנאי: לפני כן המכירה כרוכה בהשבת הסבסוד, והמוכר דווקא
+    פחות גמיש. פרויקט שטרם שוחרר מקבל אפס — ומסומן בנפרד לתצוגה.
+
+    **הניקוד מוכפל בוודאות הזיהוי.** זה לא סייג קוסמטי: כל הטענה היא שגל
+    השחרור הוא מה שמרכך את המחירים, ואם חלק מהמודעות אינן מחיר למשתכן
+    בכלל, האות מתפרק ל"אזור מוצף משום מה". ודאות בינונית שווה 70% מהניקוד
+    ונמוכה 40% — כך שמודעה שרק שכבה אחת זיהתה אינה נספרת כמו מודעה ששלוש
+    ראיות מסכימות עליה.
+    """
+    cfg = cfg or {}
+    if not weight or not listing.get("mlm") or not listing.get("mlm_released"):
+        return 0.0
+    conf_factor = {"גבוהה": 1.0, "בינונית": 0.7, "נמוכה": 0.4}.get(
+        listing.get("mlm_confidence"), 0.7)
+    cushion_pct = listing.get("mlm_cushion_pct")
+    supply_pct = listing.get("mlm_supply_pct")
+    cushion_full = float(cfg.get("mlm_cushion_full_at_pct", 40.0))
+    supply_full = float(cfg.get("mlm_supply_full_at_pct", 3.0))
+    c = _clamp(float(cushion_pct) / cushion_full, 0.0, 1.0) if cushion_pct else 0.0
+    s = _clamp(float(supply_pct) / supply_full, 0.0, 1.0) if supply_pct else 0.0
+    return round((c * 0.6 + s * 0.4) * weight * conf_factor, 2)
 
 
 def score_keywords(listing, keywords, weight):
@@ -289,7 +334,7 @@ def peer_ppsqm(benchmark, rooms):
 # ניקוד מלא — משמש בשני השלבים, נבדל רק בבסיס ההשוואה
 # ------------------------------------------------------------------
 
-def supporting_signal(drop_pct, dom_days, liq_score, cfg, liq_weight):
+def supporting_signal(drop_pct, dom_days, liq_score, cfg, liq_weight, listing=None):
     """
     "אות תומך" — ראיה עצמאית לכך שהפער אמיתי ולא ארטיפקט של הנתונים.
 
@@ -308,13 +353,27 @@ def supporting_signal(drop_pct, dom_days, liq_score, cfg, liq_weight):
                      and drop_pct >= float(cfg.get("signal_min_drop_pct", 3)))
     if real_drop:
         signals.append(f"ירידת מחיר {drop_pct:.1f}%")
-    # ותק הוא אות תומך **רק** יחד עם ירידת מחיר. מודעה שעומדת חודשים
-    # במחיר שלא זז אינה מוכר שנשחק — היא מחיר שהשוק דחה.
-    if real_drop and dom_days and dom_days >= int(
-            cfg.get("signal_min_days_on_market", 60)):
-        signals.append(f"{dom_days} יום באוויר, והמחיר ירד")
+    # ותק ארוך הוא אות תומך בזכות עצמו: מוכר שיושב בשוק חודשים ארוכים
+    # הוא מוכר שאפשר לדבר איתו על המחיר, גם אם לא הוריד אותו בפרסום.
+    # (הגרסה הקודמת דרשה גם ירידת מחיר, וכך חנקה בדיוק את האות הזה.)
+    long_dom = bool(dom_days and dom_days >= int(
+        cfg.get("signal_min_days_on_market", 60)))
+    if long_dom:
+        months = dom_days / 30.4
+        label = (f"{months:.0f} חודשים בשוק" if months >= 2
+                 else f"{dom_days} יום בשוק")
+        signals.append(f"{label}, והמחיר ירד" if real_drop else label)
     if liq_weight and liq_score >= float(cfg.get("signal_liquidity_frac", 0.7)) * liq_weight:
         signals.append("אזור נזיל")
+    # מחיר למשתכן משוחרר עם כרית משמעותית — ראיה עצמאית שלמוכר יש מרחב
+    # לרדת, ולא רק שהמחיר נראה נמוך.
+    l = listing or {}
+    # רק ודאות גבוהה נחשבת אות תומך. אות שמקדם מודעה ל"לבדוק דחוף" חייב
+    # להיות ראיה, ולא השערה שנשענת על שכבה אחת.
+    if (l.get("mlm_released") and l.get("mlm_confidence") == "גבוהה"
+            and (l.get("mlm_cushion_pct") or 0) >= float(
+                cfg.get("signal_min_cushion_pct", 20))):
+        signals.append(f"מחיר למשתכן משוחרר, כרית {l['mlm_cushion_pct']:.0f}%")
     return bool(signals), signals
 
 
@@ -447,7 +506,7 @@ def plain_reason(city, area, comp, drop_pct, dom_days, yield_info, area_info,
 def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
                   baseline=None, active_listings=0, drop=None, first_seen=None,
                   today=None, stage="prescreen", comp=None, yield_info=None,
-                  area_info=None, street=None):
+                  area_info=None, street=None, listed_at=None):
     """
     מחשב ציון 0..100 למודעה אחת ומחזיר dict עם הציון, הדירוג והפירוט.
 
@@ -483,11 +542,13 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             w["price_gap"], cfg["price_gap_full_at_pct"])
 
     drop_score, drop_pct = score_price_drop(drop, w["price_drop"], today, sanity)
+    _listed = listed_at or listing.get("listed_at")
     dom_score, dom_days, stale_no_drop = score_days_on_market(
         first_seen, w["days_on_market"], cfg["days_on_market_full_at"], today,
-        drop_pct=drop_pct, cfg=cfg)
+        drop_pct=drop_pct, cfg=cfg, listed_at=_listed)
     kw_score, kw_found = score_keywords(
         listing, cfg.get("keywords") or [], w["opportunity_keywords"])
+    mlm_score = score_mlm(listing, w.get("mlm_leverage", 0), cfg)
     liq_score = score_area_liquidity(baseline, w["area_liquidity"], active_listings)
 
     y_pct = (yield_info or {}).get("yield_pct")
@@ -499,10 +560,10 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
         cagr, w.get("area_appreciation", 0), cfg.get("cagr_full_at_pct", 6.0))
 
     total = round(gap_score + drop_score + dom_score + kw_score + liq_score
-                  + yield_score + apprec_score, 2)
+                  + yield_score + apprec_score + mlm_score, 2)
 
     has_signal, signals = supporting_signal(
-        drop_pct, dom_days, liq_score, cfg, w["area_liquidity"])
+        drop_pct, dom_days, liq_score, cfg, w["area_liquidity"], listing=listing)
 
     # ── דגל איכות נתונים — נקבע לפני הדירוג, כי הוא חוסם הכתרה ──
     bad_drop = drop_pct is not None and not is_drop_sane(
@@ -589,8 +650,9 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
         quality = street.get("street_note") or "הפער מתאדה מול הרחוב"
     elif asset_risk and quality in ("תקין", "סינון מקדים — טרם הושווה לעסקאות"):
         quality = "סיכון בנכס (%s)" % ", ".join(risk_hits[:2])
-    elif stale_no_drop and quality == "תקין":
-        quality = f"{dom_days} יום באוויר והמחיר לא זז — המחיר נדחה בשוק"
+    # ותק ארוך **אינו** פגם באיכות הנתון — הנתון תקין, המודעה פשוט יושבת
+    # זמן רב. זה מוצג כאות תומך ("X חודשים בשוק") ולא כאזהרה, כי מבחינת
+    # קונה שמגיש הצעה זו נקודת הפתיחה הטובה ולא סיבה לפסול.
     elif (net_gap is not None and gap_pct is not None and net_gap < 0
           and quality == "תקין"):
         quality = "הפער נמוך מעלויות הרכישה — אין עסקה"
@@ -619,11 +681,18 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             "price_drop": drop_score,
             "days_on_market": dom_score,
             "opportunity_keywords": kw_score,
+            "mlm_leverage": mlm_score,
             "area_liquidity": liq_score,
             "rental_yield": yield_score,
             "area_appreciation": apprec_score,
         },
         "days_on_market": dom_days,
+        "listed_at": _listed,
+        # "מוערך" רק כשתאריך התמונות אכן הוסיף ותק מעבר למה שראינו בעצמנו.
+        # כשהוא שווה ל-‎first_seen‎ (אין תמונות, או נראתה ביום ההעלאה) אין מה
+        # לסייג — הוותק הוא תצפית שלנו, לא הערכה.
+        "dom_estimated": bool(_listed and first_seen
+                              and str(_listed) < str(first_seen)),
         "stale_no_drop": stale_no_drop,
         "drop_pct": drop_pct,
         "net_gap_pct": net_gap,
@@ -660,7 +729,11 @@ def prescreen_reachable_max(cfg):
     w = cfg["weights"]
     return float(sum(w.get(k, 0) for k in (
         "price_gap", "price_drop", "days_on_market",
-        "opportunity_keywords", "area_liquidity")))
+        "opportunity_keywords", "area_liquidity",
+        # מחיר למשתכן נגזר מקובץ מקומי ומ-lat/lon שכבר בידינו — אפס בקשות,
+        # ולכן הוא בר-השגה כבר בשלב א' וחייב להיספר בנרמול השער. בלעדיו
+        # השער היה נדרש מכל מודעה אחוז גבוה יותר מהסולם וחוסם את הצינור.
+        "mlm_leverage")))
 
 
 def prescreen_gate(cfg):

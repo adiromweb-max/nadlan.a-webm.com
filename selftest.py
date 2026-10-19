@@ -34,9 +34,232 @@ def check(name, cond, detail=""):
     return cond
 
 
+def test_market_age():
+    """
+    ותק בשוק: תאריך הפרסום מתאריכי התמונות, וכיוון הניקוד.
+
+    שני הבאגים שהבדיקות כאן נועלות:
+    1. ‎priceBeforeTag‎ הוא שם השדה האמיתי של המחיר הקודם בפיד. בגרסה
+       קודמת הוא לא היה ברשימת המועמדים, ולכן תיקון "ירידת הרפאים" לא
+       תפס אף ירידה בפרודקשן.
+    2. הוותק חושב מ-‎first_seen‎ (מתי המנוע ראה), ולכן מודעה ששוכבת
+       שנים בשוק נראתה טרייה — ובנוסף נקנסה כ"מחיר שהשוק דחה".
+    """
+    from scout import yad2
+    from scout.scoring import score_days_on_market, supporting_signal
+    print("\n— ותק בשוק ותאריך הפרסום —")
+
+    url = "https://img.yad2.co.il/Pic/202607/21/2_1/o/y2_1_02041_20260721181739.jpeg"
+    check("תאריך פרסום מחולץ מנתיב התמונה",
+          yad2._img_date(url) == "2026-07-21", yad2._img_date(url))
+    check("כתובת בלי חתימת תאריך לא מייצרת תאריך",
+          yad2._img_date("https://img.yad2.co.il/Pic/none.jpeg") is None)
+
+    item = {"token": "t1", "price": 490000,
+            "priceBeforeTag": 560000,
+            "address": {"city": {"text": "באר שבע"}},
+            "additionalDetails": {"roomsCount": 3, "squareMeter": 70,
+                                  "property": {"text": "דירה"}},
+            "metaData": {"coverImage": url,
+                         "images": [
+                             "https://img.yad2.co.il/Pic/202608/02/2_1/o/y2_1_1_20260802101010.jpeg",
+                             url]}}
+    check("priceBeforeTag נתפס כמחיר קודם",
+          yad2._previous_price(item) == 560000, str(yad2._previous_price(item)))
+    parsed = yad2.parse_item(item, "באר שבע")
+    check("parse_item מחזיר previous_price", parsed["previous_price"] == 560000)
+    # המוקדם מכל התמונות — תמונה שנוספה מאוחר לא מאפסת את הוותק
+    check("listed_at = התמונה המוקדמת מכולן",
+          parsed["listed_at"] == "2026-07-21", str(parsed["listed_at"]))
+    check("תאריך תמונה עתידי נדחה",
+          yad2.listed_at(item, "2026-01-01") is None)
+
+    cfg = {"stale_suspect_days": 180, "max_plausible_days_on_market": 1825}
+    t = date(2026, 10, 18)
+    # 3 שנים בשוק, בלי ירידת מחיר — הגרסה הקודמת נתנה כאן 0
+    s_old_ad, d_old_ad, stale = score_days_on_market(
+        "2026-08-01", 14, 270, t, drop_pct=None, cfg=cfg, listed_at="2023-10-18")
+    check("ותק נמדד מ-listed_at ולא מ-first_seen", d_old_ad == 1096, str(d_old_ad))
+    check("ותק ארוך בלי ירידת מחיר מקבל ניקוד מלא (הכיוון התהפך)",
+          s_old_ad == 14.0, str(s_old_ad))
+    check("עומד בלי ירידה עדיין מסומן כדגל תצוגה", stale is True)
+    # בלי תמונות — נפילה חזרה ל-first_seen, בלי לשבור
+    s_fb, d_fb, _ = score_days_on_market(
+        "2026-08-18", 14, 270, t, drop_pct=None, cfg=cfg, listed_at=None)
+    check("בלי listed_at נופלים חזרה ל-first_seen", d_fb == 61, str(d_fb))
+    # חסם שפיות: תאריך תמונה שגוי לא מייצר מודעה בת 20 שנה
+    _s, d_cap, _ = score_days_on_market(
+        "2026-08-01", 14, 270, t, cfg=cfg, listed_at="2001-01-01")
+    check("תאריך שגוי נחסם בחסם השפיות", d_cap == 1825, str(d_cap))
+    # ותק ארוך הוא אות תומך בזכות עצמו, בלי לדרוש ירידת מחיר
+    has, sigs = supporting_signal(None, 400, 0, {"signal_min_days_on_market": 60}, 0)
+    check("ותק ארוך לבדו הוא אות תומך", has and any("בשוק" in x for x in sigs),
+          "; ".join(sigs))
+
+    # הדגל "מוערך" מסייג רק כשתאריך התמונות אכן הוסיף ותק. באג שנתפס
+    # בבדיקה: אחרי ההשלמה אחורה ל-DB יש ‎listed_at‎ לכל שורה, ולכן תנאי
+    # "קיים ערך" סימן את כל 1,102 המודעות כמוערכות — כולל אלה בלי תמונות.
+    from scout.scoring import score_listing as _sl
+    scfg = {"weights": {"price_gap": 38, "price_drop": 15, "days_on_market": 14,
+                        "opportunity_keywords": 5, "area_liquidity": 3,
+                        "rental_yield": 15, "area_appreciation": 10},
+            "price_gap_full_at_pct": 25, "days_on_market_full_at": 270,
+            "max_plausible_days_on_market": 1825, "stale_suspect_days": 180,
+            "tiers": {}, "keywords": []}
+    lst = {"price": 920000, "size_sqm": 80, "price_per_sqm": 11500,
+           "city": "באר שבע", "text": ""}
+    r_est = _sl(lst, scfg, benchmark_ppsqm=12000, first_seen="2026-08-28",
+                listed_at="2023-07-02", today=date(2026, 10, 18))
+    r_obs = _sl(lst, scfg, benchmark_ppsqm=12000, first_seen="2026-08-28",
+                listed_at="2026-08-28", today=date(2026, 10, 18))
+    check("ותק מתאריך התמונות מסומן כמוערך",
+          r_est["dom_estimated"] and r_est["days_on_market"] == 1204,
+          f'{r_est["days_on_market"]} ימים')
+    check("ותק מתצפית שלנו אינו מסומן כמוערך",
+          not r_obs["dom_estimated"] and r_obs["days_on_market"] == 51,
+          f'{r_obs["days_on_market"]} ימים')
+
+
+def test_mlm():
+    """
+    מחיר למשתכן: זיהוי מרחבי, כרית המו"מ, לחץ ההיצע ושני המסלולים.
+
+    הבאג שהבדיקות כאן נועלות: הפיתוי לחבר את שכבת משרד השיכון ליד2 לפי
+    שם שכונה. זה נמדד ונכשל — 28 התאמות מול 53 כשלונות, ועם זיווגי שווא
+    ("סיגליות" ל"שכונה ג'", כי האות ג' מופיעה במילה). הזיהוי חייב להיות
+    נקודה-בתוך-פוליגון, ולכן כאן נבדקת הגאומטריה ולא טקסט.
+    """
+    from scout import mlm
+    from scout import yad2 as _y2
+    from scout.scoring import score_mlm, supporting_signal
+    print("\n— מחיר למשתכן —")
+
+    layer = Path(__file__).resolve().parent / "data" / "mlm_projects.geojson"
+    check("שכבת הפרויקטים קיימת בריפו", layer.exists(), str(layer))
+    P = mlm.Projects()
+    check("השכבה נטענת", bool(P), f"{len(P.features)} מתחמים")
+
+    # ריבוע יחידה מלאכותי — בודק את הגאומטריה עצמה, בלי תלות בנתון אמיתי
+    import json as _json, tempfile as _tf
+    sq = {"type": "FeatureCollection", "features": [{
+        "type": "Feature",
+        "properties": {"city": "בדיקה", "project": "ריבוע", "units": 100,
+                       "orig_ppm": 6000.0, "release": "2020-01-01"},
+        "geometry": {"type": "Polygon",
+                     "coordinates": [[[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]]}}]}
+    tmpf = Path(_tf.mkdtemp()) / "sq.geojson"
+    tmpf.write_text(_json.dumps(sq), encoding="utf-8")
+    T = mlm.Projects(tmpf)
+    check("נקודה בתוך הפוליגון מזוהה", T.find(0.5, 0.5) is not None)
+    check("נקודה מחוץ לפוליגון אינה מזוהה", T.find(2.0, 2.0) is None)
+    check("נקודה בלי קואורדינטות אינה מפילה", T.find(None, None) is None)
+
+    # כרית: 90 מ"ר שנקנו ב-6,000 ₪/מ"ר = 540,000, מבוקש 900,000
+    L = {"lat": 0.5, "lon": 0.5, "price": 900000, "size_sqm": 90}
+    d = mlm.describe(L, T, date(2026, 10, 18))
+    check("המגבלה מזוהה כפגה", d.get("mlm_released") is True)
+    check("אומדן מה ששולם נכון", d.get("mlm_paid_est") == 540000, str(d.get("mlm_paid_est")))
+    check("הכרית מחושבת נכון", d.get("mlm_cushion") == 360000, str(d.get("mlm_cushion")))
+    check("הכרית באחוזים נכונה", d.get("mlm_cushion_pct") == 40.0, str(d.get("mlm_cushion_pct")))
+    # גודל חריג לא מייצר כרית אבסורדית
+    big = mlm.describe({"lat": 0.5, "lon": 0.5, "price": 900000, "size_sqm": 900},
+                       T, date(2026, 10, 18))
+    check("גודל לא-סביר אינו מייצר כרית", "mlm_cushion" not in big)
+    # מגבלה שטרם פגה אינה מזכה בניקוד
+    sq["features"][0]["properties"]["release"] = "2031-01-01"
+    tmpf.write_text(_json.dumps(sq), encoding="utf-8")
+    T2 = mlm.Projects(tmpf)
+    d2 = mlm.describe(L, T2, date(2026, 10, 18))
+    check("מגבלה שטרם פגה מסומנת", d2.get("mlm_released") is False)
+    check("פרויקט שטרם שוחרר אינו מזכה בניקוד",
+          score_mlm({**L, **d2}, 12, {}) == 0.0)
+
+    # לחץ היצע
+    group = [{"mlm": True, "mlm_project": "ריבוע", "city": "בדיקה", "mlm_units": 100}
+             for _ in range(4)]
+    mlm.supply_pressure(group)
+    check("לחץ ההיצע נספר", group[0]["mlm_on_sale"] == 4)
+    check("לחץ ההיצע באחוזים", group[0]["mlm_supply_pct"] == 4.0,
+          str(group[0]["mlm_supply_pct"]))
+
+    # הניקוד המלא נבדק בוודאות גבוהה במפורש: הפיקסצ'ר המלאכותי יושב
+    # בשכבה אחת בלבד ובלי מצב נכס, ולכן ודאותו האמיתית נמוכה — וזה נבדק
+    # בנפרד למטה. כאן נבדקת נוסחת הכרית והלחץ עצמה.
+    scored = score_mlm({**L, **d, "mlm_supply_pct": 3.0, "mlm_confidence": "גבוהה"},
+                       12, {"mlm_cushion_full_at_pct": 40, "mlm_supply_full_at_pct": 3.0})
+    check("כרית מלאה + לחץ מלא = ניקוד מלא", scored == 12.0, str(scored))
+    has, sigs = supporting_signal(None, 0, 0, {"signal_min_cushion_pct": 20}, 0,
+                                  listing={**L, **d, "mlm_confidence": "גבוהה"})
+    check("כרית משמעותית היא אות תומך",
+          has and any("מחיר למשתכן" in s for s in sigs), "; ".join(sigs))
+
+    # ── ודאות הזיהוי ──
+    # זו הנקודה הקריטית: אם חלק מהמודעות שזוהו אינן מחיר למשתכן, הטענה
+    # שגל השחרור מרכך את המחירים מתפרקת ל"אזור מוצף משום מה".
+    from scout.mlm import confidence as _conf
+    from scout.yad2 import CONDITION_TEXT as _CT
+    check("קוד 6 ממופה — 'חדש (גרו בנכס)'",
+          _CT.get(6) == "חדש (גרו בנכס)", str(_CT.get(6)))
+    check("קוד 1 ממופה — חדש מקבלן", _CT.get(1) == "חדש מקבלן (לא גרו בנכס)")
+    check("שתי שכבות + בניין חדש = ודאות גבוהה",
+          _conf(True, True, 6) == "גבוהה", str(_conf(True, True, 6)))
+    check("שתי שכבות בלי בניין חדש = בינונית",
+          _conf(True, True, 2) == "בינונית", str(_conf(True, True, 2)))
+    check("שכבה אחת + בניין חדש = בינונית", _conf(True, False, 6) == "בינונית")
+    check("שכבה אחת בלבד = נמוכה", _conf(False, True, 3) == "נמוכה")
+    check("מחוץ לשתי השכבות = ללא זיהוי", _conf(False, False, 6) is None)
+
+    lotsp = Path(__file__).resolve().parent / "data" / "mlm_lots.json"
+    check("שכבת המגרשים קיימת בריפו", lotsp.exists())
+    LT = mlm.Lots()
+    check("שכבת המגרשים נטענת", bool(LT), f"{LT.n} מגרשים")
+    # מגרש שלא קיים ברשת לא מפיל ולא מחזיר תוצאת שווא
+    check("נקודה באמצע הים אינה בתוך מגרש", LT.find(32.0, 33.0) is None)
+
+    # ודאות נמוכה מקטינה את הניקוד — לא רק מוצגת
+    base = {**L, **d, "mlm_supply_pct": 3.0}
+    scfg2 = {"mlm_cushion_full_at_pct": 40, "mlm_supply_full_at_pct": 3.0}
+    hi = score_mlm({**base, "mlm_confidence": "גבוהה"}, 12, scfg2)
+    lo = score_mlm({**base, "mlm_confidence": "נמוכה"}, 12, scfg2)
+    check("ודאות נמוכה מקטינה את ניקוד המינוף", lo < hi, f"{lo} מול {hi}")
+    # ורק ודאות גבוהה נחשבת אות תומך
+    _h1, _s1 = supporting_signal(None, 0, 0, {"signal_min_cushion_pct": 20}, 0,
+                                 listing={**base, "mlm_confidence": "נמוכה"})
+    check("ודאות נמוכה אינה אות תומך",
+          not any("מחיר למשתכן" in s for s in _s1), "; ".join(_s1) or "אין אותות")
+
+    # שני המסלולים
+    c = load_config()
+    w = c["weights"]
+    check("סכום המשקלים הוא 100", sum(w.values()) == 100, str(sum(w.values())))
+    check("mlm_leverage נספר בנרמול השער המקדים",
+          "mlm_leverage" in str(scoring_src()),
+          "אחרת השער היה דורש אחוז גבוה יותר וחוסם את הצינור")
+    wide = _y2.price_band(c, "באר שבע")
+    narrow = _y2.price_band(c, "ירוחם")
+    check("עיר במסלול הארצי מקבלת טווח רחב", wide[1] > narrow[1],
+          f"באר שבע {wide} מול ירוחם {narrow}")
+    union = list(dict.fromkeys(list(c["cities"]) + (c.get("mlm_cities") or [])))
+    check("עיר שבשתי הרשימות נסרקת פעם אחת",
+          union.count("באר שבע") == 1 and len(union) < len(c["cities"]) + len(c["mlm_cities"]),
+          f"{len(union)} ערים בסך הכול")
+    credits = len(union) * 30
+    check("הסריקה בתוך תקציב הקרדיטים",
+          credits <= int(c["scraperapi_max_credits_per_run"]),
+          f"{credits} מתוך {c['scraperapi_max_credits_per_run']}")
+
+
+def scoring_src():
+    from scout import scoring as _s
+    import inspect
+    return inspect.getsource(_s.prescreen_reachable_max)
+
+
 def main():
     cfg = load_config()
     today = date.today()
+    test_market_age()
+    test_mlm()
     tmp = Path(tempfile.mkdtemp(prefix="nadlan-selftest-"))
     cfg["paths"]["db"] = tmp / "test.db"
     cfg["paths"]["out"] = tmp / "out"

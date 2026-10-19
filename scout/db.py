@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS listings (
     price         REAL,
     price_per_sqm REAL,
     first_seen    TEXT,
+    -- תאריך הפרסום ביד2 (הערכה מתאריכי התמונות), תמיד ≤ first_seen.
+    -- זה הוותק האמיתי בשוק; first_seen הוא רק מתי אנחנו ראינו לראשונה.
+    listed_at     TEXT,
     last_seen     TEXT,
     active        INTEGER DEFAULT 1,
     raw_json      TEXT,
@@ -86,6 +89,7 @@ ADDED_COLUMNS = {
     "last_alerted_score": "REAL",
     "last_alerted_price": "REAL",
     "last_alerted_at": "TEXT",
+    "listed_at": "TEXT",
 }
 
 
@@ -98,6 +102,43 @@ def _migrate(conn):
             log.info("DB: נוספה עמודה %s", col)
 
 
+def backfill_listed_at(conn):
+    """
+    משלים ‎listed_at‎ למודעות שנשמרו לפני שהשדה הזה היה קיים.
+
+    למה זה צריך לרוץ ולא פשוט להמתין לסריקה הבאה: הסריקה מוגבלת בעמודים
+    לעיר, ולכן מודעה קיימת עשויה לא להופיע בריצה הבאה בכלל — והוותק
+    האמיתי שלה היה נשאר חסר. ה-‎raw_json‎ שכבר שמור מכיל את כתובות
+    התמונות, ולכן ההשלמה היא חישוב מקומי בלבד: אפס בקשות, אפס קרדיטים.
+
+    אידמפוטנטי: נוגע רק בשורות שבהן ‎listed_at‎ ריק. מחזיר מספר השורות
+    שעודכנו.
+    """
+    from .yad2 import listed_at as _listed_at      # ייבוא מקומי: מונע מעגל
+
+    today = date.today().isoformat()
+    rows = conn.execute(
+        "SELECT id, first_seen, raw_json FROM listings WHERE listed_at IS NULL"
+    ).fetchall()
+    updated = 0
+    for r in rows:
+        try:
+            raw = json.loads(r["raw_json"] or "{}")
+        except (ValueError, TypeError):
+            raw = {}
+        est = _listed_at(raw, today) if raw else None
+        # תמיד ≤ first_seen: ההערכה יכולה רק להוסיף ותק, לא לגרוע
+        val = _earliest(est, r["first_seen"]) or r["first_seen"]
+        if val:
+            conn.execute("UPDATE listings SET listed_at=? WHERE id=?", (val, r["id"]))
+            updated += 1
+    if updated:
+        conn.commit()
+        log.info("DB: הושלם תאריך פרסום ל-%d מודעות (מתוך ה-raw השמור, 0 קרדיטים)",
+                 updated)
+    return updated
+
+
 def connect(db_path):
     """פותח חיבור ומייצר סכימה אם צריך."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -106,6 +147,7 @@ def connect(db_path):
     conn.executescript(SCHEMA)
     _migrate(conn)
     conn.commit()
+    backfill_listed_at(conn)
     return conn
 
 
@@ -117,35 +159,56 @@ def _day_before(day):
         return day
 
 
+def _earliest(*days):
+    """התאריך המוקדם מבין הערכים (ISO), בהתעלמות מריקים ומפורמט פגום."""
+    vals = []
+    for d in days:
+        if not d:
+            continue
+        try:
+            date.fromisoformat(str(d))
+        except (TypeError, ValueError):
+            continue
+        vals.append(str(d))
+    return min(vals) if vals else None
+
+
 def upsert_listing(conn, listing, today=None):
     """
     Upsert של מודעה. מחזיר dict עם:
       is_new       — מודעה שלא נראתה קודם
       old_price    — המחיר הקודם אם השתנה, אחרת None
-      first_seen   — תאריך הופעה ראשונה (לחישוב ותק)
+      first_seen   — תאריך הופעה ראשונה **אצלנו**
+      listed_at    — תאריך הפרסום בשוק (הוותק האמיתי, לחישוב ימים באוויר)
     כשמחיר משתנה — נרשמת שורה ב-price_history.
+
+    ‎listed_at‎ הוא תמיד המוקדם מבין: ההערכה מתאריכי התמונות, הערך שכבר
+    שמור, ו-‎first_seen‎. כלומר הוא יכול רק להיסחב אחורה, לעולם לא קדימה —
+    כדי שהחלפת תמונות אצל המוכר לא תאפס מודעה שאנחנו כבר עוקבים אחריה.
     """
     today = today or date.today().isoformat()
     now = datetime.now().isoformat(timespec="seconds")
     lid = listing["id"]
 
     row = conn.execute(
-        "SELECT price, first_seen FROM listings WHERE id = ?", (lid,)
+        "SELECT price, first_seen, listed_at FROM listings WHERE id = ?", (lid,)
     ).fetchone()
 
     price = listing.get("price")
     result = {"is_new": row is None, "old_price": None, "first_seen": today}
 
     if row is None:
+        listed = _earliest(listing.get("listed_at"), today) or today
+        result["listed_at"] = listed
         conn.execute(
             """INSERT INTO listings
                (id, source, city, url, rooms, size_sqm, price, price_per_sqm,
-                first_seen, last_seen, active, raw_json,
+                first_seen, listed_at, last_seen, active, raw_json,
                 neighborhood, street, property_type, condition_text, lat, lon)
-               VALUES (?,?,?,?,?,?,?,?,?,?,1,?,?,?,?,?,?,?)""",
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,1,?,?,?,?,?,?,?)""",
             (lid, listing.get("source"), listing.get("city"), listing.get("url"),
              listing.get("rooms"), listing.get("size_sqm"), price,
-             listing.get("price_per_sqm"), today, now,
+             listing.get("price_per_sqm"), today, listed, now,
              json.dumps(listing.get("raw", {}), ensure_ascii=False),
              listing.get("neighborhood"), listing.get("street"),
              listing.get("property_type"), listing.get("condition_text"),
@@ -172,6 +235,9 @@ def upsert_listing(conn, listing, today=None):
         )
     else:
         result["first_seen"] = row["first_seen"] or today
+        listed = _earliest(row["listed_at"], listing.get("listed_at"),
+                           result["first_seen"]) or result["first_seen"]
+        result["listed_at"] = listed
         old_price = row["price"]
         # רישום שינוי מחיר בלבד (לא כל ריצה) — כך ההיסטוריה נשארת רזה ומדויקת
         if price is not None and old_price is not None and float(price) != float(old_price):
@@ -184,14 +250,14 @@ def upsert_listing(conn, listing, today=None):
             """UPDATE listings SET city=?, url=?, rooms=?, size_sqm=?, price=?,
                       price_per_sqm=?, last_seen=?, active=1, raw_json=?,
                       neighborhood=?, street=?, property_type=?, condition_text=?,
-                      lat=?, lon=?
+                      lat=?, lon=?, listed_at=?
                WHERE id=?""",
             (listing.get("city"), listing.get("url"), listing.get("rooms"),
              listing.get("size_sqm"), price, listing.get("price_per_sqm"), now,
              json.dumps(listing.get("raw", {}), ensure_ascii=False),
              listing.get("neighborhood"), listing.get("street"),
              listing.get("property_type"), listing.get("condition_text"),
-             listing.get("lat"), listing.get("lon"), lid),
+             listing.get("lat"), listing.get("lon"), listed, lid),
         )
     return result
 

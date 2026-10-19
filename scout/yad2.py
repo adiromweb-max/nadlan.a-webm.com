@@ -24,6 +24,7 @@ import logging
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date, datetime
 
 from .scraperapi import CreditBudgetExceeded
 from .pricing import clean_ppm, size_is_plausible
@@ -49,11 +50,24 @@ APARTMENT_TYPES = ("דירה", "דירת גן", "דירת גג", "פנטהאוז
 # הערכים כאן אומתו אמפירית מול דפי מודעות אמיתיים (אוגוסט 2026) — אל תנחשו
 # כאן ערכים נוספים: id לא מוכר יישאר בלי תווית, והתווית האמיתית תגיע ממילא
 # בשלב ההעשרה (enrich_listing) שרץ על כל המועמדות.
+# מצב הנכס. יד2 שולח ב-feed **רק** את הקוד, בלי טקסט (נבדק על 3,927
+# מודעות: ‎text‎ הוא None בכולן), ולכן המיפוי הזה הוא המקור היחיד לתווית.
+# הקודים אומתו מול דפי המודעה עצמם ביד2, שם הטקסט כן מופיע.
+#
+# 1 ו-6 חסרו כאן, ו-6 הוא הקוד הכי חשוב במאגר הזה: "חדש (גרו בנכס)" הוא
+# בדיוק החתימה של דירת מחיר למשתכן שנמכרת אחרי שהמגבלה פגה — בניין חדש
+# שכבר גרו בו. נמדד: 97% מהמודעות שזוהו בוודאות גבוהה כמחיר למשתכן נושאות
+# אותו, מול 15% בכל השאר. ראה ‎scout/mlm.py‎.
 CONDITION_TEXT = {
+    1: "חדש מקבלן (לא גרו בנכס)",
     2: "משופץ",
     3: "במצב שמור",
     5: "דרוש שיפוץ",
+    6: "חדש (גרו בנכס)",
 }
+
+# הקודים שמעידים על בניין חדש — ראיה שלישית, בלתי-תלויה בשתי שכבות ה-GIS
+NEW_BUILD_CONDITIONS = (1, 6)
 
 
 class Yad2Status:
@@ -145,6 +159,56 @@ def image_urls(item, limit=MAX_IMAGES):
     return list(dict.fromkeys(IMG_RE.findall(blob)))[:limit]
 
 
+# ── תאריך הפרסום האמיתי ─────────────────────────────────────────────
+# הבאג שזה מתקן: הוותק חושב מ-‎first_seen‎ — מתי *אנחנו* ראינו את המודעה.
+# ההיסטוריה שלנו קצרה, ולכן מודעה ששוכבת שנתיים בשוק נראתה למנוע כאילו
+# היא בת חודשיים. נמדד על המודעות הפעילות: פער חציוני של 20 יום, ממוצע
+# 79 יום, ובמקרה הקצה 1,153 יום — כלומר בדיוק האות הכי חזק שפוספס.
+#
+# בפיד של יד2 אין שדה תאריך (נבדק: כל המבנה מופה). אבל נתיב התמונה נושא
+# את חתימת הזמן של ההעלאה, והתמונות מועלות כשהמודעה נוצרת:
+#   https://img.yad2.co.il/Pic/202607/21/2_1/o/y2_1_02041_20260721181739.jpeg
+#                              ^^^^^^ ^^                  ^^^^^^^^
+# נלקח ה**מוקדם** מכל תמונות המודעה: תמונה שהמוכר הוסיף מאוחר אינה מאפסת
+# את הוותק. זמין ל-93% מהמודעות הפעילות, בלי אף בקשה נוספת ובלי קרדיטים.
+#
+# זו הערכה, לא הצהרה של יד2: מוכר שמחליף את כל התמונות יֵראה צעיר מכפי
+# שהוא. לכן הוותק בפועל נקבע ב-db מול ‎first_seen‎ — המוקדם מהשניים גובר,
+# וכך ההערכה יכולה רק להוסיף ותק, לא לגרוע ממנו.
+IMG_STAMP_RE = re.compile(r'_(\d{8})\d{6}\.(?:jpe?g|png|webp)', re.I)
+IMG_PATH_DATE_RE = re.compile(r'/Pic/(\d{4})(\d{2})/(\d{2})/', re.I)
+LISTED_AT_MIN = "2010-01-01"    # לפני זה = נתון שגוי, לא מודעה
+
+
+def _img_date(url):
+    """תאריך ההעלאה (ISO) מכתובת תמונה של יד2, או None."""
+    m = IMG_STAMP_RE.search(url or "")
+    if m:
+        s = m.group(1)
+        iso = f"{s[:4]}-{s[4:6]}-{s[6:8]}"
+    else:
+        m = IMG_PATH_DATE_RE.search(url or "")
+        if not m:
+            return None
+        iso = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    try:
+        datetime.strptime(iso, "%Y-%m-%d")
+    except ValueError:
+        return None
+    return iso if iso >= LISTED_AT_MIN else None
+
+
+def listed_at(item, today=None):
+    """
+    הערכת תאריך הפרסום של המודעה ביד2 — המוקדם מבין תאריכי התמונות.
+    מחזיר ISO או None. תאריך עתידי נדחה (שעון/אזור זמן של המקור).
+    """
+    today = today or date.today().isoformat()
+    dates = [d for d in (_img_date(u) for u in image_urls(item, limit=None)) if d]
+    dates = [d for d in dates if d <= today]
+    return min(dates) if dates else None
+
+
 def _text(node):
     """מוציא .text ממבנה {'text': ...} או מחזיר את הערך עצמו."""
     if isinstance(node, dict):
@@ -161,8 +225,12 @@ def _text(node):
 # יד2 מעביר את זה בשני אופנים, ושניהם נבדקים כאן: שדה מחיר קודם
 # ב-‎__NEXT_DATA__‎ (שמות משתנים בין גרסאות, ולכן רשימת מועמדים), ותג
 # טקסטואלי בעברית. התג לבדו מוכיח שהייתה ירידה גם בלי לדעת את גודלה.
-PREV_PRICE_KEYS = ("priceBeforeDiscount", "previousPrice", "priceBefore",
-                   "oldPrice", "prevPrice", "originalPrice", "lastPrice")
+# ‎priceBeforeTag‎ הוא השם האמיתי בפיד (נבדק מול ‎raw_json‎ של מודעות
+# פעילות: 11% מהן נושאות אותו, וכולן ירידה אמיתית). השמות האחרים נשמרים
+# כגיבוי לגרסאות אחרות של הפיד — אבל בלי הראשון התיקון הזה היה מת בפועל.
+PREV_PRICE_KEYS = ("priceBeforeTag", "priceBeforeDiscount", "previousPrice",
+                   "priceBefore", "oldPrice", "prevPrice", "originalPrice",
+                   "lastPrice")
 DROP_TAG_HINTS = ("ירידת מחיר", "מחיר ירד", "המחיר ירד", "הופחת", "הוזל")
 
 
@@ -256,6 +324,7 @@ def parse_item(item, fallback_city):
         "condition_text": cond.get("text") or CONDITION_TEXT.get(cond_id),
         "ad_type": item.get("adType"),
         "images": image_urls(item),
+        "listed_at": listed_at(item),
         "previous_price": prev_price,
         "drop_reported_by_source": drop_reported,
         "tags": tags,
@@ -324,6 +393,10 @@ def from_stored(row):
     listing["from_db"] = True
     listing["last_seen"] = row.get("last_seen")
     listing["first_seen"] = row.get("first_seen")
+    # ‎listed_at‎ השמור ב-DB גובר: הוא כבר הוכרע מול ‎first_seen‎ והוא
+    # מתוקן אחורה לאורך הזמן, בעוד שה-raw הוא צילום של הפעם הראשונה.
+    if row.get("listed_at"):
+        listing["listed_at"] = row["listed_at"]
     return listing
 
 
@@ -371,13 +444,31 @@ def _extract_feed(data):
     return items, feed.get("pagination") or {}, True
 
 
+def price_band(cfg, city):
+    """
+    טווח המחיר שנסרק בעיר הזו.
+
+    שני מסלולים: הערים שהמשתמש מכיר נסרקות בטווח התקציב שלו, וערי מסלול
+    מחיר למשתכן נסרקות בטווח רחב יותר. הסיבה נמדדה בפועל — בבאר שבע
+    המחיר הגבוה ביותר שנסרק היה 1,499,000 ₪, בדיוק על התקרה, ו-16 מודעות
+    ישבו 200 מ' ממתחם מחיר למשתכן בלי שאף אחת נכנסה אליו. גל של 4,536
+    יח"ד משוחררות נחתך לפני שהגיע ל-DB. לחץ ההיצע של אותן דירות הוא מה
+    שמזיז את המחירים סביבן, גם כשהן עצמן מעל התקציב.
+    """
+    if city in set(cfg.get("mlm_cities") or []):
+        return (int(cfg.get("mlm_price_min", cfg["price_min"])),
+                int(cfg.get("mlm_price_max", cfg["price_max"])))
+    return int(cfg["price_min"]), int(cfg["price_max"])
+
+
 def fetch_city_page(client, city, code, cfg, page):
     """
     מביא עמוד תוצאות אחד. מחזיר (listings, pagination, error).
     error=None כשהכול תקין.
     """
-    url = SEARCH_URL.format(code=city_param(code), pmin=int(cfg["price_min"]),
-                            pmax=int(cfg["price_max"]), page=page)
+    pmin, pmax = price_band(cfg, city)
+    url = SEARCH_URL.format(code=city_param(code), pmin=pmin,
+                            pmax=pmax, page=page)
     html = client.get(url)
     if html is None:
         return [], {}, "no-response"
@@ -401,7 +492,7 @@ def fetch_city_page(client, city, code, cfg, page):
         if not _is_apartment(l, cfg.get("apartment_types") or APARTMENT_TYPES):
             continue
         p = l.get("price")
-        if not p or not (cfg["price_min"] <= p <= cfg["price_max"]):
+        if not p or not (pmin <= p <= pmax):
             continue
         out.append(l)
 

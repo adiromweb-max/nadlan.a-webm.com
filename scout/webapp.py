@@ -109,6 +109,21 @@ def _trim(listings, cfg=None):
             "rent": s.get("monthly_rent_est"),
             "cagr": s.get("area_cagr_pct"),
             "dom": s.get("days_on_market"),
+            "listed": s.get("listed_at"),
+            "domest": bool(s.get("dom_estimated")),
+            "stale": bool(s.get("stale_no_drop")),
+            "mlm": bool(s.get("mlm")),
+            "mlmrel": bool(s.get("mlm_released")),
+            "mlmproj": s.get("mlm_project"),
+            "mlmpaid": s.get("mlm_paid_est"),
+            "cush": s.get("mlm_cushion"),
+            "cushpct": s.get("mlm_cushion_pct"),
+            "mlmsale": s.get("mlm_on_sale"),
+            "mlmunits": s.get("mlm_units"),
+            "mlmsup": s.get("mlm_supply_pct"),
+            "mlmdate": s.get("mlm_release"),
+            "mlmconf": s.get("mlm_confidence"),
+            "mlmlot": bool(s.get("mlm_in_lot")),
             "cond": s.get("condition_text"),
             "tier": tier,
             "otype": s.get("opportunity_type_he"),
@@ -420,6 +435,37 @@ const AREA_BY_KEY={}, CITY_TREND={};
 });
 function areaFor(d){ return (d.akey&&AREA_BY_KEY[d.akey]) || CITY_TREND[d.city] || null; }
 
+/* ---- ותק בשוק ----
+   הוותק נמדד מתאריך הפרסום ביד2 (מוערך מתאריכי התמונות של המודעה), ולא
+   מהרגע שהמנוע ראה אותה — ההיסטוריה של המנוע קצרה בהרבה מהשוק עצמו.
+   חודשים קוראים טוב יותר מימים כשמדובר בוותק ארוך. */
+function domText(days){
+  const d=+days||0;
+  if(d<45) return d===1?'יום אחד':d+' ימים';
+  const m=Math.round(d/30.4);
+  if(m<12) return m===1?'חודש':(m===2?'חודשיים':m+' חודשים');
+  const y=d/365;
+  if(y<1.6) return 'יותר משנה';
+  if(y<2.5) return 'כשנתיים';
+  return Math.floor(y)+' שנים';
+}
+function domPhrase(d){
+  const t=domText(d.dom);
+  if((d.dom||0)>=365) return `<b>${t}</b> בשוק — מוכר שלא הצליח למכור`;
+  if((d.dom||0)>=180) return `<b>${t}</b> בשוק — יש מרחב למשא ומתן`;
+  return `<b>${t}</b> בשוק — מוכר שעשוי להיות גמיש`;
+}
+
+/* הראיות שעליהן נשען זיהוי מחיר למשתכן — נאמרות במפורש, כדי שיהיה ברור
+   על מה הטענה נשענת ומה חסר בה. */
+function mlmEvid(d){
+  const e=[];
+  if(d.mlmproj) e.push('מתחם');
+  if(d.mlmlot)  e.push('מגרש');
+  if(d.cond==='חדש (גרו בנכס)'||d.cond==='חדש מקבלן (לא גרו בנכס)') e.push('בניין חדש');
+  return e.length? 'ראיות: '+e.join(' + ') : 'ודאות חלקית';
+}
+
 /* smart "why" — narrative from structured fields, not raw debug text */
 function smartWhy(d){
   const p=[];
@@ -427,7 +473,8 @@ function smartWhy(d){
   if((d.drop||0)>=5) p.push(`ירד <b>${(+d.drop).toFixed(0)}%</b> במחיר`);
   if(d['yield']>=4.5) p.push(`תשואת שכירות <b>${(+d['yield']).toFixed(1)}%</b>`);
   if(d.cagr>=4) p.push(`באזור שעולה <b>${(+d.cagr).toFixed(1)}%</b> בשנה`);
-  if((d.dom||0)>=90) p.push(`<b>${d.dom} ימים</b> באוויר — מוכר שעשוי להיות גמיש`);
+  if((d.dom||0)>=60) p.push(domPhrase(d));
+  if(d.mlmrel && d.cush) p.push(`<b>מחיר למשתכן משוחרר</b> (${mlmEvid(d)}) — המוכר שילם כ-${fmt(d.mlmpaid)} ₪ ויושב על כ-<b>${fmt(d.cush)} ₪</b> רווח`);
   if(!p.length){
     if(d.suspect) return 'הפער מהשוק גדול מהרגיל — שווה בדיקה, אך ודא שאין הבדל גודל או קטגוריה.';
     return 'מלאי טרי שנכנס למעקב. עדיין לא אומת מול עסקאות סגורות — ההזדמנויות המאומתות בטאב "הזדמנויות".';
@@ -532,6 +579,17 @@ function card(d,i){
   if(d.sstat==='confirm') chips.push(`<span class="b">רחוב ✓ ${(+d.sgap).toFixed(0)}%</span>`);
   if(d['yield']) chips.push(`<span class="n">תשואה ${(+d['yield']).toFixed(1)}%</span>`);
   else if(d.cagr) chips.push(`<span class="n">אזור צומח</span>`);
+  /* ותק בשוק על הכרטיס — זה האות שמחליט אם יש עם מי לדבר על המחיר,
+     ולכן הוא נראה מיד ולא רק בפירוט. מודגש מ-6 חודשים ומעלה. */
+  if((d.dom||0)>=180) chips.push(`<span class="b">${domText(d.dom)} בשוק</span>`);
+  else if((d.dom||0)>=60) chips.push(`<span class="n">${domText(d.dom)} בשוק</span>`);
+  /* מחיר למשתכן: הכרית היא כמה המוכר *יכול* לרדת — אות שונה מ"כמה
+     הדירה זולה", ולכן צ'יפ משלו. מוצג רק כשהמגבלה פגה; לפני כן המכירה
+     כרוכה בהשבת הסבסוד והמוכר דווקא פחות גמיש. */
+  if(d.mlmrel && d.cushpct && d.mlmconf==='גבוהה') chips.push(`<span class="b">כרית ${(+d.cushpct).toFixed(0)}% · מחיר למשתכן ✓</span>`);
+  else if(d.mlmrel && d.cushpct) chips.push(`<span class="n">כרית ${(+d.cushpct).toFixed(0)}% · מחיר למשתכן (ודאות ${d.mlmconf||'חלקית'})</span>`);
+  else if(d.mlm && !d.mlmrel) chips.push(`<span class="u">מחיר למשתכן — עוד מוגבל</span>`);
+  if((d.mlmsup||0)>=2) chips.push(`<span class="n">${d.mlmsale} מהמתחם למכירה</span>`);
   const why = smartWhy(d);
   const saved=WL.has(d.id);
   return `<article class="card">
@@ -568,6 +626,8 @@ function feed(list, emptyMsg){
     if(key==='drop') return (b.drop||0)-(a.drop||0);
     if(key==='yield') return (b['yield']||0)-(a['yield']||0);
     if(key==='price') return (a.price||0)-(b.price||0);
+    if(key==='dom') return (b.dom||0)-(a.dom||0);
+    if(key==='cush') return (b.cush||0)-(a.cush||0);
     return (b.gap||-99)-(a.gap||-99);
   });
   S._view=arr;
@@ -581,6 +641,8 @@ function toolbar(){
     ${oc('all','הכול')}${oc('private','פרטי בלבד')}${oc('agency','תיווך')}
     <select onchange="S.sort=this.value;render()">
       <option value="gap"${S.sort==='gap'?' selected':''}>מיון: מתחת לשוק</option>
+      <option value="dom"${S.sort==='dom'?' selected':''}>מיון: הזמן הרב ביותר בשוק</option>
+      <option value="cush"${S.sort==='cush'?' selected':''}>מיון: כרית המוכר (מחיר למשתכן)</option>
       <option value="drop"${S.sort==='drop'?' selected':''}>מיון: ירידת מחיר</option>
       <option value="yield"${S.sort==='yield'?' selected':''}>מיון: תשואה</option>
       <option value="price"${S.sort==='price'?' selected':''}>מיון: מחיר</option>
@@ -697,9 +759,10 @@ function fmtDate(s){ if(!s) return ''; const m=String(s).slice(0,10).split('-');
 function priceTimeline(d){
   const h=(d.hist||[]).filter(x=>x&&x.p);
   if(h.length<2){
-    const pub=d.first_seen?fmtDate(d.first_seen):(h[0]&&fmtDate(h[0].d));
+    const pub=d.listed?fmtDate(d.listed):(d.first_seen?fmtDate(d.first_seen):(h[0]&&fmtDate(h[0].d)));
     const pr=h[0]?fmt(h[0].p):fmt(d.price);
-    return `<div style="color:var(--ink2);font-size:13.5px;background:var(--hair2);border-radius:12px;padding:14px 16px">פורסמה${pub?' ב-'+pub:''} במחיר <b>${pr} ₪</b> — המחיר <b>לא השתנה</b> מאז.</div>`;
+    const age=(d.dom||0)>=45?` <b>${domText(d.dom)}</b> בשוק, ו`:' ';
+    return `<div style="color:var(--ink2);font-size:13.5px;background:var(--hair2);border-radius:12px;padding:14px 16px">פורסמה${pub?' ב-'+pub:''} במחיר <b>${pr} ₪</b> —${age}המחיר <b>לא השתנה</b> מאז.${d.domest?'<div style="font-size:11.5px;color:var(--muted);margin-top:6px">תאריך הפרסום מוערך מתאריכי התמונות של המודעה</div>':''}</div>`;
   }
   const W=470,H=180,pad=36,padTop=34;
   const ps=h.map(x=>x.p),max=Math.max(...ps),min=Math.min(...ps),rng=(max-min)||1;
