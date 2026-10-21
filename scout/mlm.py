@@ -197,7 +197,8 @@ class Lots:
             if not rings:
                 continue
             x0, y0, x1, y1 = _bbox(rings)
-            entry = (lot.get("u") or 0, rings, (x0, y0, x1, y1))
+            entry = (lot.get("u") or 0, rings, (x0, y0, x1, y1),
+                     lot.get("plan"), lot.get("lot"))
             self.n += 1
             for cx in range(int(x0 / self.CELL), int(x1 / self.CELL) + 1):
                 for cy in range(int(y0 / self.CELL), int(y1 / self.CELL) + 1):
@@ -218,11 +219,13 @@ class Lots:
         bucket = self.cells.get((int(lon / self.CELL), int(lat / self.CELL)))
         if not bucket:
             return None
-        for units, rings, (x0, y0, x1, y1) in bucket:
+        for units, rings, (x0, y0, x1, y1), plan, lotno in bucket:
             if not (x0 <= lon <= x1 and y0 <= lat <= y1):
                 continue
             if any(_in_ring(lon, lat, r) for r in rings):
-                return {"units": units}
+                # ‎plan‎ הוא מספר התב"ע ו-‎lot‎ מספר המגרש. שניהם מגיעים
+                # מקובץ ה-GIS הרשמי ומאפשרים לאמת מול מידע תכנוני.
+                return {"units": units, "plan": plan, "lot": lotno}
         return None
 
 
@@ -249,7 +252,7 @@ def confidence(in_project, in_lot, condition_id):
     return {3: "גבוהה", 2: "בינונית", 1: "נמוכה"}[score]
 
 
-def describe(listing, projects, today=None, lots=None):
+def describe(listing, projects, today=None, lots=None, exact=None):
     """
     מה שידוע על מודעה מבחינת מחיר למשתכן. מחזיר dict ריק אם אינה בפרויקט.
 
@@ -271,24 +274,60 @@ def describe(listing, projects, today=None, lots=None):
     lat, lon = listing.get("lat"), listing.get("lon")
     p = projects.find(lat, lon) if projects else None
     lot = lots.find(lat, lon) if lots else None
+    # ── שתי שכבות מתחמים, בכוונה ──
+    # ‎projects‎ היא השכבה המאוחדת: פוליגון אחד למתחם, והיא זו שקובעת
+    # **אם** המודעה בתוך מחיר למשתכן.
+    # ‎exact‎ היא שכבת ההגרלות: פוליגון לכל הגרלה, עם ‎LotteryId‎, והיא
+    # נותנת את **הפרטים המדויקים** (תאריך הגרלה, קבלן, ביקוש).
+    #
+    # למה לא להחליף את הראשונה בשנייה, שנשמעת מדויקת יותר: נמדד. השכבה
+    # המדויקת מזהה 30 מודעות מול 69 במאוחדת, והיא תת-קבוצה מלאה שלה —
+    # אפס מודעות חדשות. ו-39 המודעות שנשרו נושאות "חדש מקבלן/גרו בנכס"
+    # ב-90% מהמקרים, מול 18% בכלל המלאי. כלומר הן מחיר למשתכן אמיתי
+    # שהשכבה המדויקת מפספסת, כנראה מפני שהפוליגונים שלה משורטטים לפי
+    # מגרשי השיווק ולא לפי הבנוי בפועל. החלפה הייתה מוחקת 57% מהזיהויים.
+    ex = exact.find(lat, lon) if exact else None
     if not p and not lot:
         return {}
 
-    p = p or {}
+    p = dict(p or {})
+    if ex:
+        # מאפייני ההגרלה גוברים — הם מדויקים ברמת הגרלה בודדת
+        for k, v in ex.items():
+            if v is not None:
+                p[k] = v
+    # ‎free_at‎ מגיע מהשכבה החדשה ומבוסס על **תאריך ההגרלה האמיתי** של
+    # אותו פוליגון, בחיבור מדויק לפי ‎LotteryId‎ מול טבלת ההגרלות הרשמית.
+    # ‎release‎ הוא השדה הישן (אומדן לפי שנת ההגרלה המאוחרת במתחם) ונשאר
+    # כנפילה חזרה כדי שקובץ שכבה ישן לא ישבור את הריצה.
+    rel = p.get("free_at") or p.get("release")
     out = {
         "mlm": True,
         "mlm_project": p.get("project"),
         "mlm_units": p.get("units"),
         "mlm_orig_ppm": p.get("orig_ppm"),
-        "mlm_release": p.get("release"),
+        "mlm_release": rel,
         "mlm_released": None,
         "mlm_in_lot": bool(lot),
         "mlm_lot_units": (lot or {}).get("units"),
         "mlm_confidence": confidence(bool(p), bool(lot),
                                      listing.get("condition_id")),
+        # ── מה שנפתח עם קובץ ה-GIS המלא ──
+        "mlm_lottery_id": p.get("lottery_id"),
+        "mlm_lottery_date": p.get("lottery_date"),
+        "mlm_builder": p.get("builder"),
+        "mlm_hood": p.get("lottery_hood") or p.get("hood"),
+        "mlm_demand": p.get("demand"),
+        "mlm_subscribers": p.get("subscribers"),
+        "mlm_permit": p.get("permit"),
+        "mlm_method": p.get("market_method"),
+        "mlm_plan": (lot or {}).get("plan"),      # מספר תב"ע
+        "mlm_lot_no": (lot or {}).get("lot"),     # מספר מגרש
+        "mlm_exact": bool(ex),                    # נמצאה גם בשכבת ההגרלות
     }
-    rel = p.get("release")
-    if rel:
+    if p.get("released") is not None:
+        out["mlm_released"] = bool(p["released"])
+    elif rel:
         try:
             out["mlm_released"] = date.fromisoformat(rel) <= today
         except ValueError:
@@ -324,9 +363,12 @@ def supply_pressure(listings):
     מוסיף ‎mlm_on_sale‎ ו-‎mlm_supply_pct‎ לכל מודעה במקום. הערך הוא רצפה
     ולא תקרה: הסריקה מוגבלת בעמודים לעיר ולכן סופרת בחסר.
     """
+    # המפתח הוא **ההגרלה** ולא שם הפרויקט: בשכבה המלאה יש 1,317 פוליגונים
+    # ושמות פרויקט חוזרים על עצמם בין מתחמים נפרדים באותה עיר. קיבוץ לפי
+    # שם היה מערבב מתחמים ומנפח את לחץ ההיצע.
     buckets = {}
     for s in listings:
-        key = s.get("mlm_project")
+        key = s.get("mlm_lottery_id") or s.get("mlm_project")
         if s.get("mlm") and key:
             buckets.setdefault((s.get("city"), key), []).append(s)
     for (_city, _proj), group in buckets.items():

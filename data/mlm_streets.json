@@ -1,0 +1,5205 @@
+[
+ {
+  "city": "אבן יהודה",
+  "project": "מרכז",
+  "lamas": 182,
+  "units": 179,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נחצ'ה",
+   "דור"
+  ],
+  "hoods": [
+   "מרכז"
+  ],
+  "release_est": "2026-05-20",
+  "ppm_lottery": 9139.5,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 61.8,
+  "builders": [
+   "א. י. אמריקה ישראל להשקעות בע\"",
+   "גרופית הנדסה אזרחית ועבודות צי"
+  ],
+  "free_at": "2026-05-20",
+  "lottery_first": "2019-05-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אופקים",
+  "project": "אתר 13",
+  "lamas": 31,
+  "units": 147,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אורים",
+   "קהילת מטרו-ווסט",
+   "מכתש רמון",
+   "הנגב"
+  ],
+  "hoods": [
+   "אתר 13"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 5520.1,
+  "market_ppm": 14315,
+  "cushion_pct": 159,
+  "price4": 1359951,
+  "demand": 20.3,
+  "builders": [
+   "אופק - שלי בניה ופיתוח בע\"מ",
+   "חן חיים בע\"מ",
+   "מגידו י.ק. יזום בע\"מ"
+  ],
+  "free_at": "2029-04-28",
+  "lottery_first": "2018-03-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אופקים",
+  "project": "הפארק",
+  "lamas": 31,
+  "units": 284,
+  "streets_verified": [
+   "דרור"
+  ],
+  "streets_mapped": [
+   "חופית",
+   "מגלן"
+  ],
+  "hoods": [
+   "הפארק"
+  ],
+  "release_est": "2026-01-21",
+  "ppm_lottery": 6439.2,
+  "market_ppm": 14315,
+  "cushion_pct": 122,
+  "price4": 1359951,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 2
+ },
+ {
+  "city": "אופקים",
+  "project": "קרית מנחם",
+  "lamas": 31,
+  "units": 409,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אגוז",
+   "השיטה",
+   "חרצית",
+   "צאלון",
+   "סביון"
+  ],
+  "hoods": [
+   "קרית מנחם",
+   "רמת השקד",
+   "רמת שקד"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 5867.0,
+  "market_ppm": 14315,
+  "cushion_pct": 144,
+  "price4": 1359951,
+  "demand": 32.4,
+  "builders": [
+   "מגידו י.ק. בע\"מ",
+   "מגידו י.ק.יזום בע\"מ",
+   "סופר שרה"
+  ],
+  "free_at": "2025-12-16",
+  "lottery_first": "2016-09-05",
+  "lottery_match": "מאומת",
+  "our_listings": 2
+ },
+ {
+  "city": "אור יהודה",
+  "project": "בית בפארק",
+  "lamas": 2400,
+  "units": 1502,
+  "streets_verified": [
+   "שמעון פרס"
+  ],
+  "streets_mapped": [
+   "כנען",
+   "תבור",
+   "חרמון"
+  ],
+  "hoods": [
+   "מרכז-נוה סביונים",
+   "שכונת האקדמאים"
+  ],
+  "release_est": "2026-08-05",
+  "ppm_lottery": 12558.1,
+  "market_ppm": 26806,
+  "cushion_pct": 113,
+  "price4": 2546564,
+  "demand": 42.7,
+  "builders": [
+   "גינדי גרדנס בע\"מ"
+  ],
+  "free_at": "2029-03-07",
+  "lottery_first": "2017-11-13",
+  "lottery_match": "מאומת",
+  "our_listings": 1
+ },
+ {
+  "city": "אור יהודה",
+  "project": "מרכז-נוה סביונים",
+  "lamas": 2400,
+  "units": 123,
+  "streets_verified": [],
+  "streets_mapped": [
+   "כרמל"
+  ],
+  "hoods": [
+   "מרכז-נוה סביונים",
+   "שכונת האקדמאים"
+  ],
+  "release_est": "2025-07-23",
+  "ppm_lottery": 12482.7,
+  "market_ppm": 26806,
+  "cushion_pct": 115,
+  "price4": 2546564,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אור עקיבא",
+  "project": "דרום",
+  "lamas": 1020,
+  "units": 875,
+  "streets_verified": [],
+  "streets_mapped": [
+   "השולמית",
+   "דוד המלך",
+   "שושנת העמקים",
+   "אילות השדה"
+  ],
+  "hoods": [
+   "דרום"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 9180.1,
+  "market_ppm": 19293,
+  "cushion_pct": 110,
+  "price4": 1832840,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 4
+ },
+ {
+  "city": "אילת",
+  "project": "שחמון 2",
+  "lamas": 2600,
+  "units": 219,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האהבה",
+   "הנתינה",
+   "האושר"
+  ],
+  "hoods": [
+   "6 שחמון",
+   "גנים ב",
+   "שחמון",
+   "שחמון 2"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 7870.2,
+  "market_ppm": 19921,
+  "cushion_pct": 153,
+  "price4": 1892479,
+  "demand": 176.9,
+  "builders": [
+   "אחים אוזן חברה לבניה בע\"מ",
+   "אייל פרץ יזמות ונדל\"ן 2011 בע\"מ",
+   "עמרם אברהם חברה לבנין בע\"מ"
+  ],
+  "free_at": "2026-11-13",
+  "lottery_first": "2018-10-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אילת",
+  "project": "שחמון 6",
+  "lamas": 2600,
+  "units": 184,
+  "streets_verified": [],
+  "streets_mapped": [
+   "התבלינים",
+   "דפנה",
+   "דוחן",
+   "גרגיר הנחלים"
+  ],
+  "hoods": [
+   "6 שחמון",
+   "שחמון 6"
+  ],
+  "release_est": "2024-12-21",
+  "ppm_lottery": 6876.7,
+  "market_ppm": 19921,
+  "cushion_pct": 190,
+  "price4": 1892479,
+  "demand": 34.3,
+  "builders": [
+   "נופי מרואן, פרץ ציון , חקוק יעקב",
+   "עמרם אברהם חברה לבנין בע\"מ"
+  ],
+  "free_at": "2024-12-21",
+  "lottery_first": "2017-04-05",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אלעד",
+  "project": "מתחם H פארק ארכאו",
+  "lamas": 1309,
+  "units": 66,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הלל",
+   "שמאי",
+   "רדק"
+  ],
+  "hoods": [
+   "מתחם H פארק ארכאו"
+  ],
+  "release_est": "2025-03-19",
+  "ppm_lottery": 9942.7,
+  "market_ppm": 18727,
+  "cushion_pct": 88,
+  "price4": 1779076,
+  "demand": 2807.9,
+  "builders": [
+   "פרויקט ניצנה 20 ת\"א בע\"מ"
+  ],
+  "free_at": "2031-04-10",
+  "lottery_first": "2018-03-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אלפי מנשה",
+  "project": "גבעת טל ב",
+  "lamas": 3750,
+  "units": 116,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ערבה"
+  ],
+  "hoods": [
+   "גבעת טל ב"
+  ],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 9456.5,
+  "market_ppm": 26408,
+  "cushion_pct": 179,
+  "price4": 2508805,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אלקנה",
+  "project": "ש.צפון+ אשקוביות",
+  "lamas": 3560,
+  "units": 12,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הר גלעד",
+   "מישרים"
+  ],
+  "hoods": [
+   "ש.צפון+ אשקוביות"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אריאל",
+  "project": "דרום מזרח",
+  "lamas": 3570,
+  "units": 444,
+  "streets_verified": [],
+  "streets_mapped": [
+   "לשם",
+   "ספיר"
+  ],
+  "hoods": [
+   "אבני חן"
+  ],
+  "release_est": "2026-05-20",
+  "ppm_lottery": 8365.7,
+  "market_ppm": 16686,
+  "cushion_pct": 99,
+  "price4": 1585193,
+  "demand": 23.2,
+  "builders": [
+   "א ברקן ושות בעמ",
+   "גבעות טל ר.א בע\"מ",
+   "קדמא באריאל בע\"מ",
+   "תורן הבית שלך בע\"מ"
+  ],
+  "free_at": "2029-09-28",
+  "lottery_first": "2019-05-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אשדוד",
+  "project": "פארק לכיש",
+  "lamas": 70,
+  "units": 340,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרב רפאל הלפרין",
+   "שדרות הרצל",
+   "שדרות דוד בן גוריון"
+  ],
+  "hoods": [
+   "פארק לכיש",
+   "קריית איתנים"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 22268,
+  "cushion_pct": null,
+  "price4": 2115465,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אשקלון",
+  "project": "אגמים מזרח",
+  "lamas": 7100,
+  "units": 1144,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אפיקי מים",
+   "עין הנצי\"ב",
+   "גומא"
+  ],
+  "hoods": [
+   "אגמים מזרח",
+   "גבעת הפרחים"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 8208.1,
+  "market_ppm": 16253,
+  "cushion_pct": 98,
+  "price4": 1544000,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אשקלון",
+  "project": "אינפילים שמשון",
+  "lamas": 7100,
+  "units": 172,
+  "streets_verified": [
+   "אליעזר מילרוד",
+   "אפרים צור"
+  ],
+  "streets_mapped": [
+   "ברטנורא"
+  ],
+  "hoods": [
+   "אינפילים שמשון",
+   "שיקמים / שמשון ב'"
+  ],
+  "release_est": "2026-02-13",
+  "ppm_lottery": 6933.4,
+  "market_ppm": 16253,
+  "cushion_pct": 134,
+  "price4": 1544000,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 7
+ },
+ {
+  "city": "אשקלון",
+  "project": "אשקלון-שכ' צפונית",
+  "lamas": 7100,
+  "units": 3216,
+  "streets_verified": [
+   "היוצרים",
+   "דרך הים"
+  ],
+  "streets_mapped": [
+   "סברי מרנן",
+   "יערה",
+   "נחלה"
+  ],
+  "hoods": [
+   "אזור התעשיה הצפוני",
+   "אשקלון-שכ' צפונית"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 8978.3,
+  "market_ppm": 16253,
+  "cushion_pct": 81,
+  "price4": 1544000,
+  "demand": 57.7,
+  "builders": [
+   "א.שדה פרויקטים בע\"מ",
+   "אייל פרץ יזמות ונדל\"ן 2011 בע\"",
+   "אסיאג חנניה, פיקה תשתית עבודות פיתוח בע\"מ",
+   "אפי קפיטל אחזקות בע\"מ"
+  ],
+  "free_at": "2029-08-01",
+  "lottery_first": "2017-12-20",
+  "lottery_match": "מאומת",
+  "our_listings": 3
+ },
+ {
+  "city": "אשקלון",
+  "project": "ברנע אפרידר",
+  "lamas": 7100,
+  "units": 1022,
+  "streets_verified": [
+   "רפסודה"
+  ],
+  "streets_mapped": [
+   "אברהם בלסבלג"
+  ],
+  "hoods": [
+   "ברנע אפרידר",
+   "מצפה ברנע"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 8667.5,
+  "market_ppm": 16253,
+  "cushion_pct": 88,
+  "price4": 1544000,
+  "demand": 32.2,
+  "builders": [
+   "אופק - שלי בניה ופיתוח בע\"מ",
+   "אלון מרדכי ובניו חברה לבנין ופיתוח בע\"מ",
+   "י.א. אבי את יוסי עבודות מתכת בע\"מ",
+   "י.ד. עשוש תשתיות בע\"מ"
+  ],
+  "free_at": "2027-12-14",
+  "lottery_first": "2017-11-09",
+  "lottery_match": "מאומת",
+  "our_listings": 1
+ },
+ {
+  "city": "אשקלון",
+  "project": "השלמות בכוכב הצפו",
+  "lamas": 7100,
+  "units": 57,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרב חיים כהנא"
+  ],
+  "hoods": [
+   "אזור התעשיה הצפוני",
+   "השלמות בכוכב הצפו"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 7167.4,
+  "market_ppm": 16253,
+  "cushion_pct": 127,
+  "price4": 1544000,
+  "demand": 330.7,
+  "builders": [
+   "רם אדרת מגורים בע\"מ"
+  ],
+  "free_at": "2029-07-24",
+  "lottery_first": "2022-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "אשקלון",
+  "project": "נווה אילן",
+  "lamas": 7100,
+  "units": 112,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "אשקלון מזרח",
+   "ניצנים",
+   "קריית החינוך"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 16253,
+  "cushion_pct": null,
+  "price4": 1544000,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "אשקלון",
+  "project": "ניצנים",
+  "lamas": 7100,
+  "units": 642,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דוריף",
+   "דרך ארץ"
+  ],
+  "hoods": [
+   "אזור התעשיה הצפוני",
+   "ניצנים"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 9126.2,
+  "market_ppm": 16253,
+  "cushion_pct": 78,
+  "price4": 1544000,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "אשקלון",
+  "project": "עיר היין",
+  "lamas": 7100,
+  "units": 990,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עסיס ענבים",
+   "חמרא",
+   "ארגמן"
+  ],
+  "hoods": [
+   "ניצנים",
+   "עיר היין"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 9254.2,
+  "market_ppm": 16253,
+  "cushion_pct": 76,
+  "price4": 1544000,
+  "demand": 41.6,
+  "builders": [
+   "אביסרור משה ובניו עבודות בנין",
+   "אלברטו גבסו ובניו בע\"מ",
+   "אפרידר החברה לשכון ולפתוח ישרא",
+   "פרץ בוני הנגב (1993) בע\"מ"
+  ],
+  "free_at": "2029-09-28",
+  "lottery_first": "2019-01-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "באר יעקב",
+  "project": "באר יעקב-מרכז",
+  "lamas": 2530,
+  "units": 2207,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עמק",
+   "שדרות יצחק שמיר"
+  ],
+  "hoods": [
+   "באר יעקב-מרכז",
+   "תלמי מנשה"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 11039.8,
+  "market_ppm": 25751,
+  "cushion_pct": 133,
+  "price4": 2446331,
+  "demand": 64.9,
+  "builders": [
+   "אביסרור משה ובניו עבודות בנין",
+   "ארזי הנגב ייזום ובניה בע\"מ",
+   "בוני התיכון הנדסה אזרחית ותשתי",
+   "גיא & דורון לוי הנדסה בנייה וה"
+  ],
+  "free_at": "2029-04-28",
+  "lottery_first": "2018-10-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "באר יעקב",
+  "project": "תלמי מנשה",
+  "lamas": 2530,
+  "units": 477,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דרך רון ארד",
+   "הרב משה שמואל שפירא",
+   "שביט"
+  ],
+  "hoods": [
+   "חוטר",
+   "תלמי מנשה"
+  ],
+  "release_est": "2024-12-25",
+  "ppm_lottery": 9824.5,
+  "market_ppm": 25751,
+  "cushion_pct": 162,
+  "price4": 2446331,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "באר שבע",
+  "project": "01",
+  "lamas": 9000,
+  "units": 1684,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דפנה",
+   "קורנית",
+   "מרווה"
+  ],
+  "hoods": [
+   "01",
+   "סיגליות",
+   "שכונה ט"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 8480.7,
+  "market_ppm": 12665,
+  "cushion_pct": 49,
+  "price4": 1203200,
+  "demand": 9.1,
+  "builders": [
+   "אבני דרך בית שמש פרויקטים בעמ",
+   "אל עוז 18 - השקעות ויזמות בע\"מ",
+   "ארזים (ג.י.א) בע\"מ",
+   "י. אליה ובניו יזמות וקבלני בני"
+  ],
+  "free_at": "2029-04-26",
+  "lottery_first": "2017-07-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "באר שבע",
+  "project": "אתר 01",
+  "lamas": 9000,
+  "units": 1558,
+  "streets_verified": [
+   "נחל חבר",
+   "נחל לבן"
+  ],
+  "streets_mapped": [
+   "נחל שילה",
+   "נחלה שילה",
+   "נחל גוב",
+   "נחל ימין",
+   "נחל בוקק"
+  ],
+  "hoods": [
+   "אזור התעשייה באר שבע",
+   "אתר 01",
+   "שכונת הפארק"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 8221.8,
+  "market_ppm": 12665,
+  "cushion_pct": 54,
+  "price4": 1203200,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 3
+ },
+ {
+  "city": "באר שבע",
+  "project": "נחל הפארק",
+  "lamas": 9000,
+  "units": 1294,
+  "streets_verified": [
+   "פארק הנחל"
+  ],
+  "streets_mapped": [
+   "נחל קדרון",
+   "נחלה שילה",
+   "נחל בוקק",
+   "נחל פרת"
+  ],
+  "hoods": [
+   "אזור התעשייה באר שבע"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 7706.8,
+  "market_ppm": 12665,
+  "cushion_pct": 64,
+  "price4": 1203200,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 1
+ },
+ {
+  "city": "באר שבע",
+  "project": "שכ' אצבעות + מרכז",
+  "lamas": 9000,
+  "units": 102,
+  "streets_verified": [],
+  "streets_mapped": [
+   "משה לוי"
+  ],
+  "hoods": [
+   "פסגת רמות",
+   "רמות ב'"
+  ],
+  "release_est": null,
+  "ppm_lottery": 8610.0,
+  "market_ppm": 12665,
+  "cushion_pct": 47,
+  "price4": 1203200,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית אל",
+  "project": "בית אל ג'",
+  "lamas": 3574,
+  "units": 148,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרב אברהם אלקנה שפירא",
+   "מעיין גנים"
+  ],
+  "hoods": [
+   "בית אל ג'",
+   "גינות בית אל",
+   "רמת בית-אל"
+  ],
+  "release_est": "2025-07-24",
+  "ppm_lottery": 6368.0,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 13.9,
+  "builders": [
+   "אבני דרך ישוב הארץ בע\"מ",
+   "ארץ הצבי חברה לעבודות בנין בע\"מ",
+   "קדמא התחדשות רחובות בע\"מ"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2018-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית אריה",
+  "project": "עופרים",
+  "lamas": 3652,
+  "units": 68,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האשל"
+  ],
+  "hoods": [
+   "עופרים"
+  ],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 7578.1,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית דגן",
+  "project": "בית דגן",
+  "lamas": 466,
+  "units": 338,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שקמה",
+   "אלון"
+  ],
+  "hoods": [
+   "בית דגן"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 9370.1,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 158.1,
+  "builders": [
+   "אחים אוזן חברה לבניה בע\"מ",
+   "גרופית הנדסה אזרחית ועבודות צי",
+   "דהאן אליהו, דהאן עזרא",
+   "שלמה כהן חברה לבנין בע\"מ"
+  ],
+  "free_at": "2026-09-23",
+  "lottery_first": "2017-11-14",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שאן",
+  "project": "דרום מערב",
+  "lamas": 9200,
+  "units": 15,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות יצחק רבין",
+   "מעפילי אגוז"
+  ],
+  "hoods": [
+   "דרום מערב",
+   "קריית רבין"
+  ],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 4503.3,
+  "market_ppm": 10332,
+  "cushion_pct": 129,
+  "price4": 981567,
+  "demand": 20.7,
+  "builders": [
+   "אברהם אליהו ובניו בע\"מ"
+  ],
+  "free_at": "2026-01-24",
+  "lottery_first": "2019-01-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שאן",
+  "project": "קרית החינוך",
+  "lamas": 9200,
+  "units": 77,
+  "streets_verified": [],
+  "streets_mapped": [
+   "השחם",
+   "אחד העם"
+  ],
+  "hoods": [
+   "מרכז העיר",
+   "נוף הירדן",
+   "קרית החינוך"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 4785.3,
+  "market_ppm": 10332,
+  "cushion_pct": 116,
+  "price4": 981567,
+  "demand": 7.5,
+  "builders": [
+   "אברהם אליהו ובניו בע\"מ"
+  ],
+  "free_at": "2026-11-14",
+  "lottery_first": "2019-11-14",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שאן",
+  "project": "שכונת האקליפטוס",
+  "lamas": 9200,
+  "units": 114,
+  "streets_verified": [],
+  "streets_mapped": [
+   "קהילת יהודי סלוניקי",
+   "חטיבת גולני"
+  ],
+  "hoods": [
+   "יפה נוף",
+   "קריית האמנים",
+   "שכונת האקליפטוס"
+  ],
+  "release_est": "2025-01-18",
+  "ppm_lottery": 4773.6,
+  "market_ppm": 10332,
+  "cushion_pct": 116,
+  "price4": 981567,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שמש",
+  "project": "איזור תעסוקה",
+  "lamas": 2610,
+  "units": 41,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרב קוק",
+   "שדרות נהר הירדן"
+  ],
+  "hoods": [
+   "איזור תעסוקה",
+   "רמת בית שמש א"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 9945.0,
+  "market_ppm": 27377,
+  "cushion_pct": 175,
+  "price4": 2600826,
+  "demand": 377.6,
+  "builders": [
+   "אופק - שלי בניה ופיתוח בע\"מ"
+  ],
+  "free_at": "2025-12-16",
+  "lottery_first": "2016-09-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שמש",
+  "project": "אתר ד",
+  "lamas": 2610,
+  "units": 4577,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות האמוראים",
+   "רבי פרידא",
+   "רב חלקיה בר טובי",
+   "אביי"
+  ],
+  "hoods": [
+   "אתר ד",
+   "רמת בית שמש ד'"
+  ],
+  "release_est": "2026-11-03",
+  "ppm_lottery": 8888.6,
+  "market_ppm": 27377,
+  "cushion_pct": 208,
+  "price4": 2600826,
+  "demand": 103.8,
+  "builders": [
+   "א.פ.י נתיב יזמות בע\"מ",
+   "א.פ.י נתיב מפעלי בניה בע\"מ",
+   "אבני דרך פרויקט בונה בחריש בע\"",
+   "אחים אום"
+  ],
+  "free_at": "2029-07-24",
+  "lottery_first": "2017-02-07",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שמש",
+  "project": "נוה שמיר",
+  "lamas": 2610,
+  "units": 436,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אהרונסון"
+  ],
+  "hoods": [
+   "נוה שמיר",
+   "שכונות ה'-1 ה'-2"
+  ],
+  "release_est": "2025-03-18",
+  "ppm_lottery": 9446.2,
+  "market_ppm": 27377,
+  "cushion_pct": 190,
+  "price4": 2600826,
+  "demand": 192.0,
+  "builders": [
+   "א. חבר בע\"מ, אבי מנדלר נכסים והשקעות בע\"מ- פרויקט נוה שמיר",
+   "א.ש. יגל יזמות ובנייה בע\"מ",
+   "חורשת האקליפטוס יזמות (תשע\"א) בע\"מ"
+  ],
+  "free_at": "2028-05-30",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שמש",
+  "project": "נווה שמיר",
+  "lamas": 2610,
+  "units": 379,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אנה פרנק",
+   "פרנקל",
+   "יונתן"
+  ],
+  "hoods": [
+   "נוה שמיר",
+   "שכונות ה'-1 ה'-2"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 9168.4,
+  "market_ppm": 27377,
+  "cushion_pct": 199,
+  "price4": 2600826,
+  "demand": 108.0,
+  "builders": [
+   "נמדר בתים בע\"מ",
+   "עיר דוד - בניה ופיתוח (1993) ב",
+   "פסגות זיו השקעות ופיתוח (1993)"
+  ],
+  "free_at": "2027-11-18",
+  "lottery_first": "2017-12-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "בית שמש",
+  "project": "נווה שמיר - שכונות ה'-1 ה'-2",
+  "lamas": 2610,
+  "units": 331,
+  "streets_verified": [],
+  "streets_mapped": [
+   "השלושה",
+   "יונתן",
+   "קליין"
+  ],
+  "hoods": [
+   "נוה שמיר",
+   "שכונות ה'-1 ה'-2"
+  ],
+  "release_est": "2024-12-21",
+  "ppm_lottery": 9452.4,
+  "market_ppm": 27377,
+  "cushion_pct": 190,
+  "price4": 2600826,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "ביתר עלית",
+  "project": "אתר 1א",
+  "lamas": 3780,
+  "units": 56,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דברי חיים",
+   "דרך בנימין הצדיק"
+  ],
+  "hoods": [
+   "אתר 1א",
+   "גבעה א"
+  ],
+  "release_est": "2025-03-19",
+  "ppm_lottery": 9565.9,
+  "market_ppm": 28240,
+  "cushion_pct": 195,
+  "price4": 2682800,
+  "demand": 124.6,
+  "builders": [
+   "ש. לירז חברה לבניין בע\"מ"
+  ],
+  "free_at": "2027-06-28",
+  "lottery_first": "2018-03-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ביתר עלית",
+  "project": "אתר 2א",
+  "lamas": 3780,
+  "units": 56,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יהודה צדקה",
+   "הרבי מליובאויטש"
+  ],
+  "hoods": [
+   "אתר 2א",
+   "גבעה א"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 9243.0,
+  "market_ppm": 28240,
+  "cushion_pct": 206,
+  "price4": 2682800,
+  "demand": 455.8,
+  "builders": [
+   "עופר אהרון חברה לעבודות בניה ב"
+  ],
+  "free_at": "2029-09-28",
+  "lottery_first": "2018-10-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ביתר עלית",
+  "project": "אתר ב1",
+  "lamas": 3780,
+  "units": 114,
+  "streets_verified": [],
+  "streets_mapped": [
+   "בנין דוד",
+   "המבי\"ט"
+  ],
+  "hoods": [
+   "אתר ב1"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 9522.6,
+  "market_ppm": 28240,
+  "cushion_pct": 197,
+  "price4": 2682800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "ביתר עלית",
+  "project": "אתר ב2",
+  "lamas": 3780,
+  "units": 88,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרב אבא שאול"
+  ],
+  "hoods": [
+   "אתר ב2"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 8716.5,
+  "market_ppm": 28240,
+  "cushion_pct": 224,
+  "price4": 2682800,
+  "demand": 63.8,
+  "builders": [
+   "בונים נכון בע\"מ"
+  ],
+  "free_at": "2031-04-10",
+  "lottery_first": "2018-03-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ביתר עלית",
+  "project": "גבעה ג'",
+  "lamas": 3780,
+  "units": 405,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שבט הלוי"
+  ],
+  "hoods": [],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 28240,
+  "cushion_pct": null,
+  "price4": 2682800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "בני ברק",
+  "project": "קרית הרצוג",
+  "lamas": 6100,
+  "units": 1065,
+  "streets_verified": [],
+  "streets_mapped": [
+   "רחוב 600",
+   "601"
+  ],
+  "hoods": [
+   "פרדס כץ",
+   "קרית הרצוג"
+  ],
+  "release_est": "2026-05-20",
+  "ppm_lottery": 11554.9,
+  "market_ppm": 26541,
+  "cushion_pct": 130,
+  "price4": 2521400,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "בנימינה",
+  "project": "אתר 02",
+  "lamas": 9800,
+  "units": 18,
+  "streets_verified": [],
+  "streets_mapped": [
+   "פיק\"א",
+   "ניל\"י"
+  ],
+  "hoods": [],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 8119.8,
+  "market_ppm": 31966,
+  "cushion_pct": 294,
+  "price4": 3036780,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "ג'סר א-זרקא",
+  "project": "שכונה מערבית",
+  "lamas": 541,
+  "units": 72,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האלמוגים",
+   "הגלים",
+   "יפו"
+  ],
+  "hoods": [
+   "שכונה מערבית"
+  ],
+  "release_est": null,
+  "ppm_lottery": 6879.6,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "גבעת זאב",
+  "project": "אגן אילות",
+  "lamas": 3730,
+  "units": 552,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 28156,
+  "cushion_pct": null,
+  "price4": 2674800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "גדרה",
+  "project": "מזרח",
+  "lamas": 2550,
+  "units": 1475,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שרה אהרונסון",
+   "יפה ירקוני",
+   "האילנות",
+   "לאה גולדברג"
+  ],
+  "hoods": [
+   "מזרח"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 9939.3,
+  "market_ppm": 26585,
+  "cushion_pct": 167,
+  "price4": 2525551,
+  "demand": 21.5,
+  "builders": [
+   "אאפיפי קפיטל פרויקטים מגורים בע\"מ",
+   "אביסרור ובניו יזום ופתוח בע\"מ",
+   "אופק חופים בע\"מ",
+   "אפי קפיטל פרוייקט מגורים בע\"מ"
+  ],
+  "free_at": "2028-05-30",
+  "lottery_first": "2017-07-26",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "גן יבנה",
+  "project": "מערב",
+  "lamas": 166,
+  "units": 584,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אמא אדמה"
+  ],
+  "hoods": [
+   "מערב"
+  ],
+  "release_est": "2024-12-24",
+  "ppm_lottery": 9818.6,
+  "market_ppm": 34336,
+  "cushion_pct": 250,
+  "price4": 3261881,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "גני תקוה",
+  "project": "בקעת ירדן-גולן",
+  "lamas": 229,
+  "units": 22,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דרך הים",
+   "שדרות התקווה"
+  ],
+  "hoods": [
+   "בקעת ירדן-גולן"
+  ],
+  "release_est": "2025-03-21",
+  "ppm_lottery": 13745.2,
+  "market_ppm": 33699,
+  "cushion_pct": 145,
+  "price4": 3201400,
+  "demand": 173.3,
+  "builders": [
+   "עיוש רפאל בעמ"
+  ],
+  "free_at": "2025-03-21",
+  "lottery_first": "2018-03-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "גסר א-זרקא",
+  "project": "שכונה מערבית",
+  "lamas": 541,
+  "units": 105,
+  "streets_verified": [],
+  "streets_mapped": [
+   "המעגן",
+   "שער אל הנהר",
+   "יפו"
+  ],
+  "hoods": [],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 7020.0,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "דימונה",
+  "project": "השחר",
+  "lamas": 2200,
+  "units": 958,
+  "streets_verified": [
+   "הרבי מלובאוויטש",
+   "הנבל",
+   "סרן יובל נריה"
+  ],
+  "streets_mapped": [
+   "הרב עובדיה יוסף"
+  ],
+  "hoods": [
+   "חכמי ישראל",
+   "שכ' השחר ( חב' ער"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 6687.9,
+  "market_ppm": 7931,
+  "cushion_pct": 19,
+  "price4": 753450,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 9
+ },
+ {
+  "city": "דימונה",
+  "project": "ממשית",
+  "lamas": 2200,
+  "units": 350,
+  "streets_verified": [
+   "תל גבעון"
+  ],
+  "streets_mapped": [
+   "נתיב הנחש",
+   "תל לכיש",
+   "רבין"
+  ],
+  "hoods": [
+   "חכמי ישראל",
+   "ממשית",
+   "נווה גן"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 6909.7,
+  "market_ppm": 7931,
+  "cushion_pct": 15,
+  "price4": 753450,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 3
+ },
+ {
+  "city": "דימונה",
+  "project": "שכ' השחר ( חב' ער",
+  "lamas": 2200,
+  "units": 397,
+  "streets_verified": [
+   "רבי נחמן מאומן"
+  ],
+  "streets_mapped": [
+   "דבורה עומר",
+   "הרב אברהם קוק"
+  ],
+  "hoods": [
+   "חכמי ישראל",
+   "שכ' השחר ( חב' ער"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 6564.1,
+  "market_ppm": 7931,
+  "cushion_pct": 21,
+  "price4": 753450,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 15
+ },
+ {
+  "city": "הרצליה",
+  "project": "גליל ים",
+  "lamas": 6400,
+  "units": 1502,
+  "streets_verified": [],
+  "streets_mapped": [
+   "החליל",
+   "הרב עובדיה יוסף",
+   "יוסי שריד"
+  ],
+  "hoods": [
+   "גליל ים",
+   "הרצליה ב'",
+   "ויצמן"
+  ],
+  "release_est": "2026-08-05",
+  "ppm_lottery": 16746.5,
+  "market_ppm": 36451,
+  "cushion_pct": 118,
+  "price4": 3462800,
+  "demand": 55.5,
+  "builders": [
+   "אזורים בנין (1965) בע\"מ",
+   "איסתא נכסים בע\"מ, סלע בינוי והשקעות מקבוצת אמנון מסילות בע\"מ",
+   "אפריקה ישראל מגורים בע\"מ",
+   "פרשקובסקי השקעות ובניין בע\"מ"
+  ],
+  "free_at": "2026-12-15",
+  "lottery_first": "2017-07-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "זכרון יעקב",
+  "project": "מושבה",
+  "lamas": 9300,
+  "units": 150,
+  "streets_verified": [],
+  "streets_mapped": [
+   "קברנה",
+   "מרלו",
+   "ענבים"
+  ],
+  "hoods": [
+   "מושבה",
+   "שיכון דרום"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 10907.3,
+  "market_ppm": 30359,
+  "cushion_pct": 178,
+  "price4": 2884100,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "חדרה",
+  "project": "גבעת אולגה",
+  "lamas": 6500,
+  "units": 105,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות מנחם בגין"
+  ],
+  "hoods": [
+   "גבעת אולגה"
+  ],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 8307.2,
+  "market_ppm": 21525,
+  "cushion_pct": 159,
+  "price4": 2044900,
+  "demand": 74.1,
+  "builders": [
+   "אברהם אליהו ובניו בע\"מ",
+   "בוני בנין פיתוח והשקעות (ז.ח.) בע\"מ",
+   "לניב הנדסה בע\"מ"
+  ],
+  "free_at": "2027-12-14",
+  "lottery_first": "2017-11-12",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "חולון",
+  "project": "איזור ותיקים",
+  "lamas": 6600,
+  "units": 48,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יוסף אהרונוביץ'",
+   "דוד רמז"
+  ],
+  "hoods": [
+   "נווה רמז"
+  ],
+  "release_est": "2025-03-18",
+  "ppm_lottery": 17959.0,
+  "market_ppm": 26633,
+  "cushion_pct": 48,
+  "price4": 2530140,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "חיפה",
+  "project": "אחוזה",
+  "lamas": 4000,
+  "units": 101,
+  "streets_verified": [],
+  "streets_mapped": [
+   "פיק\"א"
+  ],
+  "hoods": [
+   "דרום חיפה",
+   "רוממה הישנה"
+  ],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 13946.3,
+  "market_ppm": 16136,
+  "cushion_pct": 16,
+  "price4": 1532950,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "חיפה",
+  "project": "סטלה מריס",
+  "lamas": 4000,
+  "units": 36,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עמירם חרלף"
+  ],
+  "hoods": [
+   "סטלה מריס",
+   "רמת אלמוגי"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 11687.1,
+  "market_ppm": 16136,
+  "cushion_pct": 38,
+  "price4": 1532950,
+  "demand": 281.3,
+  "builders": [
+   "אלמוג ב. ז. בניה והשקעות בע\"מ"
+  ],
+  "free_at": "2028-01-18",
+  "lottery_first": "2018-10-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "חיפה",
+  "project": "קרית אליעזר",
+  "lamas": 4000,
+  "units": 707,
+  "streets_verified": [],
+  "streets_mapped": [
+   "טיילת קרית אליעזר",
+   "מייק ברנט",
+   "אברהם לסין"
+  ],
+  "hoods": [
+   "קריית אליעזר",
+   "קרית אליעזר"
+  ],
+  "release_est": "2026-06-27",
+  "ppm_lottery": 8689.9,
+  "market_ppm": 16136,
+  "cushion_pct": 86,
+  "price4": 1532950,
+  "demand": 14.9,
+  "builders": [
+   "א. י. אמריקה ישראל להשקעות בע\"",
+   "אשדר חברה לבניה בעמ"
+  ],
+  "free_at": "2026-06-27",
+  "lottery_first": "2017-01-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "חצור הגלילית",
+  "project": "הבוסתן",
+  "lamas": 2034,
+  "units": 77,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "הבוסתן"
+  ],
+  "release_est": "2025-03-21",
+  "ppm_lottery": 6163.2,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "חריש",
+  "project": "אור המזרח",
+  "lamas": 1247,
+  "units": 306,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דרך ארץ",
+   "תנופה"
+  ],
+  "hoods": [
+   "מע\"ר אור המיזרח",
+   "מעוף"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 7371.0,
+  "market_ppm": 14380,
+  "cushion_pct": 95,
+  "price4": 1366070,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "חריש",
+  "project": "אור המיזרח",
+  "lamas": 1247,
+  "units": 186,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ערבות",
+   "דרך ארץ"
+  ],
+  "hoods": [
+   "בצוותא",
+   "מע\"ר אור המיזרח"
+  ],
+  "release_est": "2024-12-07",
+  "ppm_lottery": 7324.2,
+  "market_ppm": 14380,
+  "cushion_pct": 96,
+  "price4": 1366070,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "חריש",
+  "project": "המעו\"ף",
+  "lamas": 1247,
+  "units": 1348,
+  "streets_verified": [],
+  "streets_mapped": [
+   "התחדשות",
+   "תנופה",
+   "התמדה"
+  ],
+  "hoods": [
+   "מע\"ר אור המיזרח",
+   "מעוף"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 7562.9,
+  "market_ppm": 14380,
+  "cushion_pct": 90,
+  "price4": 1366070,
+  "demand": 8.1,
+  "builders": [
+   "דונה חברה להנדסה ובנין בע\"מ"
+  ],
+  "free_at": "2026-09-22",
+  "lottery_first": "2017-07-27",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "חריש",
+  "project": "שכ' המגף",
+  "lamas": 1247,
+  "units": 286,
+  "streets_verified": [],
+  "streets_mapped": [
+   "Savyon"
+  ],
+  "hoods": [
+   "הפרחים",
+   "שכ' המגף"
+  ],
+  "release_est": "2025-11-19",
+  "ppm_lottery": 7449.4,
+  "market_ppm": 14380,
+  "cushion_pct": 93,
+  "price4": 1366070,
+  "demand": 20.4,
+  "builders": [
+   "אבני דרך בונה בדרום פרויקטים בע\"מ"
+  ],
+  "free_at": "2025-11-19",
+  "lottery_first": "2017-07-27",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "חריש",
+  "project": "תכנן ובנה אור המז",
+  "lamas": 1247,
+  "units": 1146,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הקהילה"
+  ],
+  "hoods": [
+   "בצוותא",
+   "תכנן ובנה אור המז"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 7435.4,
+  "market_ppm": 14380,
+  "cushion_pct": 93,
+  "price4": 1366070,
+  "demand": 11.6,
+  "builders": [
+   "שפיר מגורים ובניין בע\"מ"
+  ],
+  "free_at": "2026-12-16",
+  "lottery_first": "2018-03-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "טבריה",
+  "project": "אתר לא ספציפי",
+  "lamas": 6700,
+  "units": 26,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יהודה הנשיא",
+   "ביאליק"
+  ],
+  "hoods": [
+   "טבריה עילית"
+  ],
+  "release_est": null,
+  "ppm_lottery": 7236.4,
+  "market_ppm": 14556,
+  "cushion_pct": 101,
+  "price4": 1382800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "טבריה",
+  "project": "המושבה",
+  "lamas": 6700,
+  "units": 272,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מבצע עובדה"
+  ],
+  "hoods": [
+   "המושבה",
+   "טבריה עילית"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 6698.2,
+  "market_ppm": 14556,
+  "cushion_pct": 117,
+  "price4": 1382800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "טבריה",
+  "project": "מרכז העיר",
+  "lamas": 6700,
+  "units": 39,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אסתר המלכה"
+  ],
+  "hoods": [
+   "טבריה עילית",
+   "מרכז העיר"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 6492.3,
+  "market_ppm": 14556,
+  "cushion_pct": 124,
+  "price4": 1382800,
+  "demand": 55.3,
+  "builders": [
+   "אברהם אליהו ובניו בע\"מ"
+  ],
+  "free_at": "2026-05-19",
+  "lottery_first": "2019-05-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "טבריה",
+  "project": "שכון ג'",
+  "lamas": 6700,
+  "units": 15,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ביאליק"
+  ],
+  "hoods": [
+   "טבריה עילית"
+  ],
+  "release_est": null,
+  "ppm_lottery": 7236.4,
+  "market_ppm": 14556,
+  "cushion_pct": 101,
+  "price4": 1382800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "טירת כרמל",
+  "project": "החותרים",
+  "lamas": 2100,
+  "units": 3969,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האנפה",
+   "שדרות אריאל שרון",
+   "השחף"
+  ],
+  "hoods": [
+   "החותרים"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 8211.0,
+  "market_ppm": 18709,
+  "cushion_pct": 128,
+  "price4": 1777386,
+  "demand": 6.5,
+  "builders": [
+   "אבי מנדלר נכסים והשקעות בע\"מ",
+   "אודור נכסים בע\"מ",
+   "אורתם-וילאר ניהול בע\"מ",
+   "אשדר חברה לבניה בעמ"
+  ],
+  "free_at": "2027-10-26",
+  "lottery_first": "2017-07-26",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "טירת כרמל",
+  "project": "שכ' ביאליק",
+  "lamas": 2100,
+  "units": 26,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שרת"
+  ],
+  "hoods": [
+   "שכ' ביאליק"
+  ],
+  "release_est": "2023-11-06",
+  "ppm_lottery": 6376.5,
+  "market_ppm": 18709,
+  "cushion_pct": 193,
+  "price4": 1777386,
+  "demand": 384.1,
+  "builders": [
+   "הטירה - א. לוי יזמות בע\"מ"
+  ],
+  "free_at": "2023-11-06",
+  "lottery_first": "2016-11-06",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "טרעאן",
+  "project": "שכונה צפונית",
+  "lamas": 498,
+  "units": 118,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "שכונה צפונית"
+  ],
+  "release_est": null,
+  "ppm_lottery": 4429.0,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "יבנה",
+  "project": "דרום - A",
+  "lamas": 2660,
+  "units": 423,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הנמל",
+   "הרשת"
+  ],
+  "hoods": [
+   "דרום - A",
+   "נאות רבין"
+  ],
+  "release_est": "2026-08-05",
+  "ppm_lottery": 9441.1,
+  "market_ppm": 24406,
+  "cushion_pct": 159,
+  "price4": 2318523,
+  "demand": 34.2,
+  "builders": [
+   "אבי מנדלר נכסים והשקעות בע\"מ",
+   "ברקת ישראל-מחיר למשתכן",
+   "גיא & דורון לוי הנדסה בנייה וה"
+  ],
+  "free_at": "2027-12-14",
+  "lottery_first": "2017-11-13",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "יבנה",
+  "project": "דרום - B+ C",
+  "lamas": 2660,
+  "units": 2944,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות הרצל"
+  ],
+  "hoods": [
+   "דרום - B+ C"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 10245.1,
+  "market_ppm": 24406,
+  "cushion_pct": 138,
+  "price4": 2318523,
+  "demand": 40.2,
+  "builders": [
+   "גינדי גרדנס בע\"מ",
+   "דור אל ש. הנדסה בניה והשקעות בע\"מ",
+   "מוטי אמסילי (1991) בע\"מ",
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2027-08-19",
+  "lottery_first": "2017-07-25",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "יקנעם עלית",
+  "project": "גבעת השיטה",
+  "lamas": 240,
+  "units": 46,
+  "streets_verified": [],
+  "streets_mapped": [
+   "השיטה"
+  ],
+  "hoods": [
+   "גבעת השיטה"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 8830.0,
+  "market_ppm": 22189,
+  "cushion_pct": 151,
+  "price4": 2107994,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "יקנעם עלית",
+  "project": "שער הגיא מערבי",
+  "lamas": 240,
+  "units": 306,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נשיאי ישראל",
+   "672"
+  ],
+  "hoods": [
+   "שער הגיא",
+   "שער הגיא מערבי"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 9192.3,
+  "market_ppm": 22189,
+  "cushion_pct": 141,
+  "price4": 2107994,
+  "demand": 15.2,
+  "builders": [
+   "א. י. אמריקה ישראל להשקעות בע\"",
+   "אבני דרך - יהלום עפולה בע\"מ",
+   "שובל מתחמי מגורים בע\"מ"
+  ],
+  "free_at": "2027-06-28",
+  "lottery_first": "2018-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ירוחם",
+  "project": "דרומית",
+  "lamas": 831,
+  "units": 60,
+  "streets_verified": [
+   "יוסף"
+  ],
+  "streets_mapped": [],
+  "hoods": [
+   "אופק"
+  ],
+  "release_est": "2024-12-06",
+  "ppm_lottery": 6967.4,
+  "market_ppm": 12850,
+  "cushion_pct": 84,
+  "price4": 1220710,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 2
+ },
+ {
+  "city": "ירוחם",
+  "project": "צפונית",
+  "lamas": 831,
+  "units": 171,
+  "streets_verified": [
+   "ריה\"ל",
+   "המשוררת",
+   "זלדה"
+  ],
+  "streets_mapped": [],
+  "hoods": [
+   "אירוס"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 6382.4,
+  "market_ppm": 12850,
+  "cushion_pct": 101,
+  "price4": 1220710,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 8
+ },
+ {
+  "city": "ירושלים",
+  "project": "ו' סן-סימון",
+  "lamas": 3000,
+  "units": 285,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יחזקאל ישראל",
+   "רבן יוחנן בן זכאי"
+  ],
+  "hoods": [
+   "ו' סן-סימון",
+   "קטמונים (גוננים)"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 18655.7,
+  "market_ppm": 35571,
+  "cushion_pct": 91,
+  "price4": 3379229,
+  "demand": 13.6,
+  "builders": [
+   "סלע איסתא נדל\"ן ישראלי בע\"מ"
+  ],
+  "free_at": "2026-05-19",
+  "lottery_first": "2019-05-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ירושלים",
+  "project": "מורדות ארנונה",
+  "lamas": 3000,
+  "units": 877,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יצחק ארנסט נבנצל",
+   "שמעון מישורי",
+   "יעקב נאמן"
+  ],
+  "hoods": [
+   "ארנונה",
+   "מורדות ארנונה"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 17679.4,
+  "market_ppm": 35571,
+  "cushion_pct": 101,
+  "price4": 3379229,
+  "demand": 50.1,
+  "builders": [
+   "אבני דרך - יהלום עפולה בע\"מ",
+   "בוני התיכון הנדסה אזרחית ותשתי",
+   "ג'יי הנדסה ויזמות בע\"מ",
+   "גיא & דורון לוי הנדסה בנייה וה"
+  ],
+  "free_at": "2026-11-13",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ירושלים",
+  "project": "מורדות גילה מערב",
+  "lamas": 3000,
+  "units": 89,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נחל גילה",
+   "אבנר חי שאקי"
+  ],
+  "hoods": [
+   "גילה"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 35571,
+  "cushion_pct": null,
+  "price4": 3379229,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "ירושלים",
+  "project": "מורדות מלחה",
+  "lamas": 3000,
+  "units": 254,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אברהם כחילה",
+   "אדמונד סחייק"
+  ],
+  "hoods": [
+   "מורדות מלחה",
+   "מלחה"
+  ],
+  "release_est": "2024-12-20",
+  "ppm_lottery": 16199.2,
+  "market_ppm": 35571,
+  "cushion_pct": 120,
+  "price4": 3379229,
+  "demand": 111.5,
+  "builders": [
+   "אחים חסיד חברה קבלנית לבניה בע",
+   "דליה אליאספור חברה קבלנית לבני"
+  ],
+  "free_at": "2031-04-10",
+  "lottery_first": "2017-12-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ירושלים",
+  "project": "פסגת זאב צפון מערב",
+  "lamas": 3000,
+  "units": 68,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עמיחי פאגלין"
+  ],
+  "hoods": [
+   "אתר 01",
+   "אתר לא ספציפי",
+   "בית חנינא",
+   "מורדות גילה מערב"
+  ],
+  "release_est": "2023-09-28",
+  "ppm_lottery": 9578.8,
+  "market_ppm": 35571,
+  "cushion_pct": 271,
+  "price4": 3379229,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "ירושלים",
+  "project": "רמת שלמה",
+  "lamas": 3000,
+  "units": 1043,
+  "streets_verified": [],
+  "streets_mapped": [
+   "בוקסבוים"
+  ],
+  "hoods": [
+   "רמת שלמה"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 13384.7,
+  "market_ppm": 35571,
+  "cushion_pct": 166,
+  "price4": 3379229,
+  "demand": 77.5,
+  "builders": [
+   "אס אי אס (ש.נ.ח) נדל\"ן בע\"מ",
+   "אפי קפיטל אחזקות בע\"מ",
+   "גיא א דורון לוי הנדסה בנייה וה",
+   "דליה אליאספור חברה קבלנית לבני"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2016-11-06",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "כפר יונה",
+  "project": "דרום מזרח",
+  "lamas": 168,
+  "units": 349,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אהבת אדם"
+  ],
+  "hoods": [
+   "דרום מזרח"
+  ],
+  "release_est": "2026-05-05",
+  "ppm_lottery": 8723.1,
+  "market_ppm": 23867,
+  "cushion_pct": 174,
+  "price4": 2267329,
+  "demand": 17.9,
+  "builders": [
+   "ספייס בנייה ויזמות בע\"מ/ לאטי יזמות ובנייה",
+   "ש. שרבט ושות' חברה לבניה והשקעות 2991 בע\"מ"
+  ],
+  "free_at": "2026-05-05",
+  "lottery_first": "2017-07-26",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "כפר מנדא",
+  "project": "כלל הישוב",
+  "lamas": 510,
+  "units": 67,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "כלל הישוב"
+  ],
+  "release_est": "2026-03-17",
+  "ppm_lottery": 5733.0,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "כרמיאל",
+  "project": "הר כרמי",
+  "lamas": 1139,
+  "units": 1071,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נחל צלמון",
+   "נחל עמוד",
+   "אביב",
+   "שדרות נשיאי ישראל",
+   "נחל דישון"
+  ],
+  "hoods": [
+   "הר כרמי",
+   "רמת רבין"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 8378.1,
+  "market_ppm": 12991,
+  "cushion_pct": 55,
+  "price4": 1234100,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "לוד",
+  "project": "אחיסמך",
+  "lamas": 7000,
+  "units": 376,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שבט יהודה",
+   "יעקב אבינו",
+   "משה רבנו"
+  ],
+  "hoods": [
+   "נופי בן שמן"
+  ],
+  "release_est": "2023-04-06",
+  "ppm_lottery": 7131.1,
+  "market_ppm": 18605,
+  "cushion_pct": 161,
+  "price4": 1767483,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "לוד",
+  "project": "גני אביב",
+  "lamas": 7000,
+  "units": 297,
+  "streets_verified": [],
+  "streets_mapped": [
+   "פורצי מסך הברזל"
+  ],
+  "hoods": [
+   "גני אביב",
+   "שניר"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 18605,
+  "cushion_pct": null,
+  "price4": 1767483,
+  "demand": 56.2,
+  "builders": [
+   "אבני דרך פרויקט ברקת בצפון 2016 בע\"",
+   "זוהר וצפריר שרבט בע\"מ"
+  ],
+  "free_at": "2029-04-27",
+  "lottery_first": "2022-04-27",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מבשרת ציון",
+  "project": "אתר 01",
+  "lamas": 1015,
+  "units": 516,
+  "streets_verified": [],
+  "streets_mapped": [
+   "השקד"
+  ],
+  "hoods": [
+   "אתר 01"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 11826.9,
+  "market_ppm": 32598,
+  "cushion_pct": 176,
+  "price4": 3096838,
+  "demand": 52.0,
+  "builders": [
+   "אזורים בנין (1965) בע\"מ",
+   "י. ד. ברזאני נכסים ובניין (1983) בע"
+  ],
+  "free_at": "2025-12-16",
+  "lottery_first": "2016-12-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מבשרת ציון",
+  "project": "המגרסה",
+  "lamas": 1015,
+  "units": 597,
+  "streets_verified": [],
+  "streets_mapped": [
+   "רותם",
+   "שחם"
+  ],
+  "hoods": [
+   "שכ' ט'"
+  ],
+  "release_est": "2025-03-21",
+  "ppm_lottery": 11712.4,
+  "market_ppm": 32598,
+  "cushion_pct": 178,
+  "price4": 3096838,
+  "demand": 303.7,
+  "builders": [
+   "אי. אס. איי אחזקות בע\"מ",
+   "אלואל - חברה לבניין בע\"מ",
+   "ארזים (ג.י.א) בע\"מ",
+   "חיים זקן בנין והשקעות בע\"מ"
+  ],
+  "free_at": "2029-09-28",
+  "lottery_first": "2017-12-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מגדל העמק",
+  "project": "יפה נוף",
+  "lamas": 874,
+  "units": 84,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יפה נוף"
+  ],
+  "hoods": [
+   "יפה נוף"
+  ],
+  "release_est": "2024-12-07",
+  "ppm_lottery": 6048.9,
+  "market_ppm": 11866,
+  "cushion_pct": 96,
+  "price4": 1127238,
+  "demand": 47.6,
+  "builders": [
+   "אדר בעמק"
+  ],
+  "free_at": "2024-12-07",
+  "lottery_first": "2017-01-30",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מגדל העמק",
+  "project": "כפר החורש-מ.ע.ר",
+  "lamas": 874,
+  "units": 76,
+  "streets_verified": [
+   "התדהר"
+  ],
+  "streets_mapped": [],
+  "hoods": [
+   "כפר החורש-מ.ע.ר"
+  ],
+  "release_est": "2026-06-27",
+  "ppm_lottery": 8166.6,
+  "market_ppm": 11866,
+  "cushion_pct": 45,
+  "price4": 1127238,
+  "demand": 12.6,
+  "builders": [
+   "גילי ויואל עזריה בע\"מ"
+  ],
+  "free_at": "2026-06-27",
+  "lottery_first": "2018-03-21",
+  "lottery_match": "מאומת",
+  "our_listings": 1
+ },
+ {
+  "city": "מגדל העמק",
+  "project": "מגרשים 494A,495A",
+  "lamas": 874,
+  "units": 71,
+  "streets_verified": [],
+  "streets_mapped": [
+   "חיים בר לב",
+   "כ\"ט בנובמבר"
+  ],
+  "hoods": [
+   "צפון מערב"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 7182.6,
+  "market_ppm": 11866,
+  "cushion_pct": 65,
+  "price4": 1127238,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מגדל העמק",
+  "project": "צפון מערב",
+  "lamas": 874,
+  "units": 383,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אמנון ליפקין-שחק",
+   "חיים לסקוב",
+   "עזר ויצמן",
+   "סיני"
+  ],
+  "hoods": [
+   "צפון מערב"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 6803.1,
+  "market_ppm": 11866,
+  "cushion_pct": 74,
+  "price4": 1127238,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מגדל העמק",
+  "project": "שריד",
+  "lamas": 874,
+  "units": 597,
+  "streets_verified": [
+   "אחד העם"
+  ],
+  "streets_mapped": [
+   "חיים הרצוג",
+   "חיים ויצמן",
+   "החרוב"
+  ],
+  "hoods": [
+   "שריד"
+  ],
+  "release_est": "2026-03-17",
+  "ppm_lottery": 6382.6,
+  "market_ppm": 11866,
+  "cushion_pct": 86,
+  "price4": 1127238,
+  "demand": 19.2,
+  "builders": [
+   "אדר בעמקים נכסים בע\"מ",
+   "תאופיק דראושה בעמ"
+  ],
+  "free_at": "2026-03-17",
+  "lottery_first": "2017-04-04",
+  "lottery_match": "מאומת",
+  "our_listings": 3
+ },
+ {
+  "city": "מודיעין",
+  "project": "בוכמן דרום",
+  "lamas": 1200,
+  "units": 25,
+  "streets_verified": [],
+  "streets_mapped": [
+   "רחל אמנו",
+   "מנחם בגין"
+  ],
+  "hoods": [
+   "בוכמן דרום",
+   "מוריה"
+  ],
+  "release_est": "2024-12-21",
+  "ppm_lottery": 12740.1,
+  "market_ppm": 30484,
+  "cushion_pct": 139,
+  "price4": 2895983,
+  "demand": 243.5,
+  "builders": [
+   "לב-טוב בניה והשקעות בע\"מ"
+  ],
+  "free_at": "2024-12-21",
+  "lottery_first": "2017-12-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מודיעין",
+  "project": "יער P",
+  "lamas": 1200,
+  "units": 2793,
+  "streets_verified": [],
+  "streets_mapped": [
+   "גולדה מאיר",
+   "משה שרת",
+   "עמק חפר",
+   "שמעון פרס"
+  ],
+  "hoods": [
+   "אבני חן",
+   "יער P"
+  ],
+  "release_est": "2026-08-05",
+  "ppm_lottery": 10974.6,
+  "market_ppm": 30484,
+  "cushion_pct": 178,
+  "price4": 2895983,
+  "demand": 134.1,
+  "builders": [
+   "בוני התיכון הנדסה אזרחית ותשתי",
+   "גיא & דורון לוי הנדסה בנייה וה",
+   "דונה חברה להנדסה ובנין בע\"מ",
+   "ושאחי את עמלה יזמות והנדסה בע\"מ"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2017-07-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מודיעין",
+  "project": "שדרות החשמונאים",
+  "lamas": 1200,
+  "units": 524,
+  "streets_verified": [],
+  "streets_mapped": [
+   "טיילת שדרות החשמונאים",
+   "אלישע הנביא"
+  ],
+  "hoods": [
+   "הנביאים",
+   "ציפור צפון"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 11105.1,
+  "market_ppm": 30484,
+  "cushion_pct": 175,
+  "price4": 2895983,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלה אדומים",
+  "project": "07",
+  "lamas": 3616,
+  "units": 56,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "07",
+   "נופי סלע"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 10882.8,
+  "market_ppm": 21428,
+  "cushion_pct": 97,
+  "price4": 2035700,
+  "demand": 72.6,
+  "builders": [
+   "קוטלר עדיקא חברה לבניה בעמ",
+   "ראם פרץ יזמות ונדל\"ן בע\"מ"
+  ],
+  "free_at": "2026-11-14",
+  "lottery_first": "2017-12-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלה אדומים",
+  "project": "אתר 02",
+  "lamas": 3616,
+  "units": 229,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות החברה הכלכלית"
+  ],
+  "hoods": [
+   "אבני החושן",
+   "ככר קדם"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 9953.0,
+  "market_ppm": 21428,
+  "cushion_pct": 115,
+  "price4": 2035700,
+  "demand": 43.8,
+  "builders": [
+   "מגדל מעלה אדומים בע\"מ",
+   "מצפור אדומים בע\"מ",
+   "שלמה כהן חברה לבנין בע\"מ"
+  ],
+  "free_at": "2026-05-19",
+  "lottery_first": "2019-05-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלה אדומים",
+  "project": "אתר 03",
+  "lamas": 3616,
+  "units": 40,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הר הצופים"
+  ],
+  "hoods": [
+   "אתר 03",
+   "מגדים"
+  ],
+  "release_est": "2025-03-19",
+  "ppm_lottery": 9711.0,
+  "market_ppm": 21428,
+  "cushion_pct": 121,
+  "price4": 2035700,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלות-תרשיחא",
+  "project": "גבעת אורנים",
+  "lamas": 1063,
+  "units": 247,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מירון",
+   "מצדה"
+  ],
+  "hoods": [
+   "גבעת אורנים",
+   "גבעת האורנים"
+  ],
+  "release_est": "2024-12-06",
+  "ppm_lottery": 6883.1,
+  "market_ppm": 11460,
+  "cushion_pct": 66,
+  "price4": 1088679,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלות-תרשיחא",
+  "project": "גבעת צוריאל",
+  "lamas": 1063,
+  "units": 204,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יפה ירקוני",
+   "שושנה דמארי",
+   "הנרייטה סאלד"
+  ],
+  "hoods": [
+   "גבעת צוריאל",
+   "האילנות"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 11460,
+  "cushion_pct": null,
+  "price4": 1088679,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלות-תרשיחא",
+  "project": "נוף אגם",
+  "lamas": 1063,
+  "units": 97,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שדרות מ\"ג המעפילים",
+   "צורית",
+   "יקינטון"
+  ],
+  "hoods": [
+   "גבעת צוריאל",
+   "האילנות"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 7187.3,
+  "market_ppm": 11460,
+  "cushion_pct": 59,
+  "price4": 1088679,
+  "demand": 6.2,
+  "builders": [
+   "ורדים השקעות ונכסים בע\"מ"
+  ],
+  "free_at": "2026-08-04",
+  "lottery_first": "2017-12-25",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "מעלות-תרשיחא",
+  "project": "שכ' הבנים תרשיחא",
+  "lamas": 1063,
+  "units": 18,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מעלה הכרמים"
+  ],
+  "hoods": [
+   "גבעת האורנים",
+   "שכ' הבנים"
+  ],
+  "release_est": "2025-04-17",
+  "ppm_lottery": 6306.3,
+  "market_ppm": 11460,
+  "cushion_pct": 82,
+  "price4": 1088679,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מצפה רמון",
+  "project": "רמות ספיר",
+  "lamas": 99,
+  "units": 55,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עין שחק",
+   "עין המערה"
+  ],
+  "hoods": [
+   "רמות ספיר"
+  ],
+  "release_est": "2025-03-21",
+  "ppm_lottery": 6275.1,
+  "market_ppm": 10144,
+  "cushion_pct": 62,
+  "price4": 963722,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "מרכז שפירא",
+  "project": "הרחבה היישוב",
+  "lamas": 1098,
+  "units": 52,
+  "streets_verified": [],
+  "streets_mapped": [
+   "החיטה"
+  ],
+  "hoods": [],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 7698.6,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "מרכז שפירא",
+  "project": "הרחבת היישוב",
+  "lamas": 1098,
+  "units": 50,
+  "streets_verified": [],
+  "streets_mapped": [
+   "החיטה"
+  ],
+  "hoods": [],
+  "release_est": "2024-07-27",
+  "ppm_lottery": 7966.5,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נהריה",
+  "project": "האצטדיון",
+  "lamas": 9100,
+  "units": 552,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מבצע אנטבה",
+   "גדולי האומה",
+   "הנשיא"
+  ],
+  "hoods": [
+   "גבעת כצנלסון",
+   "האצטדיון"
+  ],
+  "release_est": "2026-03-17",
+  "ppm_lottery": 8146.7,
+  "market_ppm": 17961,
+  "cushion_pct": 120,
+  "price4": 1706300,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נהריה",
+  "project": "מרכז העיר",
+  "lamas": 9100,
+  "units": 166,
+  "streets_verified": [],
+  "streets_mapped": [
+   "פינסקר",
+   "ז'בוטינסקי"
+  ],
+  "hoods": [
+   "קרית בן-גוריון"
+  ],
+  "release_est": "2026-06-26",
+  "ppm_lottery": 11473.0,
+  "market_ppm": 17961,
+  "cushion_pct": 57,
+  "price4": 1706300,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "נהריה",
+  "project": "שכונה צפון מזרחית",
+  "lamas": 9100,
+  "units": 2179,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ליבנה",
+   "דולב"
+  ],
+  "hoods": [
+   "אריאל שרון",
+   "גבעת טרומפלדור",
+   "שכונה צפון מזרחית"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 7165.0,
+  "market_ppm": 17961,
+  "cushion_pct": 151,
+  "price4": 1706300,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נחף",
+  "project": "כלל הישוב",
+  "lamas": 522,
+  "units": 103,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "כלל הישוב"
+  ],
+  "release_est": "2026-03-17",
+  "ppm_lottery": 4603.9,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 1.6,
+  "builders": [
+   "חילאילה עלי"
+  ],
+  "free_at": "2026-03-17",
+  "lottery_first": "2017-12-25",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "נס ציונה",
+  "project": "יד אליעזר",
+  "lamas": 7200,
+  "units": 216,
+  "streets_verified": [],
+  "streets_mapped": [
+   "לאה גולדברג",
+   "נעמי שמר",
+   "מאיר הרמן"
+  ],
+  "hoods": [
+   "יד אליעזר",
+   "נאות יוסי שבו"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 13513.5,
+  "market_ppm": 31774,
+  "cushion_pct": 135,
+  "price4": 3018550,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נצרת עלית",
+  "project": "הקריה החרדית - הר יונה ג'",
+  "lamas": 1061,
+  "units": 175,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אמרי סופר"
+  ],
+  "hoods": [
+   "הר יונה"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 7018.8,
+  "market_ppm": 13214,
+  "cushion_pct": 88,
+  "price4": 1255320,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "נצרת עלית",
+  "project": "חרמון-גלבוע",
+  "lamas": 1061,
+  "units": 64,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "הר יונה"
+  ],
+  "release_est": "2026-01-21",
+  "ppm_lottery": 5826.6,
+  "market_ppm": 13214,
+  "cushion_pct": 127,
+  "price4": 1255320,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "נצרת עלית",
+  "project": "מצפור ברק",
+  "lamas": 1061,
+  "units": 137,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יזרעאל"
+  ],
+  "hoods": [],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 5790.3,
+  "market_ppm": 13214,
+  "cushion_pct": 128,
+  "price4": 1255320,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "נצרת",
+  "project": "שכונת הגליל",
+  "lamas": 7300,
+  "units": 472,
+  "streets_verified": [],
+  "streets_mapped": [
+   "7064"
+  ],
+  "hoods": [
+   "שכונת הגליל"
+  ],
+  "release_est": "2024-12-25",
+  "ppm_lottery": 5312.8,
+  "market_ppm": 13316,
+  "cushion_pct": 151,
+  "price4": 1264983,
+  "demand": 49.0,
+  "builders": [
+   "א. ג'ברין בע\"מ",
+   "א.ש. אלפא נכסים בע\"מ",
+   "אחים פתחי חברה לבניה בע\"מ",
+   "איבילד ריל אסטיט בע\"מ"
+  ],
+  "free_at": "2029-07-24",
+  "lottery_first": "2017-12-25",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "נשר",
+  "project": "גבעת עמוס ובן-דור",
+  "lamas": 2500,
+  "units": 32,
+  "streets_verified": [],
+  "streets_mapped": [
+   "המרגנית"
+  ],
+  "hoods": [
+   "גבעת עמוס ובן-דור",
+   "רמות יצחק"
+  ],
+  "release_est": "2024-11-13",
+  "ppm_lottery": 8996.1,
+  "market_ppm": 18253,
+  "cushion_pct": 103,
+  "price4": 1734000,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתיבות",
+  "project": "אתר 12",
+  "lamas": 246,
+  "units": 1072,
+  "streets_verified": [
+   "אריאל שרון",
+   "יצחק שמיר"
+  ],
+  "streets_mapped": [
+   "ג'ו עמר"
+  ],
+  "hoods": [
+   "אתר 12",
+   "שכונת שער העיר"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 6720.3,
+  "market_ppm": 14998,
+  "cushion_pct": 123,
+  "price4": 1424799,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 16
+ },
+ {
+  "city": "נתיבות",
+  "project": "אתר 13",
+  "lamas": 246,
+  "units": 241,
+  "streets_verified": [
+   "אריאל שרון"
+  ],
+  "streets_mapped": [
+   "יהדות איטליה"
+  ],
+  "hoods": [
+   "אתר 13",
+   "שכונת שער העיר"
+  ],
+  "release_est": "2026-05-05",
+  "ppm_lottery": 7428.3,
+  "market_ppm": 14998,
+  "cushion_pct": 102,
+  "price4": 1424799,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 5
+ },
+ {
+  "city": "נתיבות",
+  "project": "קרית מנחם",
+  "lamas": 246,
+  "units": 160,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יובל",
+   "הרב חזני"
+  ],
+  "hoods": [
+   "קרית מנחם",
+   "שכונת שער העיר"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 14998,
+  "cushion_pct": null,
+  "price4": 1424799,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתיבות",
+  "project": "רובע 10",
+  "lamas": 246,
+  "units": 278,
+  "streets_verified": [
+   "יצחק שמיר"
+  ],
+  "streets_mapped": [
+   "איילת השחר"
+  ],
+  "hoods": [
+   "רובע 10",
+   "שכונת שער העיר"
+  ],
+  "release_est": "2026-05-05",
+  "ppm_lottery": 7428.3,
+  "market_ppm": 14998,
+  "cushion_pct": 102,
+  "price4": 1424799,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 3
+ },
+ {
+  "city": "נתיבות",
+  "project": "שכ' מערבית",
+  "lamas": 246,
+  "units": 673,
+  "streets_verified": [
+   "יוסף אבו",
+   "שלום דנינו",
+   "אריאל שרון"
+  ],
+  "streets_mapped": [
+   "צפצפה"
+  ],
+  "hoods": [
+   "שכ' מערבית",
+   "שכונת שער העיר"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 7009.5,
+  "market_ppm": 14998,
+  "cushion_pct": 114,
+  "price4": 1424799,
+  "demand": 19.3,
+  "builders": [
+   "ארזי הנגב ייזום ובניה בע\"מ",
+   "י.דביר יזמות ובניה (יצחקי) בע\"מ",
+   "י.ח. דמרי בניה ופיתוח בע\"מ"
+  ],
+  "free_at": "2029-04-27",
+  "lottery_first": "2018-03-19",
+  "lottery_match": "מאומת",
+  "our_listings": 15
+ },
+ {
+  "city": "נתניה",
+  "project": "אגם 3      .",
+  "lamas": 7400,
+  "units": 374,
+  "streets_verified": [],
+  "streets_mapped": [
+   "קרל פופר",
+   "רחל פרנקלין"
+  ],
+  "hoods": [
+   "אגם 3      .",
+   "נאות שקד",
+   "קריית נורדאו"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 11099.8,
+  "market_ppm": 27146,
+  "cushion_pct": 145,
+  "price4": 2578900,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתניה",
+  "project": "נוף גלים",
+  "lamas": 7400,
+  "units": 175,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ארצ'י שרמן",
+   "ראול ולנברג"
+  ],
+  "hoods": [
+   "Neve Oz",
+   "אגם 3      .",
+   "אתר 09"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 12686.3,
+  "market_ppm": 27146,
+  "cushion_pct": 114,
+  "price4": 2578900,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "נתניה",
+  "project": "נוף גלים.",
+  "lamas": 7400,
+  "units": 573,
+  "streets_verified": [],
+  "streets_mapped": [
+   "המכביה"
+  ],
+  "hoods": [
+   "אגם 3      .",
+   "רמת ידין"
+  ],
+  "release_est": "2026-08-05",
+  "ppm_lottery": 10653.0,
+  "market_ppm": 27146,
+  "cushion_pct": 155,
+  "price4": 2578900,
+  "demand": 61.8,
+  "builders": [
+   "א. גינאדי השקעות ובנייה 1992 בע\"מ",
+   "אלמוג ב. ז. בניה והשקעות בע\"מ",
+   "יעקבי יוניברסל ייזום והשקעות בע\"מ",
+   "פרץ לוזון, בנין ופתוח בע\"מ"
+  ],
+  "free_at": "2029-03-07",
+  "lottery_first": "2017-11-08",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתניה",
+  "project": "נוף גלים. .",
+  "lamas": 7400,
+  "units": 248,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האחים רייט",
+   "שדרות בן צבי יצחק",
+   "קרל פופר",
+   "רחל פרנקלין"
+  ],
+  "hoods": [
+   "אגם 3      .",
+   "נאות שקד",
+   "קריית נורדאו",
+   "רמת ידין"
+  ],
+  "release_est": "2026-06-27",
+  "ppm_lottery": 11114.6,
+  "market_ppm": 27146,
+  "cushion_pct": 144,
+  "price4": 2578900,
+  "demand": 147.0,
+  "builders": [
+   "גיא & דורון לוי הנדסה בנייה וה",
+   "פרץ לוזון, בנין ופתוח בע\"מ"
+  ],
+  "free_at": "2030-06-21",
+  "lottery_first": "2017-11-09",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתניה",
+  "project": "עין התכלת",
+  "lamas": 7400,
+  "units": 324,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הגדוד העברי"
+  ],
+  "hoods": [
+   "Neve Shalom",
+   "עין התכלת"
+  ],
+  "release_est": "2024-12-20",
+  "ppm_lottery": 15500.2,
+  "market_ppm": 27146,
+  "cushion_pct": 75,
+  "price4": 2578900,
+  "demand": 74.5,
+  "builders": [
+   "ציון בריגה ובניו עיר ימים בע\"מ"
+  ],
+  "free_at": "2029-01-19",
+  "lottery_first": "2017-12-20",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "נתניה",
+  "project": "עמליה ב'",
+  "lamas": 7400,
+  "units": 136,
+  "streets_verified": [],
+  "streets_mapped": [
+   "בני וו. רייך",
+   "לנטוס"
+  ],
+  "hoods": [
+   "עמליה ב'",
+   "קרית השרון"
+  ],
+  "release_est": "2025-08-21",
+  "ppm_lottery": 11296.4,
+  "market_ppm": 27146,
+  "cushion_pct": 140,
+  "price4": 2578900,
+  "demand": 138.5,
+  "builders": [
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2025-08-21",
+  "lottery_first": "2017-07-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "סח'נין",
+  "project": "דרום מזרח",
+  "lamas": 7500,
+  "units": 157,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "דרום מזרח"
+  ],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 3761.6,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 1.9,
+  "builders": [
+   "חלאילה חאנה",
+   "ס.נ. זהב עבודות בנין בע\"מ"
+  ],
+  "free_at": "2026-12-16",
+  "lottery_first": "2019-01-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "עכו",
+  "project": "הכרם ג'",
+  "lamas": 7600,
+  "units": 2207,
+  "streets_verified": [],
+  "streets_mapped": [
+   "צפירה",
+   "עופרה חזה",
+   "דרך השלם",
+   "סשה ארגוב"
+  ],
+  "hoods": [
+   "הכרם ג'",
+   "מנחם בגין"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 7891.5,
+  "market_ppm": 14104,
+  "cushion_pct": 79,
+  "price4": 1339900,
+  "demand": 3.0,
+  "builders": [
+   "א. י. אמריקה ישראל להשקעות בע\"",
+   "אבי מנדלר נכסים והשקעות בע\"מ",
+   "מגדלי כרם עכו בע\"מ",
+   "משכנות הכרם עכו בע\"מ"
+  ],
+  "free_at": "2030-06-21",
+  "lottery_first": "2017-11-14",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "עכו",
+  "project": "שערי עכו הרחבה מז",
+  "lamas": 7600,
+  "units": 577,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האשד",
+   "העוגן"
+  ],
+  "hoods": [
+   "בן גוריון",
+   "מוריה",
+   "שערי עכו הרחבה מז"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 14104,
+  "cushion_pct": null,
+  "price4": 1339900,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עמנואל",
+  "project": "אתר 03 (ג)",
+  "lamas": 3660,
+  "units": 40,
+  "streets_verified": [],
+  "streets_mapped": [
+   "איש מצליח",
+   "פנחס לוין"
+  ],
+  "hoods": [
+   "אתר 03 (ג)"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "C1",
+  "lamas": 7700,
+  "units": 375,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עירית",
+   "אדמונית",
+   "אירוס",
+   "רוזמרין"
+  ],
+  "hoods": [
+   "C1",
+   "עפולה - העיר"
+  ],
+  "release_est": "2026-05-02",
+  "ppm_lottery": 5857.5,
+  "market_ppm": 13956,
+  "cushion_pct": 138,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "C2",
+  "lamas": 7700,
+  "units": 17,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עומר",
+   "אסיף"
+  ],
+  "hoods": [],
+  "release_est": "2025-03-19",
+  "ppm_lottery": 5873.4,
+  "market_ppm": 13956,
+  "cushion_pct": 138,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "אתר לא ספציפי",
+  "lamas": 7700,
+  "units": 125,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הקציר"
+  ],
+  "hoods": [],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 6651.0,
+  "market_ppm": 13956,
+  "cushion_pct": 110,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "הבנים",
+  "lamas": 7700,
+  "units": 22,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הבנים",
+   "וולפסון"
+  ],
+  "hoods": [],
+  "release_est": "2025-11-19",
+  "ppm_lottery": 6335.6,
+  "market_ppm": 13956,
+  "cushion_pct": 120,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "הצעירה ג",
+  "lamas": 7700,
+  "units": 198,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יצחק שמיר",
+   "כביש עוקף עפולה מזרח"
+  ],
+  "hoods": [
+   "הצעירה ג",
+   "עפולה עילית"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 6546.1,
+  "market_ppm": 13956,
+  "cushion_pct": 113,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "לב העמק C1",
+  "lamas": 7700,
+  "units": 74,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האקליפטוס"
+  ],
+  "hoods": [
+   "C1",
+   "עפולה - העיר"
+  ],
+  "release_est": "2026-06-27",
+  "ppm_lottery": 6982.6,
+  "market_ppm": 13956,
+  "cushion_pct": 100,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "חלקית",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "עפולה - העיר",
+  "lamas": 7700,
+  "units": 114,
+  "streets_verified": [],
+  "streets_mapped": [
+   "משה בלנדר"
+  ],
+  "hoods": [
+   "עפולה - העיר"
+  ],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 5614.5,
+  "market_ppm": 13956,
+  "cushion_pct": 149,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "רובע יזרעאל",
+  "lamas": 7700,
+  "units": 24,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יעל רום 10"
+  ],
+  "hoods": [],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 6486.5,
+  "market_ppm": 13956,
+  "cushion_pct": 115,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "עפולה",
+  "project": "רובע יזרעראל",
+  "lamas": 7700,
+  "units": 45,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דבורה הנביאה",
+   "אסתר המלכה"
+  ],
+  "hoods": [],
+  "release_est": "2025-11-19",
+  "ppm_lottery": 6376.5,
+  "market_ppm": 13956,
+  "cushion_pct": 119,
+  "price4": 1325800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "עראבה",
+  "project": "בית א זאעתר",
+  "lamas": 531,
+  "units": 21,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "בית א זאעתר"
+  ],
+  "release_est": "2026-03-18",
+  "ppm_lottery": 4387.5,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 2.6,
+  "builders": [
+   "חלאילה עלי"
+  ],
+  "free_at": "2026-03-18",
+  "lottery_first": "2019-01-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "עתלית",
+  "project": "הרכס",
+  "lamas": 53,
+  "units": 376,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שלדג",
+   "פלמינגו",
+   "השחף"
+  ],
+  "hoods": [
+   "הרכס"
+  ],
+  "release_est": "2025-01-18",
+  "ppm_lottery": 8280.1,
+  "market_ppm": 31654,
+  "cushion_pct": 282,
+  "price4": 3007153,
+  "demand": 74.6,
+  "builders": [
+   "א.י. אמריקה ישראל ועץ השקד",
+   "עץ השקד יזום בע\"מ"
+  ],
+  "free_at": "2025-01-18",
+  "lottery_first": "2016-10-10",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "עתלית",
+  "project": "עין הכרמל",
+  "lamas": 53,
+  "units": 60,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מפרש",
+   "הסלע",
+   "עין הים"
+  ],
+  "hoods": [
+   "עין הכרמל"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 9568.3,
+  "market_ppm": 31654,
+  "cushion_pct": 231,
+  "price4": 3007153,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "עתלית",
+  "project": "רכבת מושבה א",
+  "lamas": 53,
+  "units": 126,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אנפה",
+   "פלמינגו"
+  ],
+  "hoods": [
+   "רכבת מושבה א"
+  ],
+  "release_est": "2025-12-16",
+  "ppm_lottery": 8593.6,
+  "market_ppm": 31654,
+  "cushion_pct": 268,
+  "price4": 3007153,
+  "demand": 24.2,
+  "builders": [
+   "אביב בניה ופתוח בע\"מ",
+   "שתית בע\"מ"
+  ],
+  "free_at": "2025-12-16",
+  "lottery_first": "2017-07-27",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "פרדס חנה-כרכו",
+  "project": "משכנות",
+  "lamas": 7800,
+  "units": 395,
+  "streets_verified": [],
+  "streets_mapped": [
+   "דגן",
+   "שעורה",
+   "עומרים"
+  ],
+  "hoods": [
+   "משכנות"
+  ],
+  "release_est": "2025-10-23",
+  "ppm_lottery": 8708.6,
+  "market_ppm": 22724,
+  "cushion_pct": 161,
+  "price4": 2158800,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "פרדסיה",
+  "project": "אתר 01",
+  "lamas": 171,
+  "units": 268,
+  "streets_verified": [],
+  "streets_mapped": [
+   "הרעות",
+   "החרמון",
+   "הארבל"
+  ],
+  "hoods": [
+   "אתר 01"
+  ],
+  "release_est": "2024-07-27",
+  "ppm_lottery": 8757.4,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 111.0,
+  "builders": [
+   "א. י. אמריקה ישראל להשקעות בע\"",
+   "גילעם חברה לבניה ופיתוח בע\"מ",
+   "רונידן חברה לבנין בע\"מ"
+  ],
+  "free_at": "2024-07-27",
+  "lottery_first": "2016-11-16",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "פתח תקוה",
+  "project": "רוטשילד 57",
+  "lamas": 7900,
+  "units": 204,
+  "streets_verified": [],
+  "streets_mapped": [
+   "רוטשילד",
+   "מונטיפיורי"
+  ],
+  "hoods": [
+   "נווה מעוז",
+   "רוטשילד-חפץ חיים"
+  ],
+  "release_est": "2026-06-25",
+  "ppm_lottery": 15846.0,
+  "market_ppm": 27963,
+  "cushion_pct": 76,
+  "price4": 2656458,
+  "demand": 35.4,
+  "builders": [
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2026-06-25",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "צורן-קדימה",
+  "project": "דרום מערב",
+  "lamas": 195,
+  "units": 87,
+  "streets_verified": [],
+  "streets_mapped": [],
+  "hoods": [
+   "שיכון יציב"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 26727,
+  "cushion_pct": null,
+  "price4": 2539076,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "צפת",
+  "project": "רמת רזים דרום",
+  "lamas": 8000,
+  "units": 95,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נחל מירון",
+   "נחל דישון",
+   "נחל ערוגות"
+  ],
+  "hoods": [
+   "רמת מנחם בגין",
+   "רמת רזים דרום"
+  ],
+  "release_est": "2024-12-24",
+  "ppm_lottery": 7593.3,
+  "market_ppm": 15296,
+  "cushion_pct": 101,
+  "price4": 1453150,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קצרין",
+  "project": "אתר 12",
+  "lamas": 4100,
+  "units": 93,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אשלים",
+   "דן"
+  ],
+  "hoods": [
+   "גמלא"
+  ],
+  "release_est": null,
+  "ppm_lottery": null,
+  "market_ppm": 14856,
+  "cushion_pct": null,
+  "price4": 1411300,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית אונו",
+  "project": "דרום",
+  "lamas": 2620,
+  "units": 584,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נאווה סמל"
+  ],
+  "hoods": [
+   "אונו הצעירה",
+   "דרום"
+  ],
+  "release_est": "2025-07-23",
+  "ppm_lottery": 13711.5,
+  "market_ppm": 34734,
+  "cushion_pct": 153,
+  "price4": 3299750,
+  "demand": 50.6,
+  "builders": [
+   "אשדר חברה לבניה בעמ"
+  ],
+  "free_at": "2031-09-04",
+  "lottery_first": "2018-07-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית אונו",
+  "project": "מזרח",
+  "lamas": 2620,
+  "units": 346,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יצחק נבון",
+   "שולמית אלוני"
+  ],
+  "hoods": [
+   "מזרח",
+   "נאות אריאל שרון"
+  ],
+  "release_est": "2025-07-23",
+  "ppm_lottery": 14767.7,
+  "market_ppm": 34734,
+  "cushion_pct": 135,
+  "price4": 3299750,
+  "demand": 1510.5,
+  "builders": [
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2018-07-23",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית ביאליק",
+  "project": "אפק",
+  "lamas": 9500,
+  "units": 158,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אריק איינשטיין"
+  ],
+  "hoods": [
+   "אפק",
+   "נאות אפק"
+  ],
+  "release_est": "2025-07-08",
+  "ppm_lottery": 9477.0,
+  "market_ppm": 15321,
+  "cushion_pct": 62,
+  "price4": 1455479,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית ביאליק",
+  "project": "אפק מזרח",
+  "lamas": 9500,
+  "units": 1349,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אהוד מנור",
+   "נעמי שמר",
+   "שושנה דמארי"
+  ],
+  "hoods": [
+   "אפק מזרח",
+   "נאות אפק"
+  ],
+  "release_est": "2025-06-25",
+  "ppm_lottery": 9334.8,
+  "market_ppm": 15321,
+  "cushion_pct": 64,
+  "price4": 1455479,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית גת",
+  "project": "היתכנות שורק",
+  "lamas": 2630,
+  "units": 1482,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אסתר המלכה",
+   "שדרות לכיש"
+  ],
+  "hoods": [
+   "היתכנות שורק",
+   "כרמי גת"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 7919.7,
+  "market_ppm": 15597,
+  "cushion_pct": 97,
+  "price4": 1481736,
+  "demand": 15.1,
+  "builders": [
+   "דונה חברה להנדסה ובנין בע\"מ",
+   "מגדלי איתי חברה לבנייה והשקעות",
+   "עמרם אברהם חברה לבנין בע\"מ",
+   "רייסדור בנייה בע\"מ"
+  ],
+  "free_at": "2028-05-30",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית טבעון",
+  "project": "אתר 01",
+  "lamas": 2300,
+  "units": 316,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יוסף בורג",
+   "אריק שרון",
+   "מנחם בגין"
+  ],
+  "hoods": [
+   "אלרואי",
+   "אתר 01"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 8977.7,
+  "market_ppm": 28908,
+  "cushion_pct": 222,
+  "price4": 2746225,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית ים",
+  "project": "פסגות ים",
+  "lamas": 9600,
+  "units": 143,
+  "streets_verified": [],
+  "streets_mapped": [
+   "לכיש"
+  ],
+  "hoods": [
+   "פסגות ים"
+  ],
+  "release_est": "2026-11-14",
+  "ppm_lottery": 9816.3,
+  "market_ppm": 17008,
+  "cushion_pct": 73,
+  "price4": 1615725,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית ים",
+  "project": "קרית ים א'",
+  "lamas": 9600,
+  "units": 2318,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נעמי שמר",
+   "שדרות ירושלים"
+  ],
+  "hoods": [
+   "קרית חיים",
+   "קרית ים א'"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 8608.6,
+  "market_ppm": 17008,
+  "cushion_pct": 98,
+  "price4": 1615725,
+  "demand": 3.8,
+  "builders": [
+   "אופציה שיווק בע\"מ, איתן לייפר החזקות 2015 בע\"מ",
+   "משכנות הראל בע\"מ",
+   "פפושדו פרוייקט 2 בע\"מ",
+   "שגראוי ייזום ובניה (אס.בי.סי) בע\"מ"
+  ],
+  "free_at": "2031-04-10",
+  "lottery_first": "2018-03-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית יערים",
+  "project": "קרית יערים",
+  "lamas": 1137,
+  "units": 70,
+  "streets_verified": [],
+  "streets_mapped": [
+   "כביש ירושלים תל אביב",
+   "בית יוסף"
+  ],
+  "hoods": [
+   "קרית יערים"
+  ],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 10693.8,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 16.2,
+  "builders": [
+   "ש. לירז חברה לבניין בע\"מ"
+  ],
+  "free_at": "2026-01-24",
+  "lottery_first": "2019-01-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית מוצקין",
+  "project": "כורדני",
+  "lamas": 8200,
+  "units": 2021,
+  "streets_verified": [
+   "עפרה חזה"
+  ],
+  "streets_mapped": [
+   "עופרה חזה"
+  ],
+  "hoods": [
+   "כורדני",
+   "משכנות האמנים",
+   "צפון ומחנה כורדני"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 9042.7,
+  "market_ppm": 15671,
+  "cushion_pct": 73,
+  "price4": 1488700,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 1
+ },
+ {
+  "city": "קרית מוצקין",
+  "project": "משכנות האמנים",
+  "lamas": 8200,
+  "units": 207,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עופרה חזה",
+   "שלום שבזי"
+  ],
+  "hoods": [
+   "משכנות האמנים",
+   "צפון ומחנה כורדני"
+  ],
+  "release_est": "2024-12-07",
+  "ppm_lottery": 8733.8,
+  "market_ppm": 15671,
+  "cushion_pct": 79,
+  "price4": 1488700,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית מוצקין",
+  "project": "צפון ומחנה כורדני",
+  "lamas": 8200,
+  "units": 230,
+  "streets_verified": [],
+  "streets_mapped": [
+   "יוסף שילוח",
+   "לאה גולדברג"
+  ],
+  "hoods": [
+   "משכנות האמנים",
+   "צפון ומחנה כורדני"
+  ],
+  "release_est": "2026-01-20",
+  "ppm_lottery": 7921.6,
+  "market_ppm": 15671,
+  "cushion_pct": 98,
+  "price4": 1488700,
+  "demand": 23.0,
+  "builders": [
+   "הפתרון א.ר. ניהול והשקעות בע\"מ",
+   "חצר ברושים יזמות בניה בע\"מ",
+   "סבנטל בע\"מ",
+   "ספייס בניה וייזמות בע\"מ"
+  ],
+  "free_at": "2028-01-18",
+  "lottery_first": "2018-10-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית מלאכי",
+  "project": "נאות הכפר",
+  "lamas": 1034,
+  "units": 85,
+  "streets_verified": [],
+  "streets_mapped": [
+   "מבצע ליטני",
+   "מבצע סבנה"
+  ],
+  "hoods": [
+   "נאות הכפר"
+  ],
+  "release_est": "2026-01-24",
+  "ppm_lottery": 7159.2,
+  "market_ppm": 15302,
+  "cushion_pct": 114,
+  "price4": 1453650,
+  "demand": 20.4,
+  "builders": [
+   "מגידו י.ק. יזום בע\"מ",
+   "תורן הבית שלך בע\"מ"
+  ],
+  "free_at": "2026-01-24",
+  "lottery_first": "2019-01-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "קרית שמונה",
+  "project": "יובלים",
+  "lamas": 2800,
+  "units": 423,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נחל ג'לבון",
+   "נחל נקרות"
+  ],
+  "hoods": [
+   "יובלים"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 5735.7,
+  "market_ppm": 8797,
+  "cushion_pct": 53,
+  "price4": 835669,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראש העין",
+  "project": "A",
+  "lamas": 2640,
+  "units": 841,
+  "streets_verified": [],
+  "streets_mapped": [
+   "נלי זקס",
+   "גולדה מאיר",
+   "גרטי קורי",
+   "אלברט איינשטיין"
+  ],
+  "hoods": [
+   "A",
+   "פרס נובל"
+  ],
+  "release_est": "2026-05-02",
+  "ppm_lottery": 9099.8,
+  "market_ppm": 23772,
+  "cushion_pct": 161,
+  "price4": 2258350,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראש העין",
+  "project": "B",
+  "lamas": 2640,
+  "units": 865,
+  "streets_verified": [],
+  "streets_mapped": [
+   "זהרה אלפסיה",
+   "יגאל אלון",
+   "ניסים אלוני",
+   "נתן אלתרמן"
+  ],
+  "hoods": [
+   "B",
+   "פרס נובל"
+  ],
+  "release_est": "2026-02-13",
+  "ppm_lottery": 9556.6,
+  "market_ppm": 23772,
+  "cushion_pct": 149,
+  "price4": 2258350,
+  "demand": 81.5,
+  "builders": [
+   "אורתם ניהול פרויקטים שותפות מוגבלת",
+   "דניה סיבוס",
+   "שפיר מגורים ובניין בע\"מ"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2017-01-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראש העין",
+  "project": "C",
+  "lamas": 2640,
+  "units": 699,
+  "streets_verified": [],
+  "streets_mapped": [
+   "חיים חפר",
+   "חיים הרצוג",
+   "ראובן רובין",
+   "הרב שלום שבזי",
+   "אלי ויזל"
+  ],
+  "hoods": [
+   "C",
+   "פרס נובל"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 9815.4,
+  "market_ppm": 23772,
+  "cushion_pct": 142,
+  "price4": 2258350,
+  "demand": 353.7,
+  "builders": [
+   "גיא & דורון לוי הנדסה בנייה וה",
+   "זוהר וצפריר שרבט בע\"מ",
+   "רייסדור יזמות בע\"מ",
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2029-07-25",
+  "lottery_first": "2019-05-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראש העין",
+  "project": "E",
+  "lamas": 2640,
+  "units": 2230,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שמואל הנביא",
+   "שמעיה",
+   "עמוס הנביא",
+   "אלישע הנביא"
+  ],
+  "hoods": [
+   "E",
+   "פרס נובל"
+  ],
+  "release_est": "2026-09-22",
+  "ppm_lottery": 9146.5,
+  "market_ppm": 23772,
+  "cushion_pct": 160,
+  "price4": 2258350,
+  "demand": 55.8,
+  "builders": [
+   "גיא & דורון לוי הנדסה בנייה וה",
+   "גיא א דורון לוי הנדסה בנייה וה",
+   "דונה חברה להנדסה ובנין בע\"מ",
+   "ע.ז. יסודות איתנים הנדסה ובינוי בע\"מ"
+  ],
+  "free_at": "2028-11-08",
+  "lottery_first": "2017-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראש העין",
+  "project": "פסגות אפק",
+  "lamas": 2640,
+  "units": 1044,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אלברט איינשטיין",
+   "גרטרוד עליון",
+   "מלווין קלווין"
+  ],
+  "hoods": [
+   "מצפה אפק",
+   "פרס נובל"
+  ],
+  "release_est": "2024-06-13",
+  "ppm_lottery": 9313.3,
+  "market_ppm": 23772,
+  "cushion_pct": 155,
+  "price4": 2258350,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ },
+ {
+  "city": "ראשון לציון",
+  "project": "מזרח",
+  "lamas": 8300,
+  "units": 3935,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אורנה פורת",
+   "הבה\"דים",
+   "חיים חפר",
+   "החילות"
+  ],
+  "hoods": [
+   "כפר אריה",
+   "מזרח",
+   "נרקיסים"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 11161.1,
+  "market_ppm": 26085,
+  "cushion_pct": 134,
+  "price4": 2478049,
+  "demand": 169.2,
+  "builders": [
+   "אביסרור משה ובניו עבודות בנין",
+   "אודור נכסים בע\"מ",
+   "אזורים בנין (1965) בע\"מ",
+   "אחים אום"
+  ],
+  "free_at": "2030-06-18",
+  "lottery_first": "2016-08-03",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראשון לציון",
+  "project": "מרכז",
+  "lamas": 8300,
+  "units": 108,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שולמית אלוני"
+  ],
+  "hoods": [
+   "בנות חיל",
+   "מרכז",
+   "רמת אליהו"
+  ],
+  "release_est": "2025-03-18",
+  "ppm_lottery": 13189.4,
+  "market_ppm": 26085,
+  "cushion_pct": 98,
+  "price4": 2478049,
+  "demand": 197.1,
+  "builders": [
+   "משולם לוינשטין הנדסה וקבלנות ב"
+  ],
+  "free_at": "2027-12-14",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "ראשון לציון",
+  "project": "נחלת יהודה מערב",
+  "lamas": 8300,
+  "units": 314,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שולמית אלוני"
+  ],
+  "hoods": [
+   "בנות חיל",
+   "נחלת יהודה מערב"
+  ],
+  "release_est": "2024-07-19",
+  "ppm_lottery": 13207.0,
+  "market_ppm": 26085,
+  "cushion_pct": 98,
+  "price4": 2478049,
+  "demand": 36.2,
+  "builders": [
+   "ע. לוזון נכסים והשקעות בע\"מ, דניה סיבוס בע\"מ"
+  ],
+  "free_at": "2024-07-19",
+  "lottery_first": "2017-07-19",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רחובות",
+  "project": "מרכז וייסגל",
+  "lamas": 8400,
+  "units": 38,
+  "streets_verified": [],
+  "streets_mapped": [
+   "ששת הימים",
+   "הרב זבולון גרז"
+  ],
+  "hoods": [
+   "מרכז וייסגל",
+   "קרית משה"
+  ],
+  "release_est": "2025-03-18",
+  "ppm_lottery": 9816.3,
+  "market_ppm": 26231,
+  "cushion_pct": 167,
+  "price4": 2491903,
+  "demand": 117.7,
+  "builders": [
+   "רונידן חברה לבנין בע\"מ"
+  ],
+  "free_at": "2025-03-18",
+  "lottery_first": "2018-03-18",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רכסים",
+  "project": "קיים + ג.חרובים",
+  "lamas": 922,
+  "units": 251,
+  "streets_verified": [],
+  "streets_mapped": [
+   "חזון אי\"ש"
+  ],
+  "hoods": [
+   "גבעה ג'",
+   "קיים + ג.חרובים"
+  ],
+  "release_est": "2025-08-21",
+  "ppm_lottery": 7375.7,
+  "market_ppm": 18131,
+  "cushion_pct": 146,
+  "price4": 1722402,
+  "demand": 50.9,
+  "builders": [
+   "עמרם אברהם חברה לבנין בע\"מ",
+   "שובל מתחמי מגורים בע\"מ"
+  ],
+  "free_at": "2025-08-21",
+  "lottery_first": "2017-01-10",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רמלה",
+  "project": "מכבי",
+  "lamas": 8500,
+  "units": 160,
+  "streets_verified": [],
+  "streets_mapped": [
+   "44"
+  ],
+  "hoods": [
+   "ג'ואריש",
+   "מערב"
+  ],
+  "release_est": "2025-10-21",
+  "ppm_lottery": 9806.9,
+  "market_ppm": 19437,
+  "cushion_pct": 98,
+  "price4": 1846502,
+  "demand": 91.1,
+  "builders": [
+   "עמרם אברהם חברה לבנין בע\"מ"
+  ],
+  "free_at": "2027-02-23",
+  "lottery_first": "2018-10-21",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רמלה",
+  "project": "מערב",
+  "lamas": 8500,
+  "units": 1937,
+  "streets_verified": [],
+  "streets_mapped": [
+   "רפאל איתן",
+   "משה לוי",
+   "יעקב דורי"
+  ],
+  "hoods": [
+   "ג'ואריש",
+   "מערב"
+  ],
+  "release_est": "2026-11-13",
+  "ppm_lottery": 10254.4,
+  "market_ppm": 19437,
+  "cushion_pct": 90,
+  "price4": 1846502,
+  "demand": 20.5,
+  "builders": [
+   "אפי קפיטל מגורים בע\"מ",
+   "גבעות טל ר.א בע\"מ",
+   "עמרם אברהם חברה לבנין בע\"מ",
+   "פרשקובסקי השקעות ובניין בע\"מ"
+  ],
+  "free_at": "2029-01-19",
+  "lottery_first": "2017-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רמת גן",
+  "project": "מרכז",
+  "lamas": 8600,
+  "units": 687,
+  "streets_verified": [],
+  "streets_mapped": [
+   "שיבא"
+  ],
+  "hoods": [
+   "מרכז",
+   "תל השומר"
+  ],
+  "release_est": "2025-07-23",
+  "ppm_lottery": 15023.7,
+  "market_ppm": 37009,
+  "cushion_pct": 146,
+  "price4": 3515886,
+  "demand": 60.4,
+  "builders": [
+   "סלע איסתא נדל\"ן ישראלי בע\"מ",
+   "רמי שבירו הנדסה בניה והשקעות ב"
+  ],
+  "free_at": "2029-03-07",
+  "lottery_first": "2017-11-09",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רעננה",
+  "project": "עממי+עובדים+רמז",
+  "lamas": 8700,
+  "units": 11,
+  "streets_verified": [],
+  "streets_mapped": [
+   "החורש"
+  ],
+  "hoods": [
+   "עממי+עובדים+רמז",
+   "שכונת 2004"
+  ],
+  "release_est": "2024-07-24",
+  "ppm_lottery": 16148.3,
+  "market_ppm": 37077,
+  "cushion_pct": 130,
+  "price4": 3522326,
+  "demand": 459.7,
+  "builders": [
+   "בוני בנין פיתוח והשקעות (ז.ח.) בע\"מ"
+  ],
+  "free_at": "2024-07-24",
+  "lottery_first": "2017-07-24",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "רעננה",
+  "project": "צפון מערב",
+  "lamas": 8700,
+  "units": 384,
+  "streets_verified": [],
+  "streets_mapped": [
+   "סשה ארגוב",
+   "נעמי שמר"
+  ],
+  "hoods": [
+   "2003",
+   "צפון מערב"
+  ],
+  "release_est": "2026-05-02",
+  "ppm_lottery": 15808.3,
+  "market_ppm": 37077,
+  "cushion_pct": 135,
+  "price4": 3522326,
+  "demand": 104.8,
+  "builders": [
+   "אלקטרה השקעות 1998 בע\"מ",
+   "יצחק עפר חברה לבנין ופתוח בע\"מ",
+   "רמי שבירו הנדסה בניה והשקעות ב",
+   "שגראוי ייזום ובניה (אס.בי.סי) בע\"מ"
+  ],
+  "free_at": "2026-12-15",
+  "lottery_first": "2016-10-13",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "שדרות",
+  "project": "שכ' צפונית - מרכז",
+  "lamas": 1031,
+  "units": 858,
+  "streets_verified": [
+   "נחל דולב",
+   "נחל לכיש",
+   "סחלב"
+  ],
+  "streets_mapped": [],
+  "hoods": [
+   "אזור תעשייה",
+   "כלניות",
+   "שכ' צפונית - מרכז"
+  ],
+  "release_est": "2026-09-23",
+  "ppm_lottery": 6032.0,
+  "market_ppm": 12072,
+  "cushion_pct": 100,
+  "price4": 1146861,
+  "demand": 27.4,
+  "builders": [
+   "אסום - חברה קבלנית לבנין בע\"מ",
+   "חוף התכלת ברנע אשקלון",
+   "ש.א.י. אור חברה למסחר"
+  ],
+  "free_at": "2027-01-19",
+  "lottery_first": "2016-10-26",
+  "lottery_match": "מאומת",
+  "our_listings": 19
+ },
+ {
+  "city": "שדרות",
+  "project": "שכ' צפונית פלח ז'",
+  "lamas": 1031,
+  "units": 1032,
+  "streets_verified": [
+   "הרב אבא אבוחצירה",
+   "חיטה"
+  ],
+  "streets_mapped": [
+   "תפוז",
+   "קינמון",
+   "נטע"
+  ],
+  "hoods": [
+   "אזור תעשייה",
+   "הבוסתנים",
+   "שכ' צפונית פלח ז'"
+  ],
+  "release_est": "2026-08-04",
+  "ppm_lottery": 5658.1,
+  "market_ppm": 12072,
+  "cushion_pct": 113,
+  "price4": 1146861,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 10
+ },
+ {
+  "city": "שוהם",
+  "project": "כלל הישוב",
+  "lamas": 1304,
+  "units": 525,
+  "streets_verified": [],
+  "streets_mapped": [
+   "האתרוג",
+   "פומלית"
+  ],
+  "hoods": [
+   "כלל הישוב"
+  ],
+  "release_est": "2025-03-21",
+  "ppm_lottery": 13818.6,
+  "market_ppm": 34523,
+  "cushion_pct": 150,
+  "price4": 3279700,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "מדויקת",
+  "our_listings": 0
+ },
+ {
+  "city": "שלומי",
+  "project": "צפון שכונת המורים",
+  "lamas": 812,
+  "units": 91,
+  "streets_verified": [],
+  "streets_mapped": [
+   "עץ המשאלות"
+  ],
+  "hoods": [
+   "בנה ביתך",
+   "צפון שכונת המורים"
+  ],
+  "release_est": "2026-05-05",
+  "ppm_lottery": 6054.8,
+  "market_ppm": null,
+  "cushion_pct": null,
+  "price4": null,
+  "demand": 4.7,
+  "builders": [
+   "ע.ז.יסודות איתנים שלומי בע\"מ, א.ר.ר הנדסה בניה ופיתוח (מקבוצת אל-רם נכסים) בע\"מ"
+  ],
+  "free_at": "2026-05-05",
+  "lottery_first": "2017-07-27",
+  "lottery_match": "מאומת",
+  "our_listings": 0
+ },
+ {
+  "city": "תל אביב -יפו",
+  "project": "ק. שלום-מתחם ברנר",
+  "lamas": 5000,
+  "units": 362,
+  "streets_verified": [],
+  "streets_mapped": [
+   "אשדוד",
+   "3969",
+   "נס לגויים"
+  ],
+  "hoods": [
+   "יפו"
+  ],
+  "release_est": "2026-05-19",
+  "ppm_lottery": 17784.0,
+  "market_ppm": 53378,
+  "cushion_pct": 200,
+  "price4": 5070900,
+  "demand": null,
+  "builders": [],
+  "free_at": null,
+  "lottery_first": null,
+  "lottery_match": "אין",
+  "our_listings": 0
+ }
+]

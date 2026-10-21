@@ -21,6 +21,7 @@ import threading
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
+from pathlib import Path
 
 from . import (alerts, charts, comps, dashboard, db, emailer, excel, jsonout,
                mlm, nadlan, peers, pricing, scoring, sections, tracklist,
@@ -214,18 +215,25 @@ def prescreen(listings, cfg, meta, latest_drop, today, drops=None):
     try:
         projects = mlm.Projects()
         lots = mlm.Lots()
+        # שכבת ההגרלות — פוליגון לכל הגרלה עם LotteryId. היא **אינה**
+        # מחליפה את השכבה המאוחדת (ראה ההסבר ב-mlm.describe), אלא מוסיפה
+        # לה את תאריך ההגרלה האמיתי, הקבלן, הביקוש והתב"ע.
+        exact = mlm.Projects(Path(cfg["paths"]["db"]).parent
+                             / "mlm_lotteries_gis.geojson")
         if projects or lots:
             tagged = 0
             for l in listings:
-                info = mlm.describe(l, projects, today, lots=lots)
+                info = mlm.describe(l, projects, today, lots=lots, exact=exact)
                 if info:
                     l.update(info)
                     tagged += 1
             mlm.supply_pressure(listings)
             released = sum(1 for l in listings if l.get("mlm_released"))
             hi = sum(1 for l in listings if l.get("mlm_confidence") == "גבוהה")
+            exact_n = sum(1 for l in listings if l.get("mlm_exact"))
             log.info("מחיר למשתכן: %d מודעות זוהו, %d בוודאות גבוהה, "
-                     "%d שהמגבלה עליהן פגה", tagged, hi, released)
+                     "%d שהמגבלה עליהן פגה, %d עם נתוני הגרלה מדויקים",
+                     tagged, hi, released, exact_n)
     except Exception:
         # שכבה חסרה או פגומה לא מפילה ריצה — המנוע ממשיך בלי האות הזה
         log.error("כשל בזיהוי מחיר למשתכן:\n%s", traceback.format_exc())
@@ -517,8 +525,9 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings, cfg=None):
 
     try:
         projects, lots = mlm.Projects(), mlm.Lots()
+        exact = mlm.Projects(Path(db_path).parent / "mlm_lotteries_gis.geojson")
     except Exception:
-        projects = lots = None
+        projects = lots = exact = None
 
     today = date.today()
     carried, refreshed = [], 0
@@ -547,7 +556,8 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings, cfg=None):
             # זיהוי מחיר למשתכן — חישוב מקומי מול השכבות
             if projects is not None and not x.get("mlm"):
                 try:
-                    info = mlm.describe(row, projects, today, lots=lots)
+                    info = mlm.describe(row, projects, today, lots=lots,
+                                        exact=exact)
                     if info:
                         x.update(info)
                 except Exception:

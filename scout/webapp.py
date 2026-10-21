@@ -141,6 +141,9 @@ def _trim(listings, cfg=None):
             "ok": bool(s.get("mlm_confirmed")),     # אושרה ידנית
             "no": bool(s.get("mlm_rejected")),      # נפסלה ידנית
             "mnote": s.get("manual_note"),
+            "cst": s.get("crm_status"),      # הסטטוס שלך מול הדירה
+            "cnote": s.get("crm_note"),
+            "creason": s.get("crm_reason"),
             "tier": tier,
             "otype": s.get("opportunity_type_he"),
             "reason": s.get("reason"),
@@ -311,6 +314,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .vok{inset-inline-end:52px;color:#17803d}
   .vno{inset-inline-end:94px;color:#b4232a}
   .vok.on{background:#17803d;color:#fff}
+  /* גלגל הסטטוס — לחיצה מקדמת לשלב הבא בצינור */
+  .stbtn{position:absolute;bottom:10px;inset-inline-start:10px;border:none;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.92);color:#3b3b48;box-shadow:0 3px 10px rgba(0,0,0,.15);font-family:inherit}
+  .stbtn.s1{background:#2f6fd0;color:#fff}
+  .stbtn.s2{background:#b06a00;color:#fff}
+  .stbtn.s3{background:#17803d;color:#fff}
+  .stbtn.s4{background:#6b6b78;color:#fff}
+  .crmnote{font-size:12.5px;color:var(--muted);border-inline-start:3px solid var(--accent);padding-inline-start:8px;margin-top:6px;line-height:1.45}
   .vno.on{background:#b4232a;color:#fff}
   .cbody{padding:14px 16px 16px}
   .ctop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -322,7 +332,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   /* תמונת המודעה. onerror מסיר את האלמנט ואז הגרדיאנט של .thumb נשאר
      מאחוריו — כך מודעה בלי תמונה או עם תמונה שנמחקה נראית תקין. */
   .thumbimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-  .thumb .ribbon,.thumb .newbadge,.thumb .tierbadge,.thumb .savebtn,.thumb .vbtn{z-index:2}
+  .thumb .ribbon,.thumb .newbadge,.thumb .tierbadge,.thumb .savebtn,.thumb .vbtn,.thumb .stbtn{z-index:2}
   .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin:0 0 16px}
   .gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:11px;cursor:zoom-in;background:var(--hair2)}
   .kv{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
@@ -560,20 +570,65 @@ function setNote(id){
 /* הייצוא הוא הגשר היחיד בין הדפדפן למנוע. בכוונה קובץ ולא מסד נתונים:
    דף ציבורי שכותב למסד צריך מפתח כתיבה בתוכו, וקובץ שעובר דרך גיט לא
    דורש שום סוד ומתועד בהיסטוריה. */
+/* ---- הצינור האישי ----
+   סטטוס, הערה וסיבת פסילה לכל דירה. זה נפרד לגמרי מ-✓/✕: אלה אומרים
+   "זו מחיר למשתכן / זו לא" (זיהוי), והסטטוס אומר "איפה אני עומד מולה"
+   (תהליך). דירה יכולה להיות מאומתת ועדיין פסולה כי המוכר בלתי אפשרי. */
+const CRM_STATUSES=['חדשה','התקשרתי','קבעתי ביקור','במו"מ','פסולה'];
+const CRM_ACTIVE=['התקשרתי','קבעתי ביקור','במו"מ'];
+function crmGet(){try{return JSON.parse(localStorage.getItem('aweb_crm')||'{}');}catch(e){return {};}}
+function crmSave(o){try{localStorage.setItem('aweb_crm',JSON.stringify(o));}catch(e){}}
+let CRM=crmGet();
+/* מצב מהשרת הוא נקודת הפתיחה, כך שמחשב אחר רואה את מה שכבר הועלה. */
+function crmOf(d){
+  const local=CRM[d.id];
+  if(local) return local;
+  if(d.cst||d.cnote||d.creason) return {status:d.cst,note:d.cnote,reason:d.creason};
+  return {};
+}
+function crmStatus(d){ return crmOf(d).status || ''; }
+function crmSet(id,patch){
+  const cur=CRM[id]||{};
+  CRM[id]=Object.assign({},cur,patch,{updated:new Date().toISOString().slice(0,10)});
+  if(!CRM[id].status && !CRM[id].note && !CRM[id].reason) delete CRM[id];
+  crmSave(CRM);render();
+}
+function setStatus(id,ev){
+  if(ev)ev.stopPropagation();
+  const cur=crmStatus({id:id});
+  const i=CRM_STATUSES.indexOf(cur);
+  const next=CRM_STATUSES[(i+1)%CRM_STATUSES.length];
+  if(next==='פסולה'){
+    const why=prompt('למה פסלת? (למשל: מתווך לא רציני, המוכר לא גמיש)','');
+    if(why===null){return;}
+    crmSet(id,{status:'פסולה',reason:why.trim()||'ללא סיבה'});
+    toast('נפסלה ותוסר מהמעקב');
+    return;
+  }
+  crmSet(id,{status:next, reason:null});
+  toast(next==='חדשה'?'הסטטוס אופס':('סטטוס: '+next));
+}
+function setCrmNote(id){
+  const cur=(crmOf({id:id}).note)||'';
+  const v=prompt('מה ההתרשמות שלך מהדירה?',cur);
+  if(v===null)return;
+  crmSet(id,{note:v.trim()||null});
+}
 function exportConfirmed(){
   const ids=[...new Set([...OK])].sort(), bad=[...new Set([...NO])].sort();
-  if(!ids.length && !bad.length){toast('עדיין לא אישרת ולא פסלת כלום');return;}
+  if(!ids.length && !bad.length && !Object.keys(CRM).length){toast('עדיין לא סימנת כלום');return;}
   const notes={}; Object.keys(NOTES).forEach(k=>{if(NOTES[k])notes[k]=NOTES[k];});
+  const crm={}; Object.keys(CRM).forEach(k=>{if(CRM[k]&&Object.keys(CRM[k]).length)crm[k]=CRM[k];});
   const body={
-    "_":"נוצר מהאתר (טאב 'מאומת על ידי' → ייצוא). להעלות לריפו ב-data/mlm_confirmed.json.",
+    "_":"נוצר מהאתר. להעלות לריפו ב-data/mlm_confirmed.json. confirmed/rejected = זיהוי מחיר למשתכן; crm = הצינור האישי.",
     updated:new Date().toISOString().slice(0,10),
-    confirmed:ids, rejected:bad, notes:notes};
+    confirmed:ids, rejected:bad, notes:notes, crm:crm};
   const blob=new Blob([JSON.stringify(body,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download='mlm_confirmed.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast(`יוצאו ${ids.length} מאושרות ו-${bad.length} נפסלות`);}
+  toast(`יוצאו ${ids.length} מאומתות, ${bad.length} נפסלות, ${Object.keys(crm).length} בצינור`);}
 
 /* ---- nadlan link: specific area ---- */
 function nadlanLink(d){
@@ -597,6 +652,7 @@ const TAB_IC={
   mlm:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/></svg>',
   twins:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="12"/><rect x="14" y="4" width="7" height="16"/><path d="M3 8h7M14 4h7"/></svg>',
   mine:'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
+  pipe:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg>',
   drops:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-4h-4"/></svg>',
   opps:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
   watch:'<svg viewBox="0 0 24 24"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.6 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8z"/></svg>',
@@ -604,6 +660,7 @@ const TAB_IC={
 const TABS=[{k:'new',label:'חדש היום'},{k:'mlm',label:'מחיר למשתכן'},
   {k:'twins',label:'דירות תאומות'},
   {k:'mine',label:'מאומת על ידי'},
+  {k:'pipe',label:'הצינור שלי'},
   {k:'drops',label:'ירידות מחיר'},
   {k:'opps',label:'הזדמנויות'},{k:'watch',label:'המעקב שלי'},{k:'trends',label:'מגמות'}];
 function go(k){S.tab=k;render();}
@@ -690,13 +747,15 @@ function card(d,i){
   if(isOk(d)) chips.push(`<span class="b">מחיר למשתכן — אימתת ✓</span>`);
   else if(isNo(d)) chips.push(`<span class="s">פסלת</span>`);
   if(d.szbad) chips.push(`<span class="s">גודל לא-סביר ביד2</span>`);
+  const crm = crmOf(d);
   const why = smartWhy(d);
   const saved=WL.has(d.id);
   return `<article class="card">
     <div class="thumb" style="background:${g}" onclick="openDeal('${d.id}')">${rib}${d.tier?`<span class="tierbadge">${d.tier}</span>`:''}
       <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>
       <button class="vbtn vok ${isOk(d)?'on':''}" onclick="markOk('${d.id}',event)" title="אימתתי: זו דירת מחיר למשתכן">✓</button>
-      <button class="vbtn vno ${isNo(d)?'on':''}" onclick="markNo('${d.id}',event)" title="בדקתי: זו לא מחיר למשתכן / לא רלוונטית">✕</button>${
+      <button class="vbtn vno ${isNo(d)?'on':''}" onclick="markNo('${d.id}',event)" title="בדקתי: זו לא מחיר למשתכן / לא רלוונטית">✕</button>
+      <button class="stbtn ${['','s1','s2','s3','s4'][CRM_STATUSES.indexOf(crmStatus(d))] || ''}" onclick="setStatus('${d.id}',event)" title="לחיצה מקדמת את הסטטוס">${crmStatus(d)||'+ סטטוס'}</button>${
         d.imgs&&d.imgs.length
           ? `<img class="thumbimg" src="${d.imgs[0]}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
           : bld()}</div>
@@ -710,6 +769,8 @@ function card(d,i){
       </div>
       <div class="kv">${d.dtype?`<span class="own ${d.dtype==='agency'?'ag':''}">${d.dtype==='agency'?'תיווך':'פרטי'}</span>`:''}${chips.join('')||'<span class="n">במעקב</span>'}</div>
       <div class="why">${why?`<b>למה:</b> ${why}`:''}</div>
+      ${crm.note?`<div class="crmnote"><b>ההערה שלך:</b> ${crm.note}</div>`:''}
+      ${crm.reason?`<div class="crmnote"><b>פסלת:</b> ${crm.reason}</div>`:''}
       <div class="cta">
         <button class="go" onclick="openDeal('${d.id}')">פירוט מלא ←</button>
         ${d.url?`<a class="det" href="${d.url}" target="_blank" rel="noopener">יד2 ↗</a>`:''}
@@ -756,7 +817,7 @@ function toolbar(){
     <button class="exp" onclick="exportCSV()"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>ייצוא לאקסל</button>${
     /* כפתור הייצוא למנוע מופיע רק בטאב האימות, כי שם הוא מובן: זה
        הגשר בין מה שסימנת בדפדפן לבין מה שהמנוע עוקב אחריו. */
-    S.tab==='mine' ? `<button class="exp" onclick="exportConfirmed()"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ייצוא קובץ למנוע (${D.listings.filter(isOk).length})</button>` : ''}
+    (S.tab==='mine'||S.tab==='pipe') ? `<button class="exp" onclick="exportConfirmed()"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ייצוא קובץ למנוע (${D.listings.filter(isOk).length + Object.keys(CRM).length})</button>` : ''}
   </div>`;
 }
 
@@ -769,6 +830,7 @@ function render(){
     else if(t.k==='mlm') n=D.listings.filter(d=>d.mlm).length;
     else if(t.k==='twins') n=D.listings.filter(isTwinLead).length;
     else if(t.k==='mine') n=D.listings.filter(isOk).length;
+    else if(t.k==='pipe') n=D.listings.filter(d=>crmStatus(d)&&crmStatus(d)!=='חדשה').length;
     else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
     return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${TAB_IC[t.k]||''}<span>${t.label}</span>${(n!==''&&n!=null)?`<span class="cnt">${n}</span>`:''}</a>`;
@@ -777,6 +839,7 @@ function render(){
     mlm:['דירות מחיר למשתכן','רק דירות שזוהו בתוך פרויקט מחיר למשתכן, מסודרות לפי כמה המוכר יכול לרדת. ✓ = שתי שכבות רשמיות ובניין חדש מסכימים.'],
     twins:['הזולה מבין התאומות','דירות שמוצעות עכשיו ליד דירות זהות לחלוטין — אותו רחוב, אותו מספר חדרים, גודל דומה — וזולות מהן. פה גם רואים מי נשבר ראשון ולאיזה מוכר יש הכי הרבה מתחרים.'],
     mine:['הדירות שאימתת','הדירות שפתחת, בדקת, וסימנת ✓ כמחיר למשתכן. אחרי ייצוא והעלאה של הקובץ לריפו, המנוע עוקב בדיוק אחריהן כל יום ומזהה ירידת מחיר או מודעה שנמחקה.'],
+    pipe:['הצינור שלי','כל דירה שהתחלת לטפל בה, לפי השלב. לחיצה על כפתור הסטטוס בכרטיס מקדמת לשלב הבא. דירה שפסלת יוצאת מהמעקב היומי אחרי שתייצא את הקובץ ותעלה אותו.'],
     drops:['ראדאר ירידות מחיר','כל מודעה שירדה במחיר — כמה ירדה וכמה היא מתחת לשוק.'],
     opps:['ההזדמנויות','מתומחר מתחת לעסקאות סגורות דומות באזור, אחרי אימות מול רשות המיסים.'],
     watch:['המעקב שלי','הנכסים ששמרת. נשמרים במכשיר שלך.'],
@@ -813,6 +876,12 @@ function render(){
     else if(S.tab==='mine'){
       list=D.listings.filter(isOk).sort((a,b)=>twinRank(b)-twinRank(a));
       empty='עדיין לא אימתת אף דירה. פתח מודעה, בדוק אם היא מחיר למשתכן, ולחץ ✓ על הכרטיס.';
+    }
+    /* הצינור ממוין לפי סדר השלבים ולא לפי ציון: מה שקרוב לעסקה קודם. */
+    else if(S.tab==='pipe'){
+      const rank=d=>{const i=CRM_STATUSES.indexOf(crmStatus(d));return i<0?99:(i===4?98:5-i);};
+      list=D.listings.filter(d=>crmStatus(d)&&crmStatus(d)!=='חדשה').sort((a,b)=>rank(a)-rank(b));
+      empty='עדיין לא התחלת לטפל באף דירה. לחץ על "+ סטטוס" בכרטיס.';
     }
     else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq); empty='אין ירידות מחיר כרגע.'; }
     else if(S.tab==='watch'){ list=D.listings.filter(d=>WL.has(d.id)); empty='עדיין לא שמרת נכסים. לחץ על ★ בכל כרטיס.'; }
@@ -1056,7 +1125,9 @@ function openDeal(id){
         <a href="${madlanLink(d)}" target="_blank" rel="noopener">עסקאות שנמכרו באזור ↗</a>
         <button onclick="toggleSave('${id}');closeDeal()">${WL.has(id)?'★ במעקב':'☆ הוסף למעקב'}</button>
         <button onclick="markOk('${id}')">${isOk({id:id,ok:false})?'✓ אימתת כמחיר למשתכן':'✓ אמת כמחיר למשתכן'}</button>
-        <button onclick="setNote('${id}')">${NOTES[id]?'✎ ערוך הערה':'✎ הוסף הערה'}</button>
+        <button onclick="setNote('${id}')">${NOTES[id]?'✎ ערוך הערה על הזיהוי':'✎ הערה על הזיהוי'}</button>
+        <button onclick="setCrmNote('${id}')">✎ ההתרשמות שלי מהדירה</button>
+        <button onclick="setStatus('${id}')">↻ ${crmStatus({id:id})||'קבע סטטוס'}</button>
       </div>
     </div>`;
   document.getElementById('ov').classList.add('show');

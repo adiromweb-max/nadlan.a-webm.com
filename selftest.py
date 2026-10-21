@@ -478,6 +478,16 @@ def test_peers():
           str(bonanza._peer_edge(sample)))
 
 
+def _write_crm(tmpd, obj):
+    """כותב קובץ אישורים זמני לבדיקה ומחזיר את הנתיב."""
+    import json as _j
+    p = Path(tmpd) / "crm.json"
+    p.write_text(_j.dumps({"confirmed": [], "rejected": [], "notes": {},
+                           "crm": obj.get("crm") or {}}, ensure_ascii=False),
+                 encoding="utf-8")
+    return p
+
+
 def test_tracking():
     """
     אישור ידני, קבוצת המעקב, ובדיקת החיוּת.
@@ -612,9 +622,39 @@ def test_tracking():
     check("לאתר יש ייצוא קובץ למנוע",
           "exportConfirmed" in html and "mlm_confirmed.json" in html)
     trimmed = _wa._trim([{"id": "a", "mlm_confirmed": True,
-                          "manual_note": "בדקתי"}])[0]
+                          "manual_note": "בדקתי", "crm_status": "במו\"מ",
+                          "crm_note": "מוכר גמיש"}])[0]
     check("_trim מעביר את האישור הידני",
           trimmed.get("ok") is True and trimmed.get("mnote") == "בדקתי")
+    check("_trim מעביר את הצינור",
+          trimmed.get("cst") == "במו\"מ" and trimmed.get("cnote") == "מוכר גמיש")
+    check("לאתר יש טאב הצינור שלי", "הצינור שלי" in html)
+    check("לאתר יש כפתור סטטוס", "function setStatus" in html and "stbtn" in html)
+
+    # ── הצינור האישי במנוע ──
+    # הבאג שהבדיקות כאן נועלות: לבלבל בין פסילת **זיהוי** (זו לא מחיר
+    # למשתכן) לבין פסילת **תהליך** (לא רוצה להתעסק עם המוכר). שתיהן
+    # מוציאות מהמעקב, אבל הן אומרות דברים שונים לגמרי.
+    pipe = [{"id": "p1"}, {"id": "p2"}, {"id": "p3", "mlm_confirmed": True}]
+    man = {"confirmed": set(), "rejected": set(), "notes": {}, "crm": {
+        "p1": {"status": tracklist.STATUS_NEGOTIATING, "note": "מוכר גמיש"},
+        "p2": {"status": tracklist.STATUS_DROPPED, "reason": "מתווך לא רציני"}}}
+    tracklist.apply(pipe, man, {})
+    check("סטטוס מו\"מ נקרא מהקובץ",
+          pipe[0].get("crm_status") == tracklist.STATUS_NEGOTIATING
+          and pipe[0].get("crm_note") == "מוכר גמיש")
+    check("פסילת תהליך מסמנת את הדירה", pipe[1].get("crm_dropped") is True)
+    ids = [x["id"] for x in tracklist.select(pipe, {})]
+    check("דירה שאתה עובד עליה ראשונה במעקב", ids and ids[0] == "p1", str(ids))
+    check("דירה שפסלת בצינור מחוץ למעקב", "p2" not in ids, str(ids))
+    check("פסילת תהליך אינה פסילת זיהוי",
+          pipe[1].get("mlm_rejected") is None,
+          "✕ אומר 'לא מחיר למשתכן'; פסולה אומרת 'לא רוצה להתעסק'")
+    bad = {"confirmed": set(), "rejected": set(), "notes": {},
+           "crm": {"p1": {"status": "סטטוס שהומצא"}}}
+    p1 = [{"id": "p1"}]
+    tracklist.apply(p1, tracklist.load(path=_write_crm(tmpd, bad)), {})
+    check("סטטוס לא מוכר נזרק ולא נשמר", p1[0].get("crm_status") is None)
 
 
 def main():
