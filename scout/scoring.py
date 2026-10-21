@@ -22,6 +22,7 @@ import logging
 import statistics
 from datetime import date, datetime
 
+from . import peers, tracklist
 from .pricing import (acquisition_costs, is_drop_sane, net_gap_pct,
                       sqm_per_room)
 
@@ -176,7 +177,10 @@ def score_mlm(listing, weight, cfg=None):
     cfg = cfg or {}
     if not weight or not listing.get("mlm") or not listing.get("mlm_released"):
         return 0.0
-    conf_factor = {"גבוהה": 1.0, "בינונית": 0.7, "נמוכה": 0.4}.get(
+    # ‎מאומת ידנית‎ היא הדרגה שמעל הזיהוי המרחבי: בן אדם פתח את המודעה
+    # והכריע. אין לה סייג, ולכן המקדם 1.0 כמו "גבוהה".
+    conf_factor = {tracklist.CONF_MANUAL: 1.0, "גבוהה": 1.0,
+                   "בינונית": 0.7, "נמוכה": 0.4}.get(
         listing.get("mlm_confidence"), 0.7)
     cushion_pct = listing.get("mlm_cushion_pct")
     supply_pct = listing.get("mlm_supply_pct")
@@ -370,10 +374,24 @@ def supporting_signal(drop_pct, dom_days, liq_score, cfg, liq_weight, listing=No
     l = listing or {}
     # רק ודאות גבוהה נחשבת אות תומך. אות שמקדם מודעה ל"לבדוק דחוף" חייב
     # להיות ראיה, ולא השערה שנשענת על שכבה אחת.
-    if (l.get("mlm_released") and l.get("mlm_confidence") == "גבוהה"
+    _top_conf = (tracklist.CONF_MANUAL, "גבוהה")
+    if (l.get("mlm_released") and l.get("mlm_confidence") in _top_conf
             and (l.get("mlm_cushion_pct") or 0) >= float(
                 cfg.get("signal_min_cushion_pct", 20))):
-        signals.append(f"מחיר למשתכן משוחרר, כרית {l['mlm_cushion_pct']:.0f}%")
+        _how = ("אימות ידני" if l.get("mlm_confirmed") else "זיהוי מרחבי")
+        signals.append(
+            f"מחיר למשתכן משוחרר ({_how}), כרית {l['mlm_cushion_pct']:.0f}%")
+    # אישור ידני בלי כרית מחושבת הוא עדיין ראיה: המשתמש ראה בעיניו שזו
+    # דירת מחיר למשתכן, גם אם שכבת הפוליגונים פספסה אותה ולכן אין מחיר
+    # הגרלה להשוות אליו.
+    elif l.get("mlm_confirmed"):
+        signals.append("מחיר למשתכן — אומת ידנית")
+    # ── אותות התאומות ──
+    # אלה ראיות עצמאיות במובן המדויק שהפונקציה הזאת דורשת: הן אינן
+    # נגזרות מהנתון הרשמי שיצר את הפער, אלא מהתנהגות המוכרים עצמם
+    # באותו רחוב ממש — מי זול מהשכנים, מי נשבר ראשון, וכמה מתחרים
+    # נוספו. מוכר שהוריד פעמיים הוא ראיה חזקה מכל חציון.
+    signals.extend(peers.signals(l, cfg))
     return bool(signals), signals
 
 
@@ -549,6 +567,11 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
     kw_score, kw_found = score_keywords(
         listing, cfg.get("keywords") or [], w["opportunity_keywords"])
     mlm_score = score_mlm(listing, w.get("mlm_leverage", 0), cfg)
+    # השוואת תאומות — "אותו רחוב, אותו מספר חדרים, אותו גודל". האות הזה
+    # מחושב ב-peers.annotate לפני הניקוד, בעלות אפס בקשות. הוא **מצטבר**
+    # ל-price_gap ולא מחליף אותו: price_gap מודד מול עסקאות שנסגרו, וכאן
+    # מודדים מול המתחרות שמוצעות עכשיו. שתי שאלות שונות, שתי תשובות.
+    peer_score = peers.score(listing, w.get("peer_gap", 0), cfg)
     liq_score = score_area_liquidity(baseline, w["area_liquidity"], active_listings)
 
     y_pct = (yield_info or {}).get("yield_pct")
@@ -559,8 +582,25 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
     apprec_score = score_appreciation(
         cagr, w.get("area_appreciation", 0), cfg.get("cagr_full_at_pct", 6.0))
 
-    total = round(gap_score + drop_score + dom_score + kw_score + liq_score
-                  + yield_score + apprec_score + mlm_score, 2)
+    raw_total = round(gap_score + drop_score + dom_score + kw_score + liq_score
+                      + yield_score + apprec_score + mlm_score + peer_score, 2)
+
+    # ── נרמול כשאין קבוצת תאומות ──
+    # נמדד על 1,254 מודעות פעילות: רק 33% נמצאות בקבוצה של 3+ דירות זהות
+    # באותו רחוב או שכונה. לשתי השלישים האחרות אין תאומות **לא** בגלל
+    # משהו בדירה, אלא בגלל שאף אחד אחר לא מוכר דירה כזאת שם עכשיו.
+    # היעדר ראיה אינו ראיה שלילית, ולכן 14 הנקודות האלה אינן "0" אלא
+    # **לא ברות-השגה** — בדיוק ההבחנה שכבר עומדת מאחורי prescreen_gate.
+    # בלי הנרמול הזה סף "לבדוק דחוף" (78) היה דורש מהן 91% מהסולם הזמין
+    # והיה חוסם אותן כמעט לגמרי.
+    #
+    # ההשלכה, במכוון: דירה שיש לה תאומות ויושבת בדיוק על החציון שלהן
+    # **כן** מאבדת את הנקודות. זה לא עיוות — מוכר שהדירה שלו זהה לשש
+    # אחרות ומתומחרת כמוהן הוא בדיוק מי שאין לו סיבה להיות זה שזז.
+    peer_weight = float(w.get("peer_gap", 0) or 0)
+    reachable = 100.0 - (peer_weight if not listing.get("peer_level") else 0.0)
+    scale = 100.0 / reachable if 0 < reachable < 100 else 1.0
+    total = round(raw_total * scale, 2)
 
     has_signal, signals = supporting_signal(
         drop_pct, dom_days, liq_score, cfg, w["area_liquidity"], listing=listing)
@@ -665,6 +705,11 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
 
     return {
         "score": total,
+        # ‎breakdown‎ נושא את הנקודות הגולמיות, ולכן הוא מסתכם ב-‎score_raw‎
+        # ולא ב-‎score‎. זה בכוונה: עמודה שמראה "price_gap 26.1" כשהמשקל
+        # הוא 24 הייתה מטעה יותר ממועילה.
+        "score_raw": raw_total,
+        "score_scale": round(scale, 4),
         "stage": stage,
         "tier": tier,
         "tier_he": TIER_HE.get(tier, "—"),
@@ -682,6 +727,7 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
             "days_on_market": dom_score,
             "opportunity_keywords": kw_score,
             "mlm_leverage": mlm_score,
+            "peer_gap": peer_score,
             "area_liquidity": liq_score,
             "rental_yield": yield_score,
             "area_appreciation": apprec_score,
@@ -701,6 +747,20 @@ def score_listing(listing, cfg, benchmark_ppsqm=None, benchmark_label="",
         "asset_risk_reasons": risk_hits,
         "size_anomaly": size_anomaly,
         "sqm_per_room": round(spr, 1) if spr else None,
+        # השוואת תאומות — נשמר בפלט כדי שהכרטיס והמייל יוכלו להציג
+        # "זולה ב-X% מ-N דירות זהות ברחוב" ולא רק ציון.
+        "peer_level": listing.get("peer_level"),
+        "peer_area": listing.get("peer_area"),
+        "peer_count": listing.get("peer_count"),
+        "peer_median_ppm": listing.get("peer_median_ppm"),
+        "peer_gap_pct": listing.get("peer_gap_pct"),
+        "peer_vs_next_pct": listing.get("peer_vs_next_pct"),
+        "peer_cheapest": listing.get("peer_cheapest"),
+        "peer_new_60d": listing.get("peer_new_60d"),
+        "peer_lone_dropper": listing.get("peer_lone_dropper"),
+        "peer_droppers": listing.get("peer_droppers"),
+        "repeat_drops": listing.get("repeat_drops"),
+        "peer_note": listing.get("peer_note"),
         "street_status": street.get("street_status"),
         "street_gap_pct": street.get("street_gap_pct"),
         "street_peers": street.get("street_peers"),
@@ -733,10 +793,13 @@ def prescreen_reachable_max(cfg):
         # מחיר למשתכן נגזר מקובץ מקומי ומ-lat/lon שכבר בידינו — אפס בקשות,
         # ולכן הוא בר-השגה כבר בשלב א' וחייב להיספר בנרמול השער. בלעדיו
         # השער היה נדרש מכל מודעה אחוז גבוה יותר מהסולם וחוסם את הצינור.
-        "mlm_leverage")))
+        "mlm_leverage",
+        # השוואת התאומות נגזרת כולה מהמודעות שכבר נסרקו — גם היא זמינה
+        # בשלב א' ובעלות אפס, ולכן נספרת בנרמול מאותו נימוק.
+        "peer_gap")))
 
 
-def prescreen_gate(cfg):
+def prescreen_gate(cfg, scale=1.0):
     """
     הסף לשלב הסינון המקדים.
 
@@ -746,13 +809,28 @@ def prescreen_gate(cfg):
     כדי לא לפספס בדיוק את המקרים שהשלב השני נועד לגלות.
 
     ובנוסף — השער **מנורמל לסולם שבאמת זמין בשלב א'**. תשואה ועליית ערך
-    שוות יחד 25 נקודות שאי אפשר לצבור לפני שליפת הנתונים הרשמיים, ולכן
-    שער "מוחלט" של 55 היה למעשה דורש 73% מהניקוד האפשרי במקום 55% —
+    שוות יחד 19 נקודות שאי אפשר לצבור לפני שליפת הנתונים הרשמיים, ולכן
+    שער "מוחלט" של 55 היה למעשה דורש אחוז גבוה בהרבה מהניקוד האפשרי
     והיה חוסם כמעט את כל הצינור. הנרמול שומר על הכוונה המקורית.
+
+    ‎scale‎ הוא ‎score_scale‎ של המודעה. **זה לא פרמטר נוח אלא תיקון באג
+    שנמדד:** ‎score_listing‎ מנרמל את הציון כלפי מעלה למודעה שאין לה
+    קבוצת תאומות, והשער חייב לחיות על אותו סולם. בלי זה שני הנרמולים
+    לא מתחברים — נמדד על 1,254 מודעות: השער עלה מ-42.4 ל-44.5 לכולם,
+    בעוד ש-67% מהמודעות לא יכולות להגיע ל-14 הנקודות שהעלו אותו, ומספר
+    המודעות שעברו צנח מ-40 ל-10. התיקון: החלק הלא-זמין בשלב א' נמדד
+    **אחרי** ההכפלה בסולם, בדיוק כמו הציון עצמו.
     """
     raw = max(0.0, float(cfg["alert_threshold"])
               - float(cfg.get("prescreen_margin", 15)))
-    reachable = prescreen_reachable_max(cfg)
-    if reachable <= 0:
+    w = cfg["weights"]
+    total = float(sum(w.values())) or 100.0
+    unreachable = float(total - prescreen_reachable_max(cfg))
+    try:
+        scale = float(scale or 1.0)
+    except (TypeError, ValueError):
+        scale = 1.0
+    frac = (100.0 - unreachable * scale) / 100.0
+    if frac <= 0:
         return raw
-    return round(raw * reachable / 100.0, 2)
+    return round(raw * frac, 2)

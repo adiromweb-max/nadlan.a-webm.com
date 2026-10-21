@@ -130,6 +130,27 @@ def listing_record(s, ladder=None):
         "mlm_in_lot": bool(s.get("mlm_in_lot")),
         "mlm_lot_units": s.get("mlm_lot_units"),
         "mlm_size_suspect": bool(s.get("mlm_size_suspect")),
+        # השוואת תאומות — ראה scout/peers.py.
+        # **חייב להישמר כאן**: ‎latest.json‎ הוא המאגר המצטבר, והרשומות
+        # הנגררות נבנות ממנו. שדה שלא נכתב כאן נעלם בריצה הבאה.
+        "peer_level": s.get("peer_level"),
+        "peer_area": s.get("peer_area"),
+        "peer_count": s.get("peer_count"),
+        "peer_median_ppm": _num(s.get("peer_median_ppm")),
+        "peer_gap_pct": _num(s.get("peer_gap_pct"), 2),
+        "peer_vs_next_pct": _num(s.get("peer_vs_next_pct"), 2),
+        "peer_cheapest": bool(s.get("peer_cheapest")),
+        "peer_new_60d": s.get("peer_new_60d"),
+        "peer_cohort_known": bool(s.get("peer_cohort_known")),
+        "peer_lone_dropper": bool(s.get("peer_lone_dropper")),
+        "peer_droppers": s.get("peer_droppers"),
+        "repeat_drops": s.get("repeat_drops"),
+        "peer_note": s.get("peer_note"),
+        # אישור ידני (scout/tracklist.py). חייב להישמר כאן מאותה סיבה
+        # כמו שדות התאומות: המאגר המצטבר נבנה מהקובץ הזה.
+        "mlm_confirmed": bool(s.get("mlm_confirmed")),
+        "mlm_rejected": bool(s.get("mlm_rejected")),
+        "manual_note": s.get("manual_note"),
         "yield_pct": _num(s.get("yield_pct"), 2),
         "monthly_rent_est": _num(s.get("monthly_rent_est")),
         "rent_basis": s.get("rent_basis"),

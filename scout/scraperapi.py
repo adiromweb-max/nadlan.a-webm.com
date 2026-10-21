@@ -164,6 +164,91 @@ class ScraperApiClient:
                     _short(url), self.retries + 1, last)
         return None
 
+    # קודים שמעידים שהדף עצמו **לא קיים** אצל המקור, ולא שההבאה נכשלה.
+    # ScraperAPI מחזיר את קוד הסטטוס של דף המקור, ולכן 404/410 מיד2
+    # מגיעים לכאן כמו שהם. הכשלים של ScraperAPI עצמו מגיעים כ-500 עם
+    # ‎TRANSIENT_MARKERS‎ בגוף.
+    GONE_CODES = (404, 410)
+
+    def get_detailed(self, url, extra_params=None):
+        """
+        כמו ‎get‎, אבל מבדיל בין "המודעה נמחקה" ל"ההבאה נכשלה".
+
+        **למה זה נחוץ ולמה ‎get‎ לא יכול לענות על זה:** ‎get‎ מתייחס לכל
+        ‎status >= 400‎ ככשל זמני, מנסה שוב, ומחזיר ‎None‎. לכן מודעה
+        שנמחקה מיד2 נראית בדיוק כמו עיר שנחסמה — וזו הסיבה שהמערכת
+        נאלצה לנחש לפי ותק (‎inactive_after_days‎) ולהשאיר קישורים מתים
+        באוויר עד שבועיים.
+
+        מחזיר ‎(body, status, gone)‎:
+          * ‎gone=True‎  — המקור אמר במפורש שהדף לא קיים (404/410). ודאי.
+          * ‎gone=False‎ עם ‎body‎ — הדף הובא בהצלחה.
+          * ‎gone=False‎ בלי ‎body‎ — **לא יודעים**. חסימה, תקלת רשת או
+            ויתור אחרי ניסיונות. חייב להישאר "לא ידוע" ולא "נמחקה".
+
+        404 אינו מנוסה שוב: אין מה לנסות שוב כשהתשובה סופית.
+        """
+        if self.fatal_error:
+            return None, None, False
+
+        params = {"api_key": self.api_key, "url": url}
+        if self.ultra_premium:
+            params["ultra_premium"] = "true"
+        else:
+            params["country_code"] = self.country_code
+        if extra_params:
+            params.update(extra_params)
+        full = ENDPOINT + "?" + urllib.parse.urlencode(params, safe="")
+
+        last_status = None
+        for attempt in range(self.retries + 1):
+            self._spend()
+            try:
+                resp = self._session.get(full, timeout=self.timeout)
+            except requests.RequestException as e:
+                self._refund()
+                self._note_fail()
+                log.debug("ScraperAPI: כשל רשת (%s) — %s", _short(url), e)
+                time.sleep(self.backoff * (attempt + 1))
+                continue
+
+            body = resp.text or ""
+            head = body[:400]
+            last_status = resp.status_code
+
+            if any(m in head for m in FATAL_MARKERS):
+                self._refund()
+                self._note_fail()
+                self.fatal_error = head.strip()[:200]
+                log.error("ScraperAPI: שגיאה סופית — %s", self.fatal_error)
+                return None, last_status, False
+
+            # "נמחקה" נקבע רק כששני התנאים מתקיימים: הקוד הוא 404/410
+            # **וגם** הגוף אינו נושא סימן של כשל ScraperAPI. בלי התנאי
+            # השני, תקלה של השירות שמוחזרת עם קוד מטעה הייתה מוחקת
+            # מודעות חיות מהרשימה — השגיאה היקרה מהשתיים.
+            if (resp.status_code in self.GONE_CODES
+                    and not any(m in head for m in TRANSIENT_MARKERS)):
+                with self._lock:
+                    self.requests_ok += 1
+                return None, last_status, True
+
+            if resp.status_code >= 400 or any(m in head for m in TRANSIENT_MARKERS):
+                self._refund()
+                self._note_fail()
+                log.debug("ScraperAPI: כשל זמני (%s) HTTP %s",
+                          _short(url), resp.status_code)
+                time.sleep(self.backoff * (attempt + 1))
+                continue
+
+            with self._lock:
+                self.requests_ok += 1
+            return body, last_status, False
+
+        log.debug("ScraperAPI: ויתור על %s (סטטוס אחרון %s)", _short(url),
+                  last_status)
+        return None, last_status, False
+
     def _refund(self):
         with self._lock:
             self.credits_used = max(0, self.credits_used - self.credit_cost)

@@ -686,6 +686,89 @@ def enrich_listing(client, listing):
     return True
 
 
+def check_listing(client, listing):
+    """
+    בודק מודעה אחת מול **דף המודעה שלה** ומחזיר את מצבה בפועל.
+
+    זו הפעולה שמצב המעקב בנוי עליה. היא עונה על שאלה שסריקת החיפוש
+    אינה יכולה לענות עליה: **האם המודעה הזאת עוד קיימת.** בסריקת חיפוש,
+    מודעה שנעלמה ומודעה שפשוט לא הגיעה לעמוד הראשון נראות זהות, ולכן
+    המערכת נאלצה להמתין ‎inactive_after_days‎ לפני שסימנה אותה כלא-פעילה
+    — וזו הסיבה שנפתחו קישורים מתים.
+
+    מחזיר dict:
+      ‎alive‎  — True / False / None. **None הוא תשובה לגיטימית** ופירושה
+                "לא הצלחנו לבדוק" (חסימה, תקלה). אסור לה להפוך ל-False.
+      ‎price‎, ‎condition_id‎, ‎condition_text‎, ‎description‎, ‎size_sqm‎
+                — מה שהדף מסר, כשהוא חי.
+      ‎status‎ — קוד ה-HTTP האחרון, לתיעוד בלוג.
+
+    עלות: בקשה אחת. אינה זורקת חריגות פרט ל-CreditBudgetExceeded.
+    """
+    out = {"alive": None, "price": None, "condition_id": None,
+           "condition_text": None, "description": None, "size_sqm": None,
+           "status": None}
+    token = listing.get("token") or _token_from_url(listing.get("url"))
+    if not token:
+        return out
+    try:
+        body, status, gone = client.get_detailed(ITEM_URL.format(token=token))
+    except CreditBudgetExceeded:
+        raise
+    except Exception as e:
+        log.debug("בדיקת חיוּת נכשלה ל-%s: %s", listing.get("id"), e)
+        return out
+
+    out["status"] = status
+    if gone:
+        out["alive"] = False
+        return out
+    if body is None or _looks_blocked(body):
+        return out                      # לא ידוע — נשאר None
+
+    data = _parse_next_data(body)
+    node = _find_item_node(data) if data else None
+    if not node:
+        # הדף הובא אבל לא נראה כמו מודעה. זה יכול להיות דף "המודעה הוסרה"
+        # שמוחזר עם 200, ולכן **לא** מספיק כדי להכריז על מוות.
+        #
+        # המקרה הזה נרשם ללוג עם תחילת הכותרת **בכוונה**: נמדד שיד2
+        # מחזיר 404 למודעה שנמחקה (נבדק מול האתר החי), אבל לא נבדק אם
+        # ScraperAPI מעביר את ה-404 כמו שהוא או עוטף אותו. אם מתברר
+        # שהוא מחזיר 200 עם דף "המודעה הוסרה", הלוג הזה ייתן את הטקסט
+        # המדויק להוסיף כאן — במקום לנחש מחרוזת ולסמן מודעות חיות כמתות.
+        m = re.search(r"<title[^>]*>(.{0,120})", body, re.I | re.S)
+        log.info("מעקב: דף המודעה %s הובא אך לא נמצאה בו מודעה. כותרת: %r",
+                 listing.get("id"), (m.group(1).strip() if m else body[:120]))
+        return out
+
+    out["alive"] = True
+    price = _to_float(node.get("price"))
+    if price and price > 0:
+        out["price"] = price
+    ad = node.get("additionalDetails") or {}
+    cond = ad.get("propertyCondition") or {}
+    if cond.get("id") is not None:
+        out["condition_id"] = cond.get("id")
+    if cond.get("text"):
+        out["condition_text"] = cond["text"]
+    desc = (node.get("metaData") or {}).get("description")
+    if desc:
+        out["description"] = desc
+    size = _to_float(ad.get("squareMeter"))
+    if size and size_is_plausible(size):
+        out["size_sqm"] = size
+    return out
+
+
+def _token_from_url(url):
+    """מחלץ את הטוקן מכתובת מודעה, למודעות שנטענו מה-DB בלי שדה token."""
+    if not url:
+        return None
+    m = re.search(r"/item/([A-Za-z0-9]+)", str(url))
+    return m.group(1) if m else None
+
+
 def _find_item_node(data):
     """
     דף המודעה שומר את הנתונים תחת dehydratedState של react-query.

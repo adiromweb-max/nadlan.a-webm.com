@@ -126,6 +126,21 @@ def _trim(listings, cfg=None):
             "mlmlot": bool(s.get("mlm_in_lot")),
             "szbad": bool(s.get("mlm_size_suspect")),
             "cond": s.get("condition_text"),
+            # ── השוואת תאומות (scout/peers.py) ──
+            "plvl": s.get("peer_level"),        # רחוב / שכונה
+            "parea": s.get("peer_area"),
+            "pcnt": s.get("peer_count"),
+            "pgap": s.get("peer_gap_pct"),
+            "pnext": s.get("peer_vs_next_pct"),
+            "pcheap": bool(s.get("peer_cheapest")),
+            "pnew": s.get("peer_new_60d"),
+            "pcoh": bool(s.get("peer_cohort_known")),
+            "plone": bool(s.get("peer_lone_dropper")),
+            "pdrops": s.get("repeat_drops"),
+            "pnote": s.get("peer_note"),
+            "ok": bool(s.get("mlm_confirmed")),     # אושרה ידנית
+            "no": bool(s.get("mlm_rejected")),      # נפסלה ידנית
+            "mnote": s.get("manual_note"),
             "tier": tier,
             "otype": s.get("opportunity_type_he"),
             "reason": s.get("reason"),
@@ -291,6 +306,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .tierbadge{position:absolute;top:12px;inset-inline-end:12px;background:rgba(20,18,28,.72);color:#fff;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;backdrop-filter:blur(4px)}
   .savebtn{position:absolute;bottom:10px;inset-inline-end:10px;width:34px;height:34px;border-radius:999px;border:none;background:rgba(255,255,255,.9);color:var(--accent);font-size:16px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.15)}
   .savebtn.on{background:var(--accent);color:#fff}
+  /* כפתורי האימות — ליד הכוכב, באותו גודל ובאותה שפה ויזואלית */
+  .vbtn{position:absolute;bottom:10px;width:34px;height:34px;border-radius:999px;border:none;background:rgba(255,255,255,.9);cursor:pointer;font-size:15px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.15);line-height:1}
+  .vok{inset-inline-end:52px;color:#17803d}
+  .vno{inset-inline-end:94px;color:#b4232a}
+  .vok.on{background:#17803d;color:#fff}
+  .vno.on{background:#b4232a;color:#fff}
   .cbody{padding:14px 16px 16px}
   .ctop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
   .cprice{font-size:21px;font-weight:900;font-family:"Frank Ruhl Libre",serif;white-space:nowrap}
@@ -301,7 +322,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   /* תמונת המודעה. onerror מסיר את האלמנט ואז הגרדיאנט של .thumb נשאר
      מאחוריו — כך מודעה בלי תמונה או עם תמונה שנמחקה נראית תקין. */
   .thumbimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-  .thumb .ribbon,.thumb .newbadge,.thumb .tierbadge,.thumb .savebtn{z-index:2}
+  .thumb .ribbon,.thumb .newbadge,.thumb .tierbadge,.thumb .savebtn,.thumb .vbtn{z-index:2}
   .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin:0 0 16px}
   .gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:11px;cursor:zoom-in;background:var(--hair2)}
   .kv{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
@@ -476,6 +497,15 @@ function smartWhy(d){
   if(d.cagr>=4) p.push(`באזור שעולה <b>${(+d.cagr).toFixed(1)}%</b> בשנה`);
   if((d.dom||0)>=60) p.push(domPhrase(d));
   if(d.mlmrel && d.cush) p.push(`<b>מחיר למשתכן משוחרר</b> (${mlmEvid(d)}) — המוכר שילם כ-${fmt(d.mlmpaid)} ₪ ויושב על כ-<b>${fmt(d.cush)} ₪</b> רווח`);
+  /* ההשוואה מול התאומות נאמרת במשפט שאפשר להניח על השולחן במו"מ:
+     מספר הדירות הזהות, איפה הדירה הזאת ביניהן, ומי כבר זז. */
+  if((d.pcnt||0)>=3 && d.pgap!=null && d.pgap>=3)
+    p.push(`<b>הזולה מבין ${d.pcnt} דירות זהות</b> ב${d.parea||d.hood||d.city} — ${(+d.pgap).toFixed(0)}% מתחת לחציון שלהן`);
+  if(isOk(d)) p.push(`<b>אימתת בעצמך</b> שזו דירת מחיר למשתכן${NOTES[d.id]?` — ${NOTES[d.id]}`:''}`);
+  if(d.plone) p.push(`<b>היחידה מתוך ${d.pcnt}</b> שהורידה מחיר בחודשיים האחרונים`);
+  else if((d.pdrops||0)>=2) p.push(`המוכר הוריד מחיר <b>${d.pdrops} פעמים</b>`);
+  if(d.pcoh && (d.pcnt||0)>=5 && (d.pnew||0)>=3)
+    p.push(`<b>${d.pnew} דירות זהות נוספו</b> ב${d.parea||d.hood} בחודשיים — ${d.pcnt} מוכרים מתחרים על אותו קונה`);
   if(!p.length){
     if(d.suspect) return 'הפער מהשוק גדול מהרגיל — שווה בדיקה, אך ודא שאין הבדל גודל או קטגוריה.';
     return 'מלאי טרי שנכנס למעקב. עדיין לא אומת מול עסקאות סגורות — ההזדמנויות המאומתות בטאב "הזדמנויות".';
@@ -494,6 +524,56 @@ let WL=wlGet();
 function toggleSave(id,ev){if(ev)ev.stopPropagation();
   if(WL.has(id)){WL.delete(id);toast('הוסר מהמעקב');}else{WL.add(id);toast('נוסף לרשימת המעקב ★');}
   wlSave(WL);render();}
+
+/* ---- אימות ידני של מחיר למשתכן ----
+   הזיהוי של המנוע הוא נקודה-בתוך-פוליגון בתוספת מצב הנכס — הטוב שאפשר
+   אוטומטית, אבל עדיין הסקה. בן אדם שפתח את המודעה והכריע חזק ממנה, ולכן
+   יש דרגת ודאות אחת מעל "גבוהה": "מאומת ידנית".
+
+   נשמר ב-localStorage כי הדף סטטי ואין לו שרת. כדי שהמנוע **גם** ידע,
+   מייצאים מכאן קובץ ומעלים אותו לריפו ב-data/mlm_confirmed.json. אחרי
+   העלאה, המנוע עוקב בדיוק אחרי הדירות האלה ומסמן אותן בוודאות העליונה.
+   הסימון כאן נשאר תקף גם לפני ההעלאה — הוא פשוט לא מגיע למנוע. */
+function okGet(k){try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}}
+function okSave(k,s){try{localStorage.setItem(k,JSON.stringify([...s]));}catch(e){}}
+function noteGet(){try{return JSON.parse(localStorage.getItem('aweb_mlm_notes')||'{}');}catch(e){return {};}}
+function noteSave(o){try{localStorage.setItem('aweb_mlm_notes',JSON.stringify(o));}catch(e){}}
+let OK=okGet('aweb_mlm_ok'), NO=okGet('aweb_mlm_no'), NOTES=noteGet();
+/* מצב מהשרת הוא נקודת הפתיחה: דירה שכבר אושרה והקובץ הועלה מגיעה עם
+   ok=true, כדי שמחשב אחר (או דפדפן אחרי ניקוי) לא יראה אותה כלא-מאושרת. */
+function isOk(d){ return OK.has(d.id) || (d.ok && !NO.has(d.id)); }
+function isNo(d){ return NO.has(d.id) || (d.no && !OK.has(d.id)); }
+function markOk(id,ev){if(ev)ev.stopPropagation();
+  if(OK.has(id)){OK.delete(id);toast('האימות בוטל');}
+  else{OK.add(id);NO.delete(id);toast('סומנה כמחיר למשתכן מאומת ✓');}
+  okSave('aweb_mlm_ok',OK);okSave('aweb_mlm_no',NO);render();}
+function markNo(id,ev){if(ev)ev.stopPropagation();
+  if(NO.has(id)){NO.delete(id);toast('הפסילה בוטלה');}
+  else{NO.add(id);OK.delete(id);toast('נפסלה — תוסר מהמעקב');}
+  okSave('aweb_mlm_ok',OK);okSave('aweb_mlm_no',NO);render();}
+function setNote(id){
+  const cur=NOTES[id]||'';
+  const v=prompt('הערה על הדירה (מה בדקת?)',cur);
+  if(v===null)return;
+  if(v.trim())NOTES[id]=v.trim(); else delete NOTES[id];
+  noteSave(NOTES);render();}
+/* הייצוא הוא הגשר היחיד בין הדפדפן למנוע. בכוונה קובץ ולא מסד נתונים:
+   דף ציבורי שכותב למסד צריך מפתח כתיבה בתוכו, וקובץ שעובר דרך גיט לא
+   דורש שום סוד ומתועד בהיסטוריה. */
+function exportConfirmed(){
+  const ids=[...new Set([...OK])].sort(), bad=[...new Set([...NO])].sort();
+  if(!ids.length && !bad.length){toast('עדיין לא אישרת ולא פסלת כלום');return;}
+  const notes={}; Object.keys(NOTES).forEach(k=>{if(NOTES[k])notes[k]=NOTES[k];});
+  const body={
+    "_":"נוצר מהאתר (טאב 'מאומת על ידי' → ייצוא). להעלות לריפו ב-data/mlm_confirmed.json.",
+    updated:new Date().toISOString().slice(0,10),
+    confirmed:ids, rejected:bad, notes:notes};
+  const blob=new Blob([JSON.stringify(body,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='mlm_confirmed.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast(`יוצאו ${ids.length} מאושרות ו-${bad.length} נפסלות`);}
 
 /* ---- nadlan link: specific area ---- */
 function nadlanLink(d){
@@ -515,11 +595,15 @@ function madlanLink(d){
 const TAB_IC={
   new:'<svg viewBox="0 0 24 24"><path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.5z"/></svg>',
   mlm:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/></svg>',
+  twins:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="12"/><rect x="14" y="4" width="7" height="16"/><path d="M3 8h7M14 4h7"/></svg>',
+  mine:'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
   drops:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-4h-4"/></svg>',
   opps:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
   watch:'<svg viewBox="0 0 24 24"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.6 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8z"/></svg>',
   trends:'<svg viewBox="0 0 24 24"><path d="M4 19V5M4 15l5-4 4 3 7-7"/></svg>'};
 const TABS=[{k:'new',label:'חדש היום'},{k:'mlm',label:'מחיר למשתכן'},
+  {k:'twins',label:'דירות תאומות'},
+  {k:'mine',label:'מאומת על ידי'},
   {k:'drops',label:'ירידות מחיר'},
   {k:'opps',label:'הזדמנויות'},{k:'watch',label:'המעקב שלי'},{k:'trends',label:'מגמות'}];
 function go(k){S.tab=k;render();}
@@ -593,12 +677,26 @@ function card(d,i){
   else if(d.mlmrel && d.cushpct) chips.push(`<span class="n">כרית ${(+d.cushpct).toFixed(0)}% · מחיר למשתכן (ודאות ${d.mlmconf||'חלקית'})</span>`);
   else if(d.mlm && !d.mlmrel) chips.push(`<span class="u">מחיר למשתכן — עוד מוגבל</span>`);
   if((d.mlmsup||0)>=2) chips.push(`<span class="n">${d.mlmsale} מהמתחם למכירה</span>`);
+  /* ── התאומות ──
+     הצ'יפ הזה עונה על השאלה שהכי קרובה למו"מ: מבין הדירות הזהות שמוצעות
+     עכשיו באותו רחוב, איפה הדירה הזאת. זה נתון בזמן אמת וברמת רחוב, ולכן
+     הוא משלים את הפער מול העסקאות ולא מחליף אותו. */
+  if((d.pcnt||0)>=3 && d.pgap!=null && d.pgap>=8) chips.push(`<span class="b">זולה ב-${(+d.pgap).toFixed(0)}% מ-${d.pcnt-1} זהות</span>`);
+  else if((d.pcnt||0)>=3 && d.pgap!=null && d.pgap>=3) chips.push(`<span class="n">זולה ב-${(+d.pgap).toFixed(0)}% מ-${d.pcnt-1} זהות</span>`);
+  if(d.plone) chips.push(`<span class="b">היחידה מ-${d.pcnt} שהורידה</span>`);
+  else if((d.pdrops||0)>=2) chips.push(`<span class="b">המוכר ירד ${d.pdrops} פעמים</span>`);
+  if(d.pcoh && (d.pcnt||0)>=5 && (d.pnew||0)>=3) chips.push(`<span class="n">${d.pnew} זהות נוספו בחודשיים</span>`);
+  /* אימות ידני גובר על הזיהוי המרחבי ולכן מקבל צ'יפ משלו, לפני הכרית. */
+  if(isOk(d)) chips.push(`<span class="b">מחיר למשתכן — אימתת ✓</span>`);
+  else if(isNo(d)) chips.push(`<span class="s">פסלת</span>`);
   if(d.szbad) chips.push(`<span class="s">גודל לא-סביר ביד2</span>`);
   const why = smartWhy(d);
   const saved=WL.has(d.id);
   return `<article class="card">
     <div class="thumb" style="background:${g}" onclick="openDeal('${d.id}')">${rib}${d.tier?`<span class="tierbadge">${d.tier}</span>`:''}
-      <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>${
+      <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>
+      <button class="vbtn vok ${isOk(d)?'on':''}" onclick="markOk('${d.id}',event)" title="אימתתי: זו דירת מחיר למשתכן">✓</button>
+      <button class="vbtn vno ${isNo(d)?'on':''}" onclick="markNo('${d.id}',event)" title="בדקתי: זו לא מחיר למשתכן / לא רלוונטית">✕</button>${
         d.imgs&&d.imgs.length
           ? `<img class="thumbimg" src="${d.imgs[0]}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
           : bld()}</div>
@@ -632,6 +730,9 @@ function feed(list, emptyMsg){
     if(key==='price') return (a.price||0)-(b.price||0);
     if(key==='dom') return (b.dom||0)-(a.dom||0);
     if(key==='cush') return (b.cush||0)-(a.cush||0);
+    /* מיון התאומות משתמש באותו דירוג של הטאב — פער, מי נשבר ראשון,
+       כמה ירידות וכמה מתחרים — ולא בפער לבדו. */
+    if(key==='twin') return twinRank(b)-twinRank(a);
     return (b.gap||-99)-(a.gap||-99);
   });
   S._view=arr;
@@ -647,11 +748,15 @@ function toolbar(){
       <option value="gap"${S.sort==='gap'?' selected':''}>מיון: מתחת לשוק</option>
       <option value="dom"${S.sort==='dom'?' selected':''}>מיון: הזמן הרב ביותר בשוק</option>
       <option value="cush"${S.sort==='cush'?' selected':''}>מיון: כרית המוכר (מחיר למשתכן)</option>
+      <option value="twin"${S.sort==='twin'?' selected':''}>מיון: הזולה מבין התאומות</option>
       <option value="drop"${S.sort==='drop'?' selected':''}>מיון: ירידת מחיר</option>
       <option value="yield"${S.sort==='yield'?' selected':''}>מיון: תשואה</option>
       <option value="price"${S.sort==='price'?' selected':''}>מיון: מחיר</option>
     </select>
-    <button class="exp" onclick="exportCSV()"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>ייצוא לאקסל</button>
+    <button class="exp" onclick="exportCSV()"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>ייצוא לאקסל</button>${
+    /* כפתור הייצוא למנוע מופיע רק בטאב האימות, כי שם הוא מובן: זה
+       הגשר בין מה שסימנת בדפדפן לבין מה שהמנוע עוקב אחריו. */
+    S.tab==='mine' ? `<button class="exp" onclick="exportConfirmed()"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ייצוא קובץ למנוע (${D.listings.filter(isOk).length})</button>` : ''}
   </div>`;
 }
 
@@ -662,12 +767,16 @@ function render(){
     let n='';
     if(t.k==='new') n=c.new;
     else if(t.k==='mlm') n=D.listings.filter(d=>d.mlm).length;
+    else if(t.k==='twins') n=D.listings.filter(isTwinLead).length;
+    else if(t.k==='mine') n=D.listings.filter(isOk).length;
     else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
     return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${TAB_IC[t.k]||''}<span>${t.label}</span>${(n!==''&&n!=null)?`<span class="cnt">${n}</span>`:''}</a>`;
   }).join('');
   const H={new:['מה חדש היום','רק מודעות שהתגלו או השתנו מאז אתמול — לא אותה רשימה כל יום.'],
     mlm:['דירות מחיר למשתכן','רק דירות שזוהו בתוך פרויקט מחיר למשתכן, מסודרות לפי כמה המוכר יכול לרדת. ✓ = שתי שכבות רשמיות ובניין חדש מסכימים.'],
+    twins:['הזולה מבין התאומות','דירות שמוצעות עכשיו ליד דירות זהות לחלוטין — אותו רחוב, אותו מספר חדרים, גודל דומה — וזולות מהן. פה גם רואים מי נשבר ראשון ולאיזה מוכר יש הכי הרבה מתחרים.'],
+    mine:['הדירות שאימתת','הדירות שפתחת, בדקת, וסימנת ✓ כמחיר למשתכן. אחרי ייצוא והעלאה של הקובץ לריפו, המנוע עוקב בדיוק אחריהן כל יום ומזהה ירידת מחיר או מודעה שנמחקה.'],
     drops:['ראדאר ירידות מחיר','כל מודעה שירדה במחיר — כמה ירדה וכמה היא מתחת לשוק.'],
     opps:['ההזדמנויות','מתומחר מתחת לעסקאות סגורות דומות באזור, אחרי אימות מול רשות המיסים.'],
     watch:['המעקב שלי','הנכסים ששמרת. נשמרים במכשיר שלך.'],
@@ -692,6 +801,19 @@ function render(){
       });
       empty='עדיין לא זוהו דירות מחיר למשתכן. הסריקה מכסה חלק מהערים בכל ריצה.';
     }
+    /* טאב התאומות: מדורג לפי *עוצמת האות*, לא לפי הפער לבדו. מי שנשבר
+       ראשון בקבוצה ומי שהוריד פעמיים הם ראיות חזקות יותר על גמישות
+       המוכר מכל חציון, ולכן הם נכנסים לדירוג ולא רק לתווית. */
+    else if(S.tab==='twins'){
+      list=D.listings.filter(isTwinLead).sort((a,b)=>twinRank(b)-twinRank(a));
+      empty='עדיין לא נמצאו קבוצות של דירות זהות. דרושות 3 מודעות באותו רחוב (או 4 באותה שכונה) עם אותו מספר חדרים וגודל דומה.';
+    }
+    /* טאב האימות הידני. כאן גם נמצא כפתור הייצוא, כי זו הנקודה היחידה
+       שבה האישור שלך הופך למשהו שהמנוע יודע עליו. */
+    else if(S.tab==='mine'){
+      list=D.listings.filter(isOk).sort((a,b)=>twinRank(b)-twinRank(a));
+      empty='עדיין לא אימתת אף דירה. פתח מודעה, בדוק אם היא מחיר למשתכן, ולחץ ✓ על הכרטיס.';
+    }
     else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq); empty='אין ירידות מחיר כרגע.'; }
     else if(S.tab==='watch'){ list=D.listings.filter(d=>WL.has(d.id)); empty='עדיין לא שמרת נכסים. לחץ על ★ בכל כרטיס.'; }
     else { list=D.listings.filter(isOpp); empty='אין הזדמנויות מאומתות בריצה הזו.'; }
@@ -703,6 +825,26 @@ function render(){
 }
 /* הזדמנות = ראיה מקומית, לא רק פער. לפני התיקון 28 מתוך 38 ה"הזדמנויות"
    לא היו מדורגות ע"י המנוע בכלל. */
+/* ---- דירות תאומות ----
+   ‎isTwinLead‎ — מי נכנס לטאב בכלל. התנאי הוא קבוצה אמיתית (3+) **ועוד**
+   אות אחד לפחות: זולה מהחציון, נשברה ראשונה, או מוכר שהוריד פעמיים.
+   דירה שיושבת בדיוק על החציון של התאומות שלה אינה "הזולה מביניהן", וטאב
+   שמציג אותה מדלל בדיוק את מה שהוא קיים בשבילו. */
+function isTwinLead(d){
+  if(d.disq) return false;
+  if((d.pcnt||0) < 3) return false;
+  return (d.pgap!=null && d.pgap>=3) || d.plone || (d.pdrops||0)>=2;
+}
+/* ‎twinRank‎ — עוצמת האות, לא הפער לבדו. "נשבר ראשון" ו"הוריד פעמיים" הן
+   ראיות על **המוכר**, ולכן שוות יותר מאחוז נוסף מול החציון. אותם מקדמים
+   בדיוק כמו ב-‎bonanza._peer_edge‎, כדי שהאתר והבוננזה ידרגו אותו דבר. */
+function twinRank(d){
+  let v = (d.pgap||0) * 2;
+  if(d.plone) v += 8;
+  v += Math.min(d.pdrops||0, 4) * 3;
+  if(d.pcoh && (d.pcnt||0)>=5) v += Math.min(d.pnew||0, 6) * 1.5;
+  return v;
+}
 function isOpp(d){ return !d.disq && d.stage==='final' && d.evid && !(d.risk&&d.risk.length)
   && ((d.netgap!=null?d.netgap>=5:(d.gap!=null&&d.gap>=5)) && !d.suspect || d.tier); }
 
@@ -913,6 +1055,8 @@ function openDeal(id){
         ${d.url?`<a class="prim" href="${d.url}" target="_blank" rel="noopener">פתח ביד2 ↗</a>`:''}
         <a href="${madlanLink(d)}" target="_blank" rel="noopener">עסקאות שנמכרו באזור ↗</a>
         <button onclick="toggleSave('${id}');closeDeal()">${WL.has(id)?'★ במעקב':'☆ הוסף למעקב'}</button>
+        <button onclick="markOk('${id}')">${isOk({id:id,ok:false})?'✓ אימתת כמחיר למשתכן':'✓ אמת כמחיר למשתכן'}</button>
+        <button onclick="setNote('${id}')">${NOTES[id]?'✎ ערוך הערה':'✎ הוסף הערה'}</button>
       </div>
     </div>`;
   document.getElementById('ov').classList.add('show');

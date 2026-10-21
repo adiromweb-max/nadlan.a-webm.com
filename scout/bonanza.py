@@ -39,6 +39,8 @@ DEFAULTS = {
     "bonanza_max_per_run": 1,       # כמה עסקאות לפלוט
     "bonanza_stale_days": 7,        # last_seen ישן מזה → דגל "אמת לפני שליחה"
     "bonanza_max_images": 3,
+    # מי שמוביל מול הדירות הזהות באותו רחוב נבחר לפני מודעה פרטית
+    "bonanza_prefer_peers": True,
 }
 
 
@@ -81,10 +83,37 @@ def _tier_rank(x):
     return _TIER_RANK.get(x.get("tier"), 0)
 
 
+def _peer_edge(x):
+    """
+    כמה העסקה מובילה **מול הדירות הזהות שמוצעות עכשיו באותו רחוב**.
+
+    זה הקריטריון שהבוננזה הייתה חסרה. ‎value_gap_pct‎ אומר "זול מול
+    עסקאות שנסגרו באזור" — נתון אמין אבל רחב, בפיגור של חודשים וברמת
+    שכונה. כאן נמדד הדבר שקונה באמת מחליט לפיו: מבין שבע דירות 3 חדרים
+    באותו מתחם שעומדות מול אותו קונה ברגע זה, זו הזולה, ובכמה.
+
+    המספרים מגיעים מ-‎scout/peers.py‎ ומחושבים בעלות אפס בקשות.
+    """
+    pts = 0.0
+    gap = x.get("peer_gap_pct") or 0.0
+    count = x.get("peer_count") or 0
+    if count >= 3 and gap > 0:
+        pts += gap * 2.0
+    # מי שנשבר ראשון הוא הלחוץ, והירידה שלו היא גם עוגן מול השכנים
+    if x.get("peer_lone_dropper"):
+        pts += 8.0
+    # מוכר שכבר בתנועה למטה ימשיך לרדת במו"מ
+    pts += min(int(x.get("repeat_drops") or 0), 4) * 3.0
+    # לחץ היצע: שבעה מוכרים של אותה דירה הם קונה אחד שמחליט
+    if x.get("peer_cohort_known") and count >= 5:
+        pts += min(int(x.get("peer_new_60d") or 0), 6) * 1.5
+    return pts
+
+
 def _certainty(x):
     """
     שובר-שוויון בין עסקאות באותו דירוג. משקלל ערך + ודאות:
-    תשואה, עליית ערך, ירידת מחיר, כמות קומפים, וציון.
+    תשואה, עליית ערך, ירידת מחיר, כמות קומפים, הובלה מול התאומות, וציון.
     פער קרוב לקצה הבנד (30%) מקבל קנס קל — פער "יפה מדי" חשוד יותר.
     """
     g = _gap(x)
@@ -95,6 +124,7 @@ def _certainty(x):
         + (x.get("total_drop_pct") or 0) * 1.5
         + (x.get("comp_count") or 0) * 1.5
         + (x.get("score") or 0) * 0.3
+        + _peer_edge(x)
         - edge_penalty
     )
 
@@ -113,8 +143,15 @@ def select(listings, cfg=None, already_sent=None, active_ids=None, limit=None):
              if is_bonanza_grade(x, cfg)
              and x.get("id") not in already_sent
              and (active_ids is None or x.get("id") in active_ids)]
+    # סדר הבחירה. השכבה השנייה היא החדשה: **מי שמוביל מול התאומות שלו**
+    # עולה לפני העדפת מודעה פרטית. הסיבה היא שזו השאלה שקובעת במו"מ —
+    # דירה שהיא הזולה מתוך שבע זהות ברחוב נותנת עמדת פתיחה שאין לדירה
+    # זולה שאין לה מתחרות, גם אם האחרונה פרטית וחוסכת עמלה.
+    prefer_peers = bool(_cfg(cfg, "bonanza_prefer_peers"))
     cands.sort(
         key=lambda x: (_tier_rank(x),
+                       1 if (prefer_peers and x.get("peer_cheapest")
+                             and (x.get("peer_count") or 0) >= 3) else 0,
                        1 if x.get("listing_type") == "private" else 0,
                        _certainty(x)),
         reverse=True,
@@ -189,6 +226,23 @@ def _reasons(x):
         out.append(f"מגמת עלייה באזור: כ-{x['area_cagr_pct']:.1f}% בשנה בממוצע (רב-שנתי).")
     if x.get("total_drop_pct"):
         out.append(f"המחיר כבר ירד בכ-{x['total_drop_pct']:.0f}% מאז הפרסום, סימן שהמוכר גמיש.")
+    # ── ההשוואה מול הדירות הזהות שמוצעות עכשיו ──
+    # זה הנתון שהכי שימושי במו"מ בפועל: אפשר להניח אותו על השולחן.
+    pc, pg = x.get("peer_count") or 0, x.get("peer_gap_pct")
+    parea = x.get("peer_area") or area
+    if pc >= 3 and pg is not None and pg >= 1:
+        out.append(f"מבין {pc} דירות זהות (אותו מספר חדרים וגודל דומה) "
+                   f"שמוצעות עכשיו ב{parea}, זו הזולה ב-{pg:.0f}% מהחציון שלהן.")
+    if x.get("peer_lone_dropper"):
+        out.append(f"היא היחידה מתוך {pc} שהורידה מחיר בחודשיים האחרונים. "
+                   f"מי שנשבר ראשון הוא גם מי שגמיש יותר.")
+    if (x.get("repeat_drops") or 0) >= 2:
+        out.append(f"המוכר הוריד את המחיר {int(x['repeat_drops'])} פעמים. "
+                   f"מוכר שכבר בתנועה למטה נוטה להמשיך גם במו\"מ.")
+    if (x.get("peer_cohort_known") and pc >= 5
+            and (x.get("peer_new_60d") or 0) >= 3):
+        out.append(f"{int(x['peer_new_60d'])} דירות זהות נוספו ב{parea} "
+                   f"בחודשיים האחרונים. {pc} מוכרים מתחרים על אותו קונה.")
     if x.get("condition_text"):
         out.append(f"מצב הנכס: {x['condition_text']}.")
     dom = x.get("days_on_market")

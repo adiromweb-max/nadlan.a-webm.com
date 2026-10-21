@@ -23,7 +23,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 from . import (alerts, charts, comps, dashboard, db, emailer, excel, jsonout,
-               mlm, nadlan, pricing, scoring, sections, webapp, yad2)
+               mlm, nadlan, peers, pricing, scoring, sections, tracklist,
+               webapp, yad2)
 from .config import load_config
 from .http import Fetcher
 from .scraperapi import CreditBudgetExceeded, ScraperApiClient, account_info
@@ -59,6 +60,36 @@ def setup_logging(cfg, verbose=False):
 # שלב 0 — קודי יישוב
 # ------------------------------------------------------------------
 
+def shard_cities(cities, cfg, today):
+    """
+    מחלק את הערים למשמרות — תת-קבוצה אחת לכל ריצה.
+
+    למה: יד2 חוסם לפי **נפח**, לא באקראי. נמדד בשתי ריצות רצופות על
+    אותה רשימה: 55 בקשות → 8 ערים נכנסו; 96 בקשות → רק 6 ערים, ו-39
+    נכשלו. יותר בקשות באותו חלון זמן = יותר חסימה. ניסיון חוזר מיידי
+    נבדק והזיק, ולכן הוא הוחזר ל-1.
+    הפתרון הוא לפזר: שליש מהערים בכל ריצה, שלוש ריצות ביום בשעות שונות.
+    אותו תקציב קרדיטים, שליש מהעומס הרגעי.
+
+    הרשימה **מסתובבת לפי היום**, כדי שעיר לא תיתקע תמיד באותה משמרת.
+    אם משמרת מסוימת נחסמת דרך קבע, הסיבוב דואג שכל עיר תגיע גם לאחרות.
+    ‎inactive_after_days‎ הוא 14, ולכן עיר שנסרקת כל שלושה ימים אינה
+    מאבדת את המודעות שלה מהרשימה.
+    """
+    try:
+        shard = int(cfg.get("_shard") or 0)
+        shards = int(cfg.get("yad2_shards") or 0)
+    except (TypeError, ValueError):
+        return cities
+    if shard < 1 or shards < 2 or not cities:
+        return cities
+    rot = today.toordinal() % len(cities)
+    rotated = cities[rot:] + cities[:rot]
+    picked = [c for i, c in enumerate(rotated) if i % shards == (shard - 1)]
+    log.info("משמרת %d/%d: %d ערים מתוך %d", shard, shards, len(picked), len(cities))
+    return picked
+
+
 def resolve_city_codes(fetcher, cfg, report):
     """
     מחזיר (pairs, index) כאשר pairs = [(city, setl_code)].
@@ -82,6 +113,7 @@ def resolve_city_codes(fetcher, cfg, report):
         if city not in seen:
             wanted.append(city)
             seen.add(city)
+    wanted = shard_cities(wanted, cfg, date.today())
 
     pairs = []
     for city in wanted:
@@ -169,7 +201,7 @@ def load_from_db(conn, cfg):
 # שלב 3 — סינון מקדים (חינם, מול חציון המבוקש של יד2)
 # ------------------------------------------------------------------
 
-def prescreen(listings, cfg, meta, latest_drop, today):
+def prescreen(listings, cfg, meta, latest_drop, today, drops=None):
     benchmarks = scoring.peer_benchmarks(listings)
     counts = {}
     for l in listings:
@@ -197,6 +229,46 @@ def prescreen(listings, cfg, meta, latest_drop, today):
     except Exception:
         # שכבה חסרה או פגומה לא מפילה ריצה — המנוע ממשיך בלי האות הזה
         log.error("כשל בזיהוי מחיר למשתכן:\n%s", traceback.format_exc())
+
+    # ── השוואת תאומות ──
+    # גם זה שלב א': נגזר כולו מהמודעות שכבר נסרקו ומהיסטוריית המחירים
+    # שכבר ב-DB, בעלות אפס בקשות. חייב לרוץ **אחרי** שכל המודעות נטענו,
+    # כי הקבוצה היא כל מי שמוצע עכשיו באותו רחוב.
+    # ה-‎listed_at‎ נדרש כאן למדידת ההיצע שנוסף, ולכן מושלם מה-meta לפני
+    # הבנייה — בלעדיו כל הקבוצה נראית "חדשה" והאות היה מתנפח.
+    try:
+        for l in listings:
+            if not l.get("listed_at"):
+                info = meta.get(l["id"], {})
+                if info.get("listed_at"):
+                    l["listed_at"] = info["listed_at"]
+                elif info.get("first_seen"):
+                    l["listed_at"] = info["first_seen"]
+        tagged = peers.annotate(listings, cfg, drops=drops, today=today)
+        groups = len({(l.get("peer_level"), l.get("city"), l.get("peer_area"),
+                       l.get("rooms")) for l in listings if l.get("peer_level")})
+        cheap = sum(1 for l in listings
+                    if (l.get("peer_gap_pct") or 0) >= float(
+                        cfg.get("peer_gap_min_pct", 8)))
+        log.info("תאומות: %d מודעות ב-%d קבוצות, %d זולות ב-8%%+ מהחציון "
+                 "של הקבוצה שלהן", tagged, groups, cheap)
+    except Exception:
+        log.error("כשל בהשוואת תאומות:\n%s", traceback.format_exc())
+
+    # ── אישור ידני ──
+    # רץ **אחרי** הזיהוי המרחבי בכוונה: הוא דורס את ‎mlm_confidence‎
+    # ומעלה אותה ל"מאומת ידנית". בן אדם שפתח את המודעה והכריע גובר על
+    # נקודה-בתוך-פוליגון, לא להיפך.
+    try:
+        manual = tracklist.load(cfg)
+        n_conf, n_rej = tracklist.apply(listings, manual, cfg)
+        if manual["confirmed"] or manual["rejected"]:
+            log.info("אישור ידני: %d מאושרות ו-%d נפסלות נמצאו במלאי "
+                     "(הקובץ מכיל %d/%d, עודכן %s)", n_conf, n_rej,
+                     len(manual["confirmed"]), len(manual["rejected"]),
+                     manual.get("updated") or "—")
+    except Exception:
+        log.error("כשל בטעינת האישורים הידניים:\n%s", traceback.format_exc())
 
     scored = []
     for l in listings:
@@ -391,7 +463,7 @@ def build_city_rows(conn, cfg, area_svc, listings, today, observed, area_cache):
 # ריצה מלאה
 # ------------------------------------------------------------------
 
-def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
+def _merge_accumulated(out_dir, db_path, run_day, prev_listings, cfg=None):
     """
     שומר את latest.json כ**מצטבר**: כל ההזדמנויות הפעילות שנצברו עד היום,
     לא רק הריצה האחרונה. הריצה הנוכחית מעדכנת/מוסיפה; מודעות קודמות שעדיין
@@ -413,13 +485,14 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
     data = json.loads(p.read_text(encoding="utf-8"))
     cur = data.get("listings") or []
     cur_ids = {x.get("id") for x in cur}
-    active, rows = None, {}
+    active, rows, drop_rows = None, {}, []
     try:
         c = db.connect(db_path)
         try:
             active = set()
             for r in c.execute("SELECT id, listed_at, lat, lon, price, size_sqm, "
-                               "city, neighborhood, raw_json "
+                               "city, neighborhood, street, rooms, "
+                               "price_per_sqm, raw_json "
                                "FROM listings WHERE active=1"):
                 active.add(r["id"])
                 d = dict(r)
@@ -434,11 +507,13 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
                 except (ValueError, TypeError):
                     d["condition_id"] = None
                 rows[r["id"]] = d
+            drop_rows = db.price_drop_history(
+                c, sanity_limit=None)
         finally:
             c.close()
     except Exception:
         log.error("כשל בקריאת ה-DB לריענון הצבירה:\n%s", traceback.format_exc())
-        active, rows = None, {}
+        active, rows, drop_rows = None, {}, []
 
     try:
         projects, lots = mlm.Projects(), mlm.Lots()
@@ -483,7 +558,38 @@ def _merge_accumulated(out_dir, db_path, run_day, prev_listings):
                  refreshed)
     if carried and projects is not None:
         mlm.supply_pressure(carried + cur)
-    data["listings"] = cur + carried
+
+    # ── השוואת תאומות על המאגר המצטבר ──
+    # חייבת לרוץ כאן ולא רק ב-prescreen: הקבוצה היא כל מי שמוצע עכשיו
+    # באותו רחוב, והמאגר המצטבר הוא התמונה המלאה. בריצה בודדת יד2 חוסם
+    # את רוב הערים, ולכן קבוצה שנבנית מהריצה לבדה תהיה חלקית — "3 דירות
+    # זהות" במקום 7, והאות היחיד שמעניין כאן הוא בדיוק המספר הזה.
+    merged = cur + carried
+    try:
+        # שדות הקיבוץ מרועננים מה-DB. רשומה נגררת עברה דרך ‎_trim‎ ולא
+        # בטוח שנשאר בה רחוב או ₪/מ"ר, ובלעדיהם היא נושרת מהקבוצה ומקטינה
+        # אותה בשקט — בדיוק הכשל שהריענון הזה נועד למנוע.
+        for x in merged:
+            row = rows.get(x.get("id"))
+            if not row:
+                continue
+            for f in ("street", "neighborhood", "rooms", "size_sqm",
+                      "price_per_sqm", "city"):
+                if x.get(f) in (None, "") and row.get(f) not in (None, ""):
+                    x[f] = row[f]
+            if not x.get("listed_at") and row.get("listed_at"):
+                x["listed_at"] = row["listed_at"]
+        tagged = peers.annotate(merged, cfg or {}, drops=drop_rows,
+                                today=today)
+        log.info("צבירה: השוואת תאומות על %d מודעות, %d קיבלו אות",
+                 len(merged), tagged)
+        # גם האישור הידני מוחל כאן: רשומה נגררת שאושרה אתמול חייבת
+        # לחזור מאושרת, אחרת היא נושרת מקבוצת המעקב בלי שאף אחד ביקש.
+        tracklist.apply(merged, tracklist.load(cfg or {}), cfg or {})
+    except Exception:
+        log.error("כשל בהשוואת תאומות בצבירה:\n%s", traceback.format_exc())
+
+    data["listings"] = merged
     p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     log.info('צבירה: %d מהריצה + %d שנצברו = %d סה"כ',
              len(cur), len(carried), len(cur) + len(carried))
@@ -630,13 +736,19 @@ def run(cfg, dry_run=False, today=None):
             log.error("כשל בבניית סולם המחירים:\n%s", traceback.format_exc())
 
         # --- שלב 3: סינון מקדים ---
-        scored, _benchmarks = prescreen(listings, cfg, meta, latest_drop, today)
+        scored, _benchmarks = prescreen(listings, cfg, meta, latest_drop,
+                                        today, drops=drops)
         for s in scored:
             s["prescreen_score"] = s.get("score")
 
+        # השער הוא **לכל מודעה**, כי הציון עצמו מנורמל לסולם הזמין לה
+        # (ראה prescreen_gate). שער אחיד היה מעלה את הרף לכל המודעות
+        # בגלל רכיב ש-67% מהן לא יכולות לצבור בכלל.
         gate = scoring.prescreen_gate(cfg)
         max_final = int(cfg.get("max_final_checks_per_run", 40))
-        passing = [s for s in scored if (s.get("score") or 0) >= gate]
+        passing = [s for s in scored
+                   if (s.get("score") or 0) >= scoring.prescreen_gate(
+                       cfg, s.get("score_scale") or 1.0)]
         candidates = passing[:max_final]
         if len(passing) > max_final:
             log.warning("%d מודעות עברו את השער אך נבדקות רק %d המובילות "
@@ -739,7 +851,9 @@ def run(cfg, dry_run=False, today=None):
         ("ערים בסריקה", f"{len(pairs)}/{len(cfg['cities'])}"),
         ("מודעות" if offline else "מודעות שנסרקו",
          f"{len(listings)} (מה-DB, בלי סריקה)" if offline else len(listings)),
-        ("עברו סינון מקדים", f"{len(candidates)} (שער {scoring.prescreen_gate(cfg):.0f})"),
+        ("עברו סינון מקדים",
+          f"{len(candidates)} (שער {scoring.prescreen_gate(cfg):.0f} עם "
+          f"תאומות, {scoring.prescreen_gate(cfg, 100.0 / (100.0 - cfg['weights'].get('peer_gap', 0))):.0f} בלעדיהן)"),
         ("נבדקו מול עסקאות אמיתיות", len(finals)),
         ("נמצאו קומפים מספיקים", f"{len(with_comps)} (ל-{insufficient} אין מספיק)"),
         ("לבדוק דחוף", tc["check-urgent"]),
@@ -881,7 +995,7 @@ def run(cfg, dry_run=False, today=None):
     # מזג לכדי מאגר מצטבר (כל ההזדמנויות הפעילות, לא רק הריצה הזו)
     try:
         _merge_accumulated(cfg["paths"]["out"], cfg["paths"]["db"],
-                           today.isoformat(), _prev_listings)
+                           today.isoformat(), _prev_listings, cfg=cfg)
     except Exception:
         log.error("כשל בצבירת latest.json:\n%s", traceback.format_exc())
 
@@ -957,10 +1071,14 @@ def main(argv=None):
     ap.add_argument("--no-scrape", action="store_true",
                     help="בלי אף בקשה ל-ScraperAPI: המודעות נטענות מה-DB "
                          "והנתונים הרשמיים נשלפים חיים (חינם)")
+    ap.add_argument("--shard", type=int, default=0,
+                    help="מספר המשמרת (1..yad2_shards). סורק רק את תת-הקבוצה "
+                         "שלה. בלי הדגל — כל הערים, כמו קודם")
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
     cfg["no_scrape"] = bool(args.no_scrape)
+    cfg["_shard"] = int(args.shard or 0)
     if args.cities:
         cfg["cities"] = [c.strip() for c in args.cities.split(",") if c.strip()]
     if args.max_pages is not None:

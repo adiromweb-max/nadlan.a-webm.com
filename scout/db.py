@@ -90,6 +90,17 @@ ADDED_COLUMNS = {
     "last_alerted_price": "REAL",
     "last_alerted_at": "TEXT",
     "listed_at": "TEXT",
+    # ── מצב המעקב (scout/track.py) ──
+    # ‎last_checked‎   — מתי נבדקה מול דף המודעה שלה בפעם האחרונה.
+    #                   שונה מ-‎last_seen‎, שאומר רק "הופיעה בסריקת חיפוש".
+    # ‎dead_checks‎    — כמה בדיקות רצופות החזירו 404. מודעה מסומנת
+    #                   כנמחקה רק אחרי ‎track_dead_confirmations‎, כי
+    #                   סימון שגוי מוציא דירה חיה מהרשימה — השגיאה
+    #                   היקרה מהשתיים.
+    # ‎removed_at‎     — התאריך שבו אושר שהיא נמחקה מיד2.
+    "last_checked": "TEXT",
+    "dead_checks": "INTEGER",
+    "removed_at": "TEXT",
 }
 
 
@@ -260,6 +271,87 @@ def upsert_listing(conn, listing, today=None):
              listing.get("lat"), listing.get("lon"), listed, lid),
         )
     return result
+
+
+def record_check(conn, listing_id, result, today=None, dead_needed=2):
+    """
+    רושם תוצאת בדיקה של מודעה בודדת מול דף המודעה שלה.
+
+    זו הכתיבה המקבילה ל-‎upsert_listing‎ עבור מצב המעקב, ובמכוון היא
+    **צרה**: היא נוגעת במחיר, במצב הנכס ובדגלי החיוּת, ולא דורסת
+    ‎raw_json‎, ‎city‎, ‎lat/lon‎ וכל השאר. ‎upsert_listing‎ מצפה למודעה
+    שלמה מהפיד; דף המודעה אינו מחזיר את כל זה, וקריאה לו עם מודעה חלקית
+    הייתה מאפסת שדות קיימים.
+
+    ‎result‎ הוא מה ש-‎yad2.check_listing‎ החזיר. שלושה מצבים:
+      ‎alive=True‎  — מעדכן מחיר (ורושם ב-price_history אם השתנה), מאפס
+                     את מונה המוות.
+      ‎alive=False‎ — מקדם את מונה המוות. רק כשהוא מגיע ל-‎dead_needed‎
+                     המודעה מסומנת ‎active=0‎.
+      ‎alive=None‎  — **לא נבדק**. מעדכן ‎last_checked‎ ולא נוגע בכלום
+                     אחר. חסימה אינה עדות למוות.
+
+    מחזיר dict: ‎{"state", "old_price", "new_price", "dead_checks"}‎
+    כאשר ‎state‎ הוא ‎alive‎ / ‎dead‎ / ‎dying‎ / ‎unknown‎.
+    """
+    today = today or date.today().isoformat()
+    now = datetime.now().isoformat(timespec="seconds")
+    row = conn.execute(
+        "SELECT price, dead_checks, active FROM listings WHERE id=?",
+        (listing_id,)).fetchone()
+    if row is None:
+        return {"state": "unknown", "old_price": None, "new_price": None,
+                "dead_checks": 0}
+
+    alive = result.get("alive")
+    out = {"state": "unknown", "old_price": None, "new_price": None,
+           "dead_checks": row["dead_checks"] or 0}
+
+    if alive is None:
+        conn.execute("UPDATE listings SET last_checked=? WHERE id=?",
+                     (now, listing_id))
+        return out
+
+    if alive is False:
+        n = (row["dead_checks"] or 0) + 1
+        out["dead_checks"] = n
+        if n >= int(dead_needed):
+            conn.execute(
+                "UPDATE listings SET active=0, dead_checks=?, last_checked=?, "
+                "removed_at=COALESCE(removed_at, ?) WHERE id=?",
+                (n, now, today, listing_id))
+            out["state"] = "dead"
+        else:
+            conn.execute(
+                "UPDATE listings SET dead_checks=?, last_checked=? WHERE id=?",
+                (n, now, listing_id))
+            out["state"] = "dying"
+        return out
+
+    out["state"] = "alive"
+    # מתאפס גם בערך המוחזר ולא רק ב-DB: הקורא קורא מהדict הזה, ובלי
+    # השורה הזאת מודעה שחזרה לחיים הייתה מדווחת עם מונה המוות הישן.
+    out["dead_checks"] = 0
+    price = result.get("price")
+    old = row["price"]
+    if price is not None and old is not None and float(price) != float(old):
+        out["old_price"] = float(old)
+        out["new_price"] = float(price)
+        conn.execute(
+            "INSERT INTO price_history (listing_id, price, seen_at) VALUES (?,?,?)",
+            (listing_id, float(price), today))
+    sets = ["last_seen=?", "last_checked=?", "active=1", "dead_checks=0",
+            "removed_at=NULL"]
+    vals = [now, now]
+    if price is not None:
+        sets.append("price=?")
+        vals.append(float(price))
+    if result.get("condition_text"):
+        sets.append("condition_text=?")
+        vals.append(result["condition_text"])
+    vals.append(listing_id)
+    conn.execute(f"UPDATE listings SET {', '.join(sets)} WHERE id=?", vals)
+    return out
 
 
 def mark_inactive_stale(conn, source, days=14, today=None):
