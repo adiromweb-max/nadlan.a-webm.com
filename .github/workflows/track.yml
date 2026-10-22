@@ -1,0 +1,62 @@
+name: nadlan-scout daily tracking
+
+# מעקב — בודק רק את המודעות שמעניינות, כל אחת דרך **דף המודעה שלה**.
+# לא סורק ערים בכלל.
+#
+# שני דברים שהסריקה לא יכולה לעשות והמעקב כן:
+#   1. לדעת בוודאות שמודעה נמחקה. בסריקת חיפוש, מודעה שנעלמה ומודעה
+#      שלא הגיעה לעמוד הראשון נראות זהות — ולכן קישורים מתים נשארו
+#      באוויר עד שבועיים. דף מודעה בודד מחזיר 404, וזו תשובה סופית.
+#   2. לעשות את זה בזול. ~150 מודעות × קרדיט אחד, מול 1,560 לסריקה.
+#
+# מי במעקב נקבע ב-scout/tracklist.py: קודם כל מה שאושר ידנית באתר
+# (data/mlm_confirmed.json), אחריו מחיר למשתכן בוודאות גבוהה, מובילות
+# התאומות, והמוכתרות.
+on:
+  schedule:
+    - cron: "0 3 * * *"     # יומי, לפני משמרת הגיוס
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "לבדוק רק N מודעות (ריק = הכול)"
+        required: false
+        default: ""
+permissions:
+  contents: write
+concurrency:
+  group: nadlan-track
+  cancel-in-progress: false
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Run tracking
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+        run: |
+          ARGS="--dry-run"
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"
+          fi
+          python -m scout.track $ARGS
+
+      - name: Publish dashboard
+        run: |
+          mkdir -p docs
+          cp out/app.html docs/index.html
+
+      - name: Commit results
+        run: |
+          git config user.name "nadlan-scout-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git pull --rebase --autostash || true
+          git add -f data/nadlan.db docs/index.html out/latest.json || true
+          git commit -m "track [skip ci]" || echo "nothing to commit"
+          git push || echo "push skipped"
