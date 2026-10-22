@@ -629,6 +629,28 @@ def test_tracking():
     check("_trim מעביר את הצינור",
           trimmed.get("cst") == "במו\"מ" and trimmed.get("cnote") == "מוכר גמיש")
     check("לאתר יש טאב הצינור שלי", "הצינור שלי" in html)
+    # ── מיון חד-פעמי ──
+    # הבאג שהבדיקות כאן נועלות: מודעה שטיפלת בה חוזרת להופיע בכל
+    # הרשימות, כך שעוברים שוב ושוב על אותו מלאי. ובכיוון ההפוך —
+    # מודעה שנעלמת לגמרי בלי דרך להחזיר אותה.
+    check("לאתר יש טאב מחוקות", "מחוקות" in html)
+    check("מודעה שטופלה יוצאת מהרשימות",
+          "function isHandled" in html and "function visible" in html
+          and "isTwinLead(d)&&visible(d)" in html)
+    check("אפשר להחזיר מודעות מטופלות לתצוגה", "showHandled" in html)
+    check("טאב המחוקות אינו מסנן את עצמו",
+          "list=D.listings.filter(isNo);" in html,
+          "אחרת מה שמחקת לא היה מופיע גם שם")
+    # ── טריות הבדיקה ──
+    # זה מה שעונה על 'למה פתחתי מודעה שלא קיימת ביד2': המנוע לא מושך
+    # אותה עכשיו, הוא ראה אותה לפני ימים וממשיך להציג. נמדד: 20% מתות
+    # אחרי 8-14 יום.
+    check("לאתר יש חיווי טריות", "function seenDays" in html
+          and "ייתכן שהוסרה" in html)
+    fresh = _wa._trim([{"id": "f", "last_seen": "2026-10-20T10:00:00",
+                        "last_checked": None}])[0]
+    check("_trim מעביר את תאריך הראייה האחרון",
+          fresh.get("seen") == "2026-10-20T10:00:00", str(fresh.get("seen")))
     check("לאתר יש כפתור סטטוס", "function setStatus" in html and "stbtn" in html)
 
     # ── הצינור האישי במנוע ──
