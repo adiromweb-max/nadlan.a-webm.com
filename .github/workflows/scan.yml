@@ -1,8 +1,28 @@
-name: nadlan-scout daily scan
+name: nadlan-scout weekly discovery
+
+# גיוס — סריקת ערים שמביאה **מלאי חדש**. רץ שבועי, לא יומי.
+#
+# למה שבועי: הסריקה עולה ~1,560 קרדיטים, וברוב הימים היא רק מגלה
+# שהדירות שמעניינות אותנו לא זזו. המעקב אחרי אותן דירות (track.yml)
+# עושה את זה טוב יותר ובעשירית העלות, ולכן הסריקה נשארת רק למה שהיא
+# באמת טובה בו: לגלות מודעות שעוד לא ראינו.
+#
+# למה עדיין בשלוש משמרות ולא ריצה אחת: יד2 חוסם לפי **נפח**, ולא
+# באקראי. נמדד בשתי ריצות רצופות על אותה רשימה — 55 בקשות הכניסו 8 ערים,
+# 96 בקשות הכניסו רק 6 ו-39 נכשלו. ריצה שבועית אחת גדולה הייתה הנפח
+# הגרוע ביותר האפשרי. לכן הגיוס מפוזר על שלושה ימים עוקבים, שליש
+# מהערים בכל יום (‎--shard‎ מול ‎yad2_shards‎ ב-config).
 on:
   schedule:
-    - cron: "0 5 * * *"
+    - cron: "0 5 * * 1"     # שני    — משמרת 1
+    - cron: "0 5 * * 2"     # שלישי  — משמרת 2
+    - cron: "0 5 * * 3"     # רביעי  — משמרת 3
   workflow_dispatch:
+    inputs:
+      shard:
+        description: "מספר משמרת (1-3). ריק = נגזר מהיום בשבוע"
+        required: false
+        default: ""
 permissions:
   contents: write
 concurrency:
@@ -18,18 +38,36 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Run scan
+
+      - name: Pick shard
+        id: shard
+        run: |
+          # הרצה ידנית יכולה לבחור משמרת; אחרת היא נגזרת מהיום בשבוע.
+          # date -u +%u מחזיר 1=שני .. 7=ראשון, ולכן שני/שלישי/רביעי
+          # נותנים 1/2/3 ישירות. הרצה ידנית ביום אחר נופלת חזרה ל-1.
+          N="${{ github.event.inputs.shard }}"
+          if [ -z "$N" ]; then
+            D=$(date -u +%u)
+            if [ "$D" -ge 1 ] && [ "$D" -le 3 ]; then N="$D"; else N=1; fi
+          fi
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          echo "משמרת גיוס: $N"
+
+      - name: Run discovery scan
         env:
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
-        run: python -m scout.main --dry-run
+        run: python -m scout.main --dry-run --shard ${{ steps.shard.outputs.n }}
+
       - name: Publish dashboard
         run: |
           mkdir -p docs
           cp out/app.html docs/index.html
+
       - name: Commit results
         run: |
           git config user.name "nadlan-scout-bot"
           git config user.email "bot@users.noreply.github.com"
+          git pull --rebase --autostash || true
           git add -f data/nadlan.db docs/index.html out/latest.json || true
-          git commit -m "daily scan [skip ci]" || echo "nothing to commit"
+          git commit -m "discovery shard ${{ steps.shard.outputs.n }} [skip ci]" || echo "nothing to commit"
           git push || echo "push skipped"
