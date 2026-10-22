@@ -130,6 +130,20 @@ def listing_record(s, ladder=None):
         "mlm_in_lot": bool(s.get("mlm_in_lot")),
         "mlm_lot_units": s.get("mlm_lot_units"),
         "mlm_size_suspect": bool(s.get("mlm_size_suspect")),
+        # ── מה שנפתח עם קובץ ה-GIS המלא (scout/mlm.py) ──
+        # בלי השורות האלה השדות מחושבים בכל ריצה ונזרקים לפני שהם
+        # מגיעים לאתר או למאגר המצטבר.
+        "mlm_exact": bool(s.get("mlm_exact")),
+        "mlm_lottery_id": s.get("mlm_lottery_id"),
+        "mlm_lottery_date": s.get("mlm_lottery_date"),
+        "mlm_builder": s.get("mlm_builder"),
+        "mlm_hood": s.get("mlm_hood"),
+        "mlm_demand": s.get("mlm_demand"),
+        "mlm_subscribers": s.get("mlm_subscribers"),
+        "mlm_permit": s.get("mlm_permit"),
+        "mlm_method": s.get("mlm_method"),
+        "mlm_plan": s.get("mlm_plan"),
+        "mlm_lot_no": s.get("mlm_lot_no"),
         # השוואת תאומות — ראה scout/peers.py.
         # **חייב להישמר כאן**: ‎latest.json‎ הוא המאגר המצטבר, והרשומות
         # הנגררות נבנות ממנו. שדה שלא נכתב כאן נעלם בריצה הבאה.

@@ -125,6 +125,16 @@ def _trim(listings, cfg=None):
             "mlmconf": s.get("mlm_confidence"),
             "mlmlot": bool(s.get("mlm_in_lot")),
             "szbad": bool(s.get("mlm_size_suspect")),
+            # ── נתוני ההגרלה המדויקים ──
+            "mplan": s.get("mlm_plan"),            # מספר תב"ע
+            "mlotno": s.get("mlm_lot_no"),         # מספר מגרש
+            "mbuilder": s.get("mlm_builder"),
+            "mhood": s.get("mlm_hood"),            # השכונה הרשמית
+            "mdemand": s.get("mlm_demand"),        # נרשמים לדירה בהגרלה
+            "mldate": s.get("mlm_lottery_date"),
+            "mpermit": s.get("mlm_permit"),
+            "mmethod": s.get("mlm_method"),
+            "mexact": bool(s.get("mlm_exact")),
             "cond": s.get("condition_text"),
             # ── השוואת תאומות (scout/peers.py) ──
             "plvl": s.get("peer_level"),        # רחוב / שכונה
@@ -160,6 +170,14 @@ def _trim(listings, cfg=None):
             "url": s.get("url"),
             "nadlan": s.get("nadlan_link"),
             "first_seen": s.get("first_seen"),
+            # מתי המנוע ראה את המודעה בפעם האחרונה. זה **לא** ותק המודעה
+            # אלא טריות הבדיקה שלנו — וזה מה שקובע אם הקישור עוד חי.
+            "seen": s.get("last_seen"),
+            "checked": s.get("last_checked"),
+            # מתי המנוע ראה את המודעה בפעם האחרונה. זה **לא** ותק המודעה
+            # אלא טריות הבדיקה שלנו, וזה מה שקובע אם הקישור עוד חי.
+            "seen": s.get("last_seen"),
+            "checked": s.get("last_checked"),
             "hist": [{"p": p.get("price"), "d": p.get("seen_at")}
                      for p in (s.get("price_history") or []) if p.get("price")],
         })
@@ -507,6 +525,12 @@ function smartWhy(d){
   if(d.cagr>=4) p.push(`באזור שעולה <b>${(+d.cagr).toFixed(1)}%</b> בשנה`);
   if((d.dom||0)>=60) p.push(domPhrase(d));
   if(d.mlmrel && d.cush) p.push(`<b>מחיר למשתכן משוחרר</b> (${mlmEvid(d)}) — המוכר שילם כ-${fmt(d.mlmpaid)} ₪ ויושב על כ-<b>${fmt(d.cush)} ₪</b> רווח`);
+  /* הנתונים המדויקים מההגרלה — זה מה שאפשר להניח על השולחן במו"מ:
+     מתי בדיוק הייתה ההגרלה, מאיזה קבלן, וכמה אנשים רצו את האזור. */
+  if(d.mldate) p.push(`הגרלה ב-<b>${d.mldate}</b>${d.mlmdate?`, המגבלה פגה ב-<b>${d.mlmdate}</b>`:''}`);
+  if(d.mdemand) p.push(`<b>${d.mdemand} נרשמים לכל דירה</b> בהגרלה${d.mdemand>=50?' — אזור מבוקש':(d.mdemand<=5?' — כמעט אף אחד לא נרשם':'')}`);
+  if(d.mbuilder) p.push(`קבלן: ${d.mbuilder}`);
+  if(d.mplan) p.push(`תב״ע <b>${d.mplan}</b>${d.mlotno?`, מגרש <b>${d.mlotno}</b>`:''}`);
   /* ההשוואה מול התאומות נאמרת במשפט שאפשר להניח על השולחן במו"מ:
      מספר הדירות הזהות, איפה הדירה הזאת ביניהן, ומי כבר זז. */
   if((d.pcnt||0)>=3 && d.pgap!=null && d.pgap>=3)
@@ -553,13 +577,27 @@ let OK=okGet('aweb_mlm_ok'), NO=okGet('aweb_mlm_no'), NOTES=noteGet();
    ok=true, כדי שמחשב אחר (או דפדפן אחרי ניקוי) לא יראה אותה כלא-מאושרת. */
 function isOk(d){ return OK.has(d.id) || (d.ok && !NO.has(d.id)); }
 function isNo(d){ return NO.has(d.id) || (d.no && !OK.has(d.id)); }
+/* ---- מיון חד-פעמי ----
+   המטרה: לעבור על המלאי פעם אחת ולא לפגוש שוב ושוב את אותן מודעות.
+   כל מודעה שטיפלת בה — אימתת (✓), מחקת (✕) או פסלת בצינור — יוצאת
+   מכל הרשימות ועוברת לטאב שלה. הכפתור "הצג גם מטופלות" מחזיר אותן
+   לתצוגה בלי לבטל את הסימון, כדי ששום דבר לא יאבד. */
+function seenDays(d){
+  const v = d.seen || d.checked;
+  if(!v) return null;
+  const t = Date.parse(String(v).slice(0,10));
+  if(isNaN(t)) return null;
+  return Math.max(0, Math.round((Date.now()-t)/86400000));
+}
+function isHandled(d){ return isOk(d) || isNo(d) || crmStatus(d)==='פסולה'; }
+function visible(d){ return S.showHandled || !isHandled(d); }
 function markOk(id,ev){if(ev)ev.stopPropagation();
-  if(OK.has(id)){OK.delete(id);toast('האימות בוטל');}
-  else{OK.add(id);NO.delete(id);toast('סומנה כמחיר למשתכן מאומת ✓');}
+  if(OK.has(id)){OK.delete(id);toast('האימות בוטל — חזרה למלאי');}
+  else{OK.add(id);NO.delete(id);toast('אומתה ועברה לטאב "מאומת על ידי"');}
   okSave('aweb_mlm_ok',OK);okSave('aweb_mlm_no',NO);render();}
 function markNo(id,ev){if(ev)ev.stopPropagation();
-  if(NO.has(id)){NO.delete(id);toast('הפסילה בוטלה');}
-  else{NO.add(id);OK.delete(id);toast('נפסלה — תוסר מהמעקב');}
+  if(NO.has(id)){NO.delete(id);toast('הוחזרה למלאי');}
+  else{NO.add(id);OK.delete(id);toast('הועברה למחוקות');}
   okSave('aweb_mlm_ok',OK);okSave('aweb_mlm_no',NO);render();}
 function setNote(id){
   const cur=NOTES[id]||'';
@@ -653,6 +691,7 @@ const TAB_IC={
   twins:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="12"/><rect x="14" y="4" width="7" height="16"/><path d="M3 8h7M14 4h7"/></svg>',
   mine:'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
   pipe:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg>',
+  trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>',
   drops:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-4h-4"/></svg>',
   opps:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
   watch:'<svg viewBox="0 0 24 24"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.6 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8z"/></svg>',
@@ -661,6 +700,7 @@ const TABS=[{k:'new',label:'חדש היום'},{k:'mlm',label:'מחיר למשת�
   {k:'twins',label:'דירות תאומות'},
   {k:'mine',label:'מאומת על ידי'},
   {k:'pipe',label:'הצינור שלי'},
+  {k:'trash',label:'מחוקות'},
   {k:'drops',label:'ירידות מחיר'},
   {k:'opps',label:'הזדמנויות'},{k:'watch',label:'המעקב שלי'},{k:'trends',label:'מגמות'}];
 function go(k){S.tab=k;render();}
@@ -746,6 +786,22 @@ function card(d,i){
   /* אימות ידני גובר על הזיהוי המרחבי ולכן מקבל צ'יפ משלו, לפני הכרית. */
   if(isOk(d)) chips.push(`<span class="b">מחיר למשתכן — אימתת ✓</span>`);
   else if(isNo(d)) chips.push(`<span class="s">פסלת</span>`);
+  /* ביקוש בהגרלה — מדד איכות אזור שמבוסס על התנהגות ולא על הערכה.
+     החציון הארצי הוא 57 נרשמים לדירה. */
+  if((d.mdemand||0)>=50) chips.push(`<span class="b">${d.mdemand} נרשמים לדירה</span>`);
+  else if(d.mdemand && d.mdemand<=5) chips.push(`<span class="u">רק ${d.mdemand} נרשמים לדירה</span>`);
+  if(d.mplan) chips.push(`<span class="n">תב״ע ${d.mplan}</span>`);
+  if(d.mmethod && d.mmethod.indexOf('מטרה')!==-1) chips.push(`<span class="u">מחיר מטרה, לא מחיר למשתכן</span>`);
+  /* ── טריות הבדיקה ──
+     נמדד מול יד2 החי: מודעה שנראתה היום חיה ב-100%, אחרי 4-7 ימים 13%
+     מתות, אחרי 8-14 כבר 20%. לכן זה מוצג על הכרטיס ולא נבלע: עדיף
+     לדעת מראש שקישור עלול להיות מת מאשר לגלות את זה בלחיצה. */
+  const sd = seenDays(d);
+  if(d.checked) chips.push(`<span class="b">נבדקה מול יד2</span>`);
+  else if(sd!=null && sd<=1) chips.push(`<span class="b">נראתה היום</span>`);
+  else if(sd!=null && sd<=3) chips.push(`<span class="n">נראתה לפני ${sd} ימים</span>`);
+  else if(sd!=null && sd<=7) chips.push(`<span class="u">נראתה לפני ${sd} ימים</span>`);
+  else if(sd!=null) chips.push(`<span class="s">לא נראתה ${sd} ימים — ייתכן שהוסרה</span>`);
   if(d.szbad) chips.push(`<span class="s">גודל לא-סביר ביד2</span>`);
   const crm = crmOf(d);
   const why = smartWhy(d);
@@ -754,7 +810,7 @@ function card(d,i){
     <div class="thumb" style="background:${g}" onclick="openDeal('${d.id}')">${rib}${d.tier?`<span class="tierbadge">${d.tier}</span>`:''}
       <button class="savebtn ${saved?'on':''}" onclick="toggleSave('${d.id}',event)" title="מעקב">★</button>
       <button class="vbtn vok ${isOk(d)?'on':''}" onclick="markOk('${d.id}',event)" title="אימתתי: זו דירת מחיר למשתכן">✓</button>
-      <button class="vbtn vno ${isNo(d)?'on':''}" onclick="markNo('${d.id}',event)" title="בדקתי: זו לא מחיר למשתכן / לא רלוונטית">✕</button>
+      <button class="vbtn vno ${isNo(d)?'on':''}" onclick="markNo('${d.id}',event)" title="${isNo(d)?'החזר למלאי':'הסר מהרשימות והעבר למחוקות'}">✕</button>
       <button class="stbtn ${['','s1','s2','s3','s4'][CRM_STATUSES.indexOf(crmStatus(d))] || ''}" onclick="setStatus('${d.id}',event)" title="לחיצה מקדמת את הסטטוס">${crmStatus(d)||'+ סטטוס'}</button>${
         d.imgs&&d.imgs.length
           ? `<img class="thumbimg" src="${d.imgs[0]}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
@@ -794,6 +850,7 @@ function feed(list, emptyMsg){
     /* מיון התאומות משתמש באותו דירוג של הטאב — פער, מי נשבר ראשון,
        כמה ירידות וכמה מתחרים — ולא בפער לבדו. */
     if(key==='twin') return twinRank(b)-twinRank(a);
+    if(key==='fresh') return (seenDays(a)??999)-(seenDays(b)??999);
     return (b.gap||-99)-(a.gap||-99);
   });
   S._view=arr;
@@ -805,11 +862,13 @@ function toolbar(){
   const oc=(k,l)=>`<button class="chipf ${S.owner===k?'on':''}" onclick="S.owner='${k}';render()">${l}</button>`;
   return `<div class="toolbar">
     ${oc('all','הכול')}${oc('private','פרטי בלבד')}${oc('agency','תיווך')}
+    <button class="chipf ${S.showHandled?'on':''}" onclick="S.showHandled=!S.showHandled;render()" title="מודעות שאימתת, מחקת או פסלת">${S.showHandled?'מסתיר מטופלות':'הצג גם מטופלות'}</button>
     <select onchange="S.sort=this.value;render()">
       <option value="gap"${S.sort==='gap'?' selected':''}>מיון: מתחת לשוק</option>
       <option value="dom"${S.sort==='dom'?' selected':''}>מיון: הזמן הרב ביותר בשוק</option>
       <option value="cush"${S.sort==='cush'?' selected':''}>מיון: כרית המוכר (מחיר למשתכן)</option>
       <option value="twin"${S.sort==='twin'?' selected':''}>מיון: הזולה מבין התאומות</option>
+      <option value="fresh"${S.sort==='fresh'?' selected':''}>מיון: נראתה לאחרונה</option>
       <option value="drop"${S.sort==='drop'?' selected':''}>מיון: ירידת מחיר</option>
       <option value="yield"${S.sort==='yield'?' selected':''}>מיון: תשואה</option>
       <option value="price"${S.sort==='price'?' selected':''}>מיון: מחיר</option>
@@ -831,6 +890,7 @@ function render(){
     else if(t.k==='twins') n=D.listings.filter(isTwinLead).length;
     else if(t.k==='mine') n=D.listings.filter(isOk).length;
     else if(t.k==='pipe') n=D.listings.filter(d=>crmStatus(d)&&crmStatus(d)!=='חדשה').length;
+    else if(t.k==='trash') n=D.listings.filter(isNo).length;
     else if(t.k==='drops') n=D.listings.filter(d=>(d.drop||0)>0 && !d.disq).length;
     else if(t.k==='opps') n=D.listings.filter(isOpp).length; else if(t.k==='watch') n=WL.size;
     return `<a class="${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${TAB_IC[t.k]||''}<span>${t.label}</span>${(n!==''&&n!=null)?`<span class="cnt">${n}</span>`:''}</a>`;
@@ -840,6 +900,7 @@ function render(){
     twins:['הזולה מבין התאומות','דירות שמוצעות עכשיו ליד דירות זהות לחלוטין — אותו רחוב, אותו מספר חדרים, גודל דומה — וזולות מהן. פה גם רואים מי נשבר ראשון ולאיזה מוכר יש הכי הרבה מתחרים.'],
     mine:['הדירות שאימתת','הדירות שפתחת, בדקת, וסימנת ✓ כמחיר למשתכן. אחרי ייצוא והעלאה של הקובץ לריפו, המנוע עוקב בדיוק אחריהן כל יום ומזהה ירידת מחיר או מודעה שנמחקה.'],
     pipe:['הצינור שלי','כל דירה שהתחלת לטפל בה, לפי השלב. לחיצה על כפתור הסטטוס בכרטיס מקדמת לשלב הבא. דירה שפסלת יוצאת מהמעקב היומי אחרי שתייצא את הקובץ ותעלה אותו.'],
+    trash:['מחוקות','מה שמחקת עם ✕. הן לא מופיעות באף רשימה אחרת, והמנוע לא עוקב אחריהן. לחיצה על ✕ שוב מחזירה מודעה למלאי.'],
     drops:['ראדאר ירידות מחיר','כל מודעה שירדה במחיר — כמה ירדה וכמה היא מתחת לשוק.'],
     opps:['ההזדמנויות','מתומחר מתחת לעסקאות סגורות דומות באזור, אחרי אימות מול רשות המיסים.'],
     watch:['המעקב שלי','הנכסים ששמרת. נשמרים במכשיר שלך.'],
@@ -853,12 +914,12 @@ function render(){
   if(S.tab==='trends'){ body.innerHTML=trends(); }
   else {
     let list, empty;
-    if(S.tab==='new'){ list=D.listings.filter(d=>d.isnew && !d.disq); empty='אין מודעות חדשות בריצה האחרונה — חזור מחר.'; }
+    if(S.tab==='new'){ list=D.listings.filter(d=>d.isnew && !d.disq && visible(d)); empty='אין מודעות חדשות שלא טיפלת בהן. חזור מחר, או הצג גם מטופלות.'; }
     /* טאב מחיר למשתכן: רק מודעות שזוהו, ממוינות לפי כרית המוכר. הטאב
        הזה נוסף כי ברירת המחדל הראתה את כל המלאי, ומודעת מחיר למשתכן
        אחת מתוך 64 פשוט לא נראתה. */
     else if(S.tab==='mlm'){
-      list=D.listings.filter(d=>d.mlm).sort((a,b)=>{
+      list=D.listings.filter(d=>d.mlm && visible(d)).sort((a,b)=>{
         const r=(x)=>({'גבוהה':3,'בינונית':2,'נמוכה':1})[x.mlmconf]||0;
         return (r(b)-r(a)) || ((b.cush||0)-(a.cush||0));
       });
@@ -868,7 +929,7 @@ function render(){
        ראשון בקבוצה ומי שהוריד פעמיים הם ראיות חזקות יותר על גמישות
        המוכר מכל חציון, ולכן הם נכנסים לדירוג ולא רק לתווית. */
     else if(S.tab==='twins'){
-      list=D.listings.filter(isTwinLead).sort((a,b)=>twinRank(b)-twinRank(a));
+      list=D.listings.filter(d=>isTwinLead(d)&&visible(d)).sort((a,b)=>twinRank(b)-twinRank(a));
       empty='עדיין לא נמצאו קבוצות של דירות זהות. דרושות 3 מודעות באותו רחוב (או 4 באותה שכונה) עם אותו מספר חדרים וגודל דומה.';
     }
     /* טאב האימות הידני. כאן גם נמצא כפתור הייצוא, כי זו הנקודה היחידה
@@ -883,9 +944,13 @@ function render(){
       list=D.listings.filter(d=>crmStatus(d)&&crmStatus(d)!=='חדשה').sort((a,b)=>rank(a)-rank(b));
       empty='עדיין לא התחלת לטפל באף דירה. לחץ על "+ סטטוס" בכרטיס.';
     }
-    else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq); empty='אין ירידות מחיר כרגע.'; }
+    else if(S.tab==='trash'){
+      list=D.listings.filter(isNo);
+      empty='לא מחקת אף מודעה. ✕ על כרטיס מעביר אותה לכאן.';
+    }
+    else if(S.tab==='drops'){ list=D.listings.filter(d=>(d.drop||0)>0 && !d.disq && visible(d)); empty='אין ירידות מחיר שלא טיפלת בהן.'; }
     else if(S.tab==='watch'){ list=D.listings.filter(d=>WL.has(d.id)); empty='עדיין לא שמרת נכסים. לחץ על ★ בכל כרטיס.'; }
-    else { list=D.listings.filter(isOpp); empty='אין הזדמנויות מאומתות בריצה הזו.'; }
+    else { list=D.listings.filter(d=>isOpp(d)&&visible(d)); empty='אין הזדמנויות שלא טיפלת בהן.'; }
     body.innerHTML = toolbar() + feed(list, empty);
   }
   document.getElementById('foot').innerHTML =
